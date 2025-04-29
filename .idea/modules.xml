@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/10-team-matching-quiz-be.iml" filepath="$PROJECT_DIR$/.idea/10-team-matching-quiz-be.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wingterview.main.iml" filepath="$PROJECT_DIR$/.idea/modules/wingterview.main.iml" />
+    </modules>
+  </component>
+</project>
