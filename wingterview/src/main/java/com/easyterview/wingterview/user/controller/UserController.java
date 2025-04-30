@@ -1,6 +1,8 @@
 package com.easyterview.wingterview.user.controller;
 
 import com.easyterview.wingterview.global.response.ApiResponse;
+import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     @PutMapping
-    public ResponseEntity<ApiResponse> saveUserInfo(@RequestBody UserBasicInfoDto userBasicInfo){
+    public ResponseEntity<ApiResponse> saveUserInfo(@Valid @RequestBody UserBasicInfoDto userBasicInfo){
 
     }
 
