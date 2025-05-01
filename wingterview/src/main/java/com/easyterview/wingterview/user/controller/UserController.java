@@ -16,7 +16,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PutMapping("/me")
+    @PutMapping
     public ResponseEntity<ApiResponse> saveUserInfo(@Valid @RequestBody UserBasicInfoDto userBasicInfo){
         userService.saveUserInfo(userBasicInfo);
         return ApiResponse.response(UserResponseMessage.USER_INFO_SEND_DONE);

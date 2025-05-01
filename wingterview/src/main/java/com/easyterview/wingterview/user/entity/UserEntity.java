@@ -73,8 +73,10 @@ public class UserEntity {
     private RefreshTokenEntity refreshToken;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<UserJobInterestEntity> userJobInterest = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<UserTechStackEntity> userTechStack = new ArrayList<>();
 }

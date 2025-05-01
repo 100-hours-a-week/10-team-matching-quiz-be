@@ -16,6 +16,14 @@ public class GlobalExceptionHandler {
         // 에러 메시지 추출
         String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
         log.error(errorMessage);
-        return ApiResponse.response(ExceptionMessage.NOT_VALID_INPUT, CustomExceptionDto.builder().reason(errorMessage).build());
+        return ApiResponse.response(ExceptionMessage.INVALID_INPUT, CustomExceptionDto.builder().reason(errorMessage).build());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiResponse> invalidTokenException(InvalidTokenException e){
+        // 에러 메시지 추출
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+        return ApiResponse.response(ExceptionMessage.INVALID_TOKEN, CustomExceptionDto.builder().reason(errorMessage).build());
     }
 }
