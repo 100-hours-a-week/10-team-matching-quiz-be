@@ -2,6 +2,7 @@ package com.easyterview.wingterview.auth.controller;
 
 import com.easyterview.wingterview.auth.dto.request.AuthRequestDto;
 import com.easyterview.wingterview.auth.dto.response.AuthResponseDto;
+import com.easyterview.wingterview.auth.dto.response.RefreshResponseDto;
 import com.easyterview.wingterview.auth.jwt.JwtUtil;
 import com.easyterview.wingterview.auth.service.AuthService;
 import com.easyterview.wingterview.common.constants.AuthResponseMessage;
@@ -10,6 +11,7 @@ import com.easyterview.wingterview.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -35,6 +37,12 @@ public class AuthController {
     }
 
     // test용(프론트엔드 역할)
+    /*
+    https://kauth.kakao.com/oauth/authorize?response_type=code
+&client_id=ef80aa676a39c68abe9ada569d9ab70b
+&redirect_uri=http://localhost:8080/api/auth/oauth/kakao/callback
+
+     */
     @GetMapping("/oauth/kakao/callback")
     public ResponseEntity<ApiResponse> kakaoCallback(
             @RequestParam(value = "code", required = false) String code,
@@ -54,5 +62,10 @@ public class AuthController {
         return ApiResponse.response(AuthResponseMessage.LOGIN_SUCCESS);
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse> reissueToken(){
+        RefreshResponseDto refreshResponseDto = authService.reissue();
+        return ApiResponse.response(AuthResponseMessage.REFRESH_TOKEN_DONE, refreshResponseDto);
+    }
 
 }

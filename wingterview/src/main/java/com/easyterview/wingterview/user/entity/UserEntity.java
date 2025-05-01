@@ -1,6 +1,7 @@
 package com.easyterview.wingterview.user.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -65,4 +66,8 @@ public class UserEntity {
 
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshTokenEntity refreshToken;
+
 }
