@@ -1,26 +1,37 @@
 package com.easyterview.wingterview.config;
 
+import com.easyterview.wingterview.auth.jwt.JwtUtil;
+import com.easyterview.wingterview.global.security.entrypoint.JwtAuthenticationEntryPoint;
+import com.easyterview.wingterview.global.security.filter.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtUtil jwtUtil;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable) // 🔥 이 줄이 핵심!
-                .httpBasic(AbstractHttpConfigurer::disable)
+                .exceptionHandling(eh -> eh.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // TODO : AI 쪽 API는 permitAll
                         .anyRequest().authenticated()
-                );
-        return http.build();
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, authenticationEntryPoint), UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 }
+

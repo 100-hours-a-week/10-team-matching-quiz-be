@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.user.dto.request;
 
+import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -46,4 +47,5 @@ public class UserBasicInfoDto {
     @Size(min = 2, max = 2, message = "좌표 정보가 유효하지 않음")
     // TODO : Custom Validator로 seatPosition의 각 요소의 조건 걸기
     private List<Integer> seatPosition;
+
 }

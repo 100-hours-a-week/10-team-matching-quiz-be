@@ -5,6 +5,7 @@ import com.easyterview.wingterview.auth.dto.response.AuthResponseDto;
 import com.easyterview.wingterview.auth.jwt.JwtUtil;
 import com.easyterview.wingterview.auth.service.AuthService;
 import com.easyterview.wingterview.common.constants.AuthResponseMessage;
+import com.easyterview.wingterview.common.constants.ExceptionMessage;
 import com.easyterview.wingterview.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-//    private final JwtUtil jwtUtil;
 
     @PostMapping("/oauth/{provider}")
     public ResponseEntity<ApiResponse> authLogin(@PathVariable String provider, @RequestBody AuthRequestDto authRequest){

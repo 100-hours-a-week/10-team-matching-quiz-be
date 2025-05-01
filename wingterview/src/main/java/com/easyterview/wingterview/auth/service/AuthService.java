@@ -8,6 +8,5 @@ import java.util.Map;
 @Service
 public interface AuthService {
     Map<String,Object> getAccessToken(String code);
-
     AuthResponseDto getOrCreateUserByToken(Map<String, Object> tokenResponse);
 }

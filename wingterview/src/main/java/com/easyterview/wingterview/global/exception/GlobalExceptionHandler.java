@@ -16,7 +16,6 @@ public class GlobalExceptionHandler {
         // 에러 메시지 추출
         String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
         log.error(errorMessage);
-
         return ApiResponse.response(ExceptionMessage.NOT_VALID_INPUT, CustomExceptionDto.builder().reason(errorMessage).build());
     }
 }

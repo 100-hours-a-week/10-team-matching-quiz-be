@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ExceptionMessage implements ResponseMessage{
-    NOT_VALID_INPUT(400, "유효하지 않은 입력");
+public enum UserResponseMessage implements ResponseMessage{
+    USER_INFO_SEND_DONE(200, "유저 정보 전송 완료")
 
+    ;
 
 
     private final int statusCode;

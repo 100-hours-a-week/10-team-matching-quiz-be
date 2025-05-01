@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 import java.util.Optional;
@@ -59,12 +58,12 @@ public class AuthServiceImpl implements AuthService{
     public AuthResponseDto getOrCreateUserByToken(Map<String, Object> tokenResponse) {
         String idToken = (String) tokenResponse.get("id_token");
         String email = jwtUtil.extractEmail(idToken);
-        String providerId = jwtUtil.extractSub(idToken);  // 반환형도 Long이어야 할 듯
+        String providerId = jwtUtil.extractSub(idToken);
 
         // TODO : KAKAO provider enum으로 관리
         Optional<UserEntity> user = userRepository.findByProviderAndProviderId("KAKAO", providerId);
 
-        UserEntity finalUser;
+        boolean isNewUser;
         if (user.isEmpty()) {
             UserEntity newUser = UserEntity.builder()
                     .email(email)
@@ -72,15 +71,15 @@ public class AuthServiceImpl implements AuthService{
                     .providerId(providerId)
                     .build();
 
-            finalUser = userRepository.save(newUser);
+            isNewUser = true;
         } else {
-            finalUser = user.get();
+            isNewUser = false;
         }
 
         return AuthResponseDto.builder()
                 .accessToken((String) tokenResponse.get("access_token"))
                 .refreshToken((String) tokenResponse.get("refresh_token"))
-                .userId(finalUser.getId().toString())
+                .isNewUser(isNewUser)
                 .build();
     }
 }
