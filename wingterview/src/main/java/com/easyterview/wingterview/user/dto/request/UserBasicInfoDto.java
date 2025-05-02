@@ -2,6 +2,7 @@ package com.easyterview.wingterview.user.dto.request;
 
 import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -27,14 +28,14 @@ public class UserBasicInfoDto {
             regexp = "^[가-힣]{3,4}\\s[가-힣]{2}$",
             message = "과정명 형식 오류"
     )
-    @NotBlank(message = "커리큘럼 누락")
+    @NotEmpty(message = "커리큘럼 누락")
     private String curriculum;
 
-    @NotBlank(message = "희망 직무 누락")
+    @NotEmpty(message = "희망 직무 누락")
     @Size(max = 3, message = "희망 직무 갯수 초과")
     private List<String> jobInterest;
 
-    @NotBlank(message = "희망 직무 누락")
+    @NotEmpty(message = "희망 직무 누락")
     @Size(max = 3, message = "희망 직무 갯수 초과")
     private List<String> techStack;
 

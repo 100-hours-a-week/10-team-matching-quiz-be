@@ -12,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(name = "user_job_interest")
 public class UserJobInterestEntity {
 
     @Id
@@ -20,6 +21,7 @@ public class UserJobInterestEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @Column(length = 30)
     @Enumerated(EnumType.STRING)
     private JobInterest jobInterest;
 
