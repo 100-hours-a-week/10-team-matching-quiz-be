@@ -5,6 +5,8 @@ import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
+import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
+import com.easyterview.wingterview.user.dto.response.SeatPosition;
 import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.entity.UserJobInterestEntity;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.StringTokenizer;
 
 @Slf4j
 @Service
@@ -36,7 +40,7 @@ public class UserServiceImpl implements UserService {
         user.setNickname(userBasicInfo.getNickName());
         user.setCurriculum(userBasicInfo.getCurriculum());
         user.setProfileImageUrl(userBasicInfo.getProfileImageUrl());
-        user.setSeat(SeatPositionUtil.seatPosToInt(userBasicInfo));
+        user.setSeat(SeatPositionUtil.seatPosToInt(userBasicInfo.getSeatPosition().get(0),userBasicInfo.getSeatPosition().get(1)));
 
         List<UserTechStackEntity> techStacks = userBasicInfo.getTechStack().stream()
                 .map(TechStack::from) // 문자열 → enum
@@ -83,6 +87,21 @@ public class UserServiceImpl implements UserService {
         return SeatPositionDto.builder()
                 .seats(blockedSeats)
                 .mySeatPosition(mySeatPosition)
+                .build();
+    }
+
+    @Override
+    public CheckSeatDto checkSeatBlocked(String seatPositionId) {
+        StringTokenizer st = new StringTokenizer(seatPositionId, "-");
+        int seatX = Integer.parseInt(st.nextToken());
+        int seatY = Integer.parseInt(st.nextToken());
+
+        Optional<UserEntity> seatUser = userRepository.findBySeat(SeatPositionUtil.seatPosToInt(seatX,seatY));
+        boolean isSelected = seatUser.isPresent();
+
+        return CheckSeatDto.builder()
+                .isSelected(isSelected)
+                .seatPosition(SeatPositionUtil.seatPosToExpression(seatX, seatY))
                 .build();
     }
 
