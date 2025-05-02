@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     @Query("SELECT u.seat FROM UserEntity u WHERE u.seat IS NOT NULL")
     List<Integer> findAllSeatInfo();
+
+    Optional<UserEntity> findBySeat(Integer seatIdx);
 }
