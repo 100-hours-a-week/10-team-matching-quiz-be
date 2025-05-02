@@ -8,6 +8,8 @@ import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
 import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
 import com.easyterview.wingterview.user.dto.response.SeatPosition;
 import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
+import com.easyterview.wingterview.user.dto.response.UserInfoDto;
+import com.easyterview.wingterview.user.entity.InterviewStatEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.entity.UserJobInterestEntity;
 import com.easyterview.wingterview.user.entity.UserTechStackEntity;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -58,6 +61,10 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .toList();
 
+        InterviewStatEntity interviewStat = InterviewStatEntity.builder()
+                .user(user)
+                .build();
+
         // 기존 것들 clear하고 새로 설정
         user.getUserJobInterest().clear();
         user.getUserJobInterest().addAll(jobInterests);
@@ -65,8 +72,9 @@ public class UserServiceImpl implements UserService {
         user.getUserTechStack().clear();
         user.getUserTechStack().addAll(techStacks);
 
-        userRepository.save(user); // cascade 덕분에 연관 Entity도 저장됨
+        user.setInterviewStat(interviewStat);
 
+        userRepository.save(user); // cascade 덕분에 연관 Entity도 저장됨
     }
 
     @Override
@@ -102,6 +110,29 @@ public class UserServiceImpl implements UserService {
         return CheckSeatDto.builder()
                 .isSelected(isSelected)
                 .seatPosition(SeatPositionUtil.seatPosToExpression(seatX, seatY))
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public UserInfoDto getMyInfo() {
+        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+
+        return UserInfoDto.builder()
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .name(user.getName())
+                .curriculum(user.getCurriculum())
+                .seatCode(SeatPositionUtil.seatIdxToSeatCode(user.getSeat()))
+                .jobInterest(user.getUserJobInterest().stream()
+                        .map(interestEntity -> interestEntity.getJobInterest().getLabel())
+                        .collect(Collectors.toList()))
+                .teckStack(user.getUserTechStack().stream()
+                        .map(techStackEntity -> techStackEntity.getTechStack().getLabel())
+                        .toList())
+                .interviewCnt(user.getInterviewStat().getInterviewCnt())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 

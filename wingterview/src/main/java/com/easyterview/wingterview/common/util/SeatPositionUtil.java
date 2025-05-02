@@ -40,4 +40,35 @@ public class SeatPositionUtil {
                 .position(position)
                 .build();
     }
+
+    public static String seatIdxToSeatCode(Integer seatIdx){
+        int seatX = seatIdx / Seats.COL_LENGTH.getLength() + 1;
+        int seatY = seatIdx % Seats.COL_LENGTH.getLength() + 1;
+
+        StringBuilder sb = new StringBuilder();
+
+        if(1 <= seatY && seatY <= 3){
+            sb.append("A").append("-");
+        }
+        else if(4 <= seatY && seatY <= 6){
+            sb.append("B").append("-");
+        }
+        else{
+            sb.append("C").append("-");
+        }
+
+        sb.append(seatX).append("-");
+
+        if(seatY % 3 == 0){
+            sb.append("R");
+        }
+        else if(seatY % 3 == 1){
+            sb.append("L");
+        }
+        else{
+            sb.append("M");
+        }
+
+        return sb.toString();
+    }
 }
