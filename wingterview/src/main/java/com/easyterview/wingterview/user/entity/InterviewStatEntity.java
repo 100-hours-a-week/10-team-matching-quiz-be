@@ -12,9 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "refresh_token")
-public class RefreshTokenEntity {
-
+@Table(name = "interview_statistics")
+public class InterviewStatEntity {
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -25,8 +24,7 @@ public class RefreshTokenEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
 
-    @Column(name = "refresh_token", nullable = false, length = 500)
-    private String refreshToken;
-
-
+    @Column(name = "interview_cnt")
+    @Builder.Default
+    private Integer interviewCnt = 0;
 }

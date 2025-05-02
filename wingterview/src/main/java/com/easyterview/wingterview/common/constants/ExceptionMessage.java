@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ExceptionMessage implements ResponseMessage{
-    NOT_VALID_INPUT(400, "유효하지 않은 입력");
+    INVALID_INPUT(400, "유효하지 않은 입력"),
+    INVALID_TOKEN(400, "유효하지 않은 토큰");
 
 
 

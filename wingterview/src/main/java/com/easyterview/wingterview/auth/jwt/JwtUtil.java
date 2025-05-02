@@ -12,15 +12,13 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -102,13 +100,10 @@ public class JwtUtil {
             throw new RuntimeException("인증된 사용자가 존재하지 않습니다.");
         }
 
-
-
-        // 예시: UserDetails 없이 단순한 UsernamePasswordAuthenticationToken 생성
         return new UsernamePasswordAuthenticationToken(
                 user.get().getId(),
                 null,
-                Collections.emptyList() // 권한 설정 안함
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
     }
 

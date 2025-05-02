@@ -7,6 +7,8 @@ import lombok.*;
 import org.hibernate.annotations.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -44,7 +46,7 @@ public class UserEntity {
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
-    @Column(name = "curriculum", nullable = false, length = 5)
+    @Column(name = "curriculum", nullable = false, length = 10)
     @Builder.Default
     private String curriculum = "temp";
 
@@ -70,4 +72,14 @@ public class UserEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private RefreshTokenEntity refreshToken;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserJobInterestEntity> userJobInterest = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserTechStackEntity> userTechStack = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private InterviewStatEntity interviewStat;
 }
