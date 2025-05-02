@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -32,15 +34,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = jwt.substring(7);
             try {
                 if (jwtUtil.isTokenValid(jwt)) {
-                    // 🔹 JWT에서 이메일 & 인증 객체 생성
                     Authentication authentication = jwtUtil.getAuthentication(jwt);
-
-                    // 🔹 SecurityContextHolder에 인증 정보 저장
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-
                 }
+
             }
-            // TODO : AuthenticationEntryPoint를 사용하는 방법 모색
             catch (AuthenticationException e){
                 jwtAuthenticationEntryPoint.commence(request,response,e);
             }

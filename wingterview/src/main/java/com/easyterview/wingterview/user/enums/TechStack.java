@@ -9,15 +9,17 @@ import java.util.stream.Stream;
 @Getter
 public enum TechStack {
 
-    BACKEND_DEVELOPER("백엔드 개발자"),
-    FRONTEND_DEVELOPER("프론트엔드 개발자"),
-    FULLSTACK_DEVELOPER("풀스택 개발자"),
-    CLOUD_ENGINEER("클라우드 엔지니어"),
-    SOLUTIONS_ARCHITECT("솔루션즈 아키텍트"),
-    DEVOPS_ENGINEER("DevOps 엔지니어"),
-    ML_ENGINEER("머신러닝 엔지니어"),
-    AI_BACKEND_DEVELOPER("AI 백엔드 개발자"),
-    DATA_SCIENTIST("데이터 사이언티스트");
+    JAVA("Java"),
+    SPRING("Spring"),
+    REACT("React"),
+    TYPESCRIPT("Typescript"),
+    JAVASCRIPT("Javascript"),
+    PYTHON("Python"),
+    KUBERNETES("Kubernetes"),
+    AWS("AWS"),
+    PYTORCH("Pytorch"),
+    FASTAPI("Fastapi"),
+    LANGCHAIN("Langchain");
 
     private final String label;
 

@@ -46,7 +46,7 @@ public class UserEntity {
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
-    @Column(name = "curriculum", nullable = false, length = 5)
+    @Column(name = "curriculum", nullable = false, length = 10)
     @Builder.Default
     private String curriculum = "temp";
 

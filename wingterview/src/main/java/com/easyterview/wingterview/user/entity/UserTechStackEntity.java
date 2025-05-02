@@ -12,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(name = "user_tech_stack")
 public class UserTechStackEntity {
     @Id
     @GeneratedValue
@@ -19,6 +20,7 @@ public class UserTechStackEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @Column(length = 30)
     @Enumerated(EnumType.STRING)
     private TechStack techStack;
 
