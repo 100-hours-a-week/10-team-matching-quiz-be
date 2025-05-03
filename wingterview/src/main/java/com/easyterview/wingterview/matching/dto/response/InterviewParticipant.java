@@ -1,6 +1,5 @@
-package com.easyterview.wingterview.matching.dto.request;
+package com.easyterview.wingterview.matching.dto.response;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -8,7 +7,7 @@ import java.util.List;
 
 @Getter
 @SuperBuilder
-public class InterviewParticipent {
+public class InterviewParticipant {
     private final String nickname;
     private final String name;
     private final String curriculum;

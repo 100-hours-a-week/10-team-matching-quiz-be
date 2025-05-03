@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.matching.dto.request;
+package com.easyterview.wingterview.matching.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

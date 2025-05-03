@@ -12,9 +12,10 @@ import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.repository.InterviewParticipantRepository;
 import com.easyterview.wingterview.interview.repository.InterviewRepository;
 import com.easyterview.wingterview.matching.config.MatchingStatusManager;
-import com.easyterview.wingterview.matching.dto.request.Interviewee;
-import com.easyterview.wingterview.matching.dto.request.Interviewer;
-import com.easyterview.wingterview.matching.dto.request.MatchingResultDto;
+import com.easyterview.wingterview.matching.dto.response.Interviewee;
+import com.easyterview.wingterview.matching.dto.response.Interviewer;
+import com.easyterview.wingterview.matching.dto.response.MatchingResultDto;
+import com.easyterview.wingterview.matching.dto.response.MatchingStatisticsDto;
 import com.easyterview.wingterview.matching.entity.MatchingEntity;
 import com.easyterview.wingterview.matching.repository.MatchingRepository;
 import com.easyterview.wingterview.user.entity.UserEntity;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
 public class MatchingServiceImpl implements MatchingService {
 
     private final MatchingRepository matchingRepository;
-    private final InterviewRepository interviewRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
     private final MatchingStatusManager matchingStatusManager;
     private final UserRepository userRepository;
@@ -117,6 +117,18 @@ public class MatchingServiceImpl implements MatchingService {
                 .interviewer(interviewer)
                 .interviewee(interviewee)
                 .interviewId(interview.getId().toString())
+                .build();
+    }
+
+    @Override
+    public MatchingStatisticsDto getMatchingStatistics() {
+        if(!matchingStatusManager.isMatchingOpen())
+            throw new MatchingClosedException();
+
+        ;
+
+        return MatchingStatisticsDto.builder()
+                .count((int)matchingRepository.count())
                 .build();
     }
 
