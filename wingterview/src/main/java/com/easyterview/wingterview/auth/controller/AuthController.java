@@ -43,24 +43,24 @@ public class AuthController {
 &redirect_uri=http://localhost:8080/api/auth/oauth/kakao/callback
 
      */
-    @GetMapping("/oauth/kakao/callback")
-    public ResponseEntity<ApiResponse> kakaoCallback(
-            @RequestParam(value = "code", required = false) String code,
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "error_description", required = false) String errorDescription
-    ) {
-        if (error != null) {
-            return ApiResponse.response(AuthResponseMessage.LOGIN_FAILED, errorDescription);
-        }
-
-        if (code == null) {
-            return ApiResponse.response(AuthResponseMessage.MISSING_AUTH_CODE);
-        }
-
-        authLogin("kakao",AuthRequestDto.builder().code(code).build());
-
-        return ApiResponse.response(AuthResponseMessage.LOGIN_SUCCESS);
-    }
+//    @GetMapping("/oauth/kakao/callback")
+//    public ResponseEntity<ApiResponse> kakaoCallback(
+//            @RequestParam(value = "code", required = false) String code,
+//            @RequestParam(value = "error", required = false) String error,
+//            @RequestParam(value = "error_description", required = false) String errorDescription
+//    ) {
+//        if (error != null) {
+//            return ApiResponse.response(AuthResponseMessage.LOGIN_FAILED, errorDescription);
+//        }
+//
+//        if (code == null) {
+//            return ApiResponse.response(AuthResponseMessage.MISSING_AUTH_CODE);
+//        }
+//
+//        authLogin("kakao",AuthRequestDto.builder().code(code).build());
+//
+//        return ApiResponse.response(AuthResponseMessage.LOGIN_SUCCESS);
+//    }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse> reissueToken(){

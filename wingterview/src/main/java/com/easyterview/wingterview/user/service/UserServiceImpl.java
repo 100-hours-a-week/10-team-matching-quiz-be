@@ -6,7 +6,6 @@ import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
 import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
-import com.easyterview.wingterview.user.dto.response.SeatPosition;
 import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
 import com.easyterview.wingterview.user.dto.response.UserInfoDto;
 import com.easyterview.wingterview.user.entity.InterviewStatEntity;
@@ -40,7 +39,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
 
         user.setName(userBasicInfo.getName());
-        user.setNickname(userBasicInfo.getNickName());
+        user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
         user.setProfileImageUrl(userBasicInfo.getProfileImageUrl());
         user.setSeat(SeatPositionUtil.seatPosToInt(userBasicInfo.getSeatPosition().get(0),userBasicInfo.getSeatPosition().get(1)));
@@ -109,7 +108,6 @@ public class UserServiceImpl implements UserService {
 
         return CheckSeatDto.builder()
                 .isSelected(isSelected)
-                .seatPosition(SeatPositionUtil.seatPosToExpression(seatX, seatY))
                 .build();
     }
 

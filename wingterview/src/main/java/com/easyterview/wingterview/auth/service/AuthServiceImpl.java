@@ -133,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
             user.setRefreshToken(
                     RefreshTokenEntity.builder()
                             .refreshToken(newRefreshToken)
-                            .user(user)  // ⚠️ 연관관계 설정 필요
+                            .user(user)
                             .build()
             );
         }
