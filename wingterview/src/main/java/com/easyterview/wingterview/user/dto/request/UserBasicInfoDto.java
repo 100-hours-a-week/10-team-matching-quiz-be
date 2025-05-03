@@ -22,7 +22,7 @@ public class UserBasicInfoDto {
             message = "닉네임은 소문자로 2글자 이상 영어이름.영어성 형식으로 작성해주세요. 예: joy.lee"
     )
     @Size(min = 2, max = 50, message = "닉네임은 최소 2자 최대 50자까지 입력 가능합니다.")
-    private String nickName;
+    private String nickname;
 
     @Pattern(
             regexp = "^[가-힣]{3,4}\\s[가-힣]{2}$",

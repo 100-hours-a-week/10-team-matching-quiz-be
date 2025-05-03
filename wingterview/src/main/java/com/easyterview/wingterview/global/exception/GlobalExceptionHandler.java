@@ -28,8 +28,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse> handleIllegalArgument(IllegalArgumentException e) {
-        log.error("잘못된 입력: {}", e.getMessage());
         return ApiResponse.response(ExceptionMessage.INVALID_INPUT, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
+
+    @ExceptionHandler(AlreadyEnqueuedException.class)
+    public ResponseEntity<ApiResponse> handleAlreadyEnqueued(AlreadyEnqueuedException e) {
+        return ApiResponse.response(ExceptionMessage.ALREADY_ENQUEUED, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
+
+    @ExceptionHandler(MatchingClosedException.class)
+    public ResponseEntity<ApiResponse> handleMatchingClosed(MatchingClosedException e) {
+        return ApiResponse.response(ExceptionMessage.QUEUE_CLOSED, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
+
+    @ExceptionHandler(UserNotParticipatedException.class)
+    public ResponseEntity<ApiResponse> handleUserNotFound(UserNotParticipatedException e){
+        return ApiResponse.response(ExceptionMessage.INVALID_USER, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
 
 

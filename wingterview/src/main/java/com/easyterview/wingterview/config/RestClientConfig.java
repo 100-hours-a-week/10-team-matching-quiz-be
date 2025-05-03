@@ -27,7 +27,7 @@ public class RestClientConfig {
         // RestClient 빌더 반환
         return RestClient.builder()
                 .messageConverters(converters -> {
-                    converters.add(new FormHttpMessageConverter());  // 🔥 핵심
+                    converters.add(new FormHttpMessageConverter());
                     converters.add(new MappingJackson2HttpMessageConverter());
                 })
                 .build();

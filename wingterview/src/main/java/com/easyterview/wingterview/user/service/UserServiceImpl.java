@@ -6,7 +6,6 @@ import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
 import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
-import com.easyterview.wingterview.user.dto.response.SeatPosition;
 import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
 import com.easyterview.wingterview.user.dto.response.UserInfoDto;
 import com.easyterview.wingterview.user.entity.InterviewStatEntity;
@@ -37,10 +36,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveUserInfo(UserBasicInfoDto userBasicInfo) {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+                .orElseThrow(InvalidTokenException::new);
 
         user.setName(userBasicInfo.getName());
-        user.setNickname(userBasicInfo.getNickName());
+        user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
         user.setProfileImageUrl(userBasicInfo.getProfileImageUrl());
         user.setSeat(SeatPositionUtil.seatPosToInt(userBasicInfo.getSeatPosition().get(0),userBasicInfo.getSeatPosition().get(1)));
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService {
         });
 
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+                .orElseThrow(InvalidTokenException::new);
         Integer mySeatIdx = user.getSeat();
         int[] mySeatPosition = user.getSeat() == null ? null : new int[] {mySeatIdx / Seats.COL_LENGTH.getLength() + 1 , mySeatIdx % Seats.COL_LENGTH.getLength() + 1 };
 
@@ -109,7 +108,6 @@ public class UserServiceImpl implements UserService {
 
         return CheckSeatDto.builder()
                 .isSelected(isSelected)
-                .seatPosition(SeatPositionUtil.seatPosToExpression(seatX, seatY))
                 .build();
     }
 
@@ -117,7 +115,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoDto getMyInfo() {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+                .orElseThrow(InvalidTokenException::new);
 
         return UserInfoDto.builder()
                 .nickname(user.getNickname())

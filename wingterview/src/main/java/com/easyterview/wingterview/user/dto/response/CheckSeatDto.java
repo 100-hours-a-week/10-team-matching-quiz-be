@@ -7,5 +7,4 @@ import lombok.Getter;
 @Builder
 public class CheckSeatDto {
     private final Boolean isSelected;
-    private final SeatPosition seatPosition;
 }

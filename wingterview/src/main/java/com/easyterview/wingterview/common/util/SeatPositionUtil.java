@@ -1,9 +1,8 @@
 package com.easyterview.wingterview.common.util;
 
 import com.easyterview.wingterview.common.enums.Seats;
-import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
-import com.easyterview.wingterview.user.dto.response.SeatPosition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SeatPositionUtil {
@@ -11,7 +10,7 @@ public class SeatPositionUtil {
         return (seatX-1) * Seats.COL_LENGTH.getLength() + (seatY-1);
     }
 
-    public static SeatPosition seatPosToExpression(int seatX, int seatY){
+    /*public static SeatPosition seatPosToExpression(int seatX, int seatY){
         String group = "";
         String position = "";
         if(1 <= seatY && seatY <= 3){
@@ -39,7 +38,7 @@ public class SeatPositionUtil {
                 .group(group)
                 .position(position)
                 .build();
-    }
+    }*/
 
     public static String seatIdxToSeatCode(Integer seatIdx){
         int seatX = seatIdx / Seats.COL_LENGTH.getLength() + 1;
@@ -70,5 +69,10 @@ public class SeatPositionUtil {
         }
 
         return sb.toString();
+    }
+
+    public static List<Integer> seatIdxToSeatPosition(Integer seat) {
+        int colLength = Seats.COL_LENGTH.getLength();
+        return List.of(seat / colLength + 1, seat % colLength + 1);
     }
 }
