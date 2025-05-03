@@ -2,6 +2,9 @@ package com.easyterview.wingterview.common.util;
 
 import com.easyterview.wingterview.common.enums.Seats;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SeatPositionUtil {
     public static int seatPosToInt(int seatX, int seatY){
         return (seatX-1) * Seats.COL_LENGTH.getLength() + (seatY-1);
@@ -66,5 +69,10 @@ public class SeatPositionUtil {
         }
 
         return sb.toString();
+    }
+
+    public static List<Integer> seatIdxToSeatPosition(Integer seat) {
+        int colLength = Seats.COL_LENGTH.getLength();
+        return List.of(seat / colLength + 1, seat % colLength + 1);
     }
 }

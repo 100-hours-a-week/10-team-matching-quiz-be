@@ -1,5 +1,8 @@
 package com.easyterview.wingterview.user.entity;
 
+import com.easyterview.wingterview.interview.entity.InterviewEntity;
+import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
+import com.easyterview.wingterview.matching.entity.MatchingEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -82,4 +85,11 @@ public class UserEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private InterviewStatEntity interviewStat;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private MatchingEntity matchingParticipant;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<InterviewParticipantEntity> interviews = new ArrayList<>();
 }

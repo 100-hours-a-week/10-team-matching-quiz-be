@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveUserInfo(UserBasicInfoDto userBasicInfo) {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+                .orElseThrow(InvalidTokenException::new);
 
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
         });
 
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+                .orElseThrow(InvalidTokenException::new);
         Integer mySeatIdx = user.getSeat();
         int[] mySeatPosition = user.getSeat() == null ? null : new int[] {mySeatIdx / Seats.COL_LENGTH.getLength() + 1 , mySeatIdx % Seats.COL_LENGTH.getLength() + 1 };
 
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoDto getMyInfo() {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(() -> new InvalidTokenException("잘못된 토큰"));
+                .orElseThrow(InvalidTokenException::new);
 
         return UserInfoDto.builder()
                 .nickname(user.getNickname())
