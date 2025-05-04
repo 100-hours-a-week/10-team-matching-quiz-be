@@ -3,8 +3,11 @@ package com.easyterview.wingterview.user.service;
 import com.easyterview.wingterview.common.enums.Seats;
 import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
+import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
+import com.easyterview.wingterview.user.dto.request.SeatPosition;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
+import com.easyterview.wingterview.user.dto.response.BlockedSeats;
 import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
 import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
 import com.easyterview.wingterview.user.dto.response.UserInfoDto;
@@ -42,7 +45,10 @@ public class UserServiceImpl implements UserService {
         user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
         user.setProfileImageUrl(userBasicInfo.getProfileImageUrl());
-        user.setSeat(SeatPositionUtil.seatPosToInt(userBasicInfo.getSeatPosition().get(0),userBasicInfo.getSeatPosition().get(1)));
+
+        // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
+        SeatPosition seatPosition = userBasicInfo.getSeatPosition();
+        user.setSeat(SeatPositionUtil.seatPosToInt(seatPosition));
 
         List<UserTechStackEntity> techStacks = userBasicInfo.getTechStack().stream()
                 .map(TechStack::from) // 문자열 → enum
@@ -78,13 +84,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SeatPositionDto getBlockedSeats() {
-        boolean[][] blockedSeats = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()];
+        // DTO 구조 변경(A,B,C 분단)
+        boolean[][] A = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()/3];
+        boolean[][] B = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()/3];
+        boolean[][] C = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()/3];
         List<Integer> seats = userRepository.findAllSeatInfo();
+
+        // 자리들에 대해 boolean[][] 배열에 넣어주기
         seats.forEach((index) -> {
             int seatX = index / Seats.COL_LENGTH.getLength();
             int seatY = index % Seats.COL_LENGTH.getLength();
-            blockedSeats[seatX][seatY] = true;
+            if(seatY / 3 == 0){
+                A[seatX][seatY%3] = true;
+            }
+            else if(seatY / 3 == 1){
+                B[seatX][seatY%3] = true;
+            }
+            else{
+                C[seatX][seatY%3] = true;
+            }
         });
+        BlockedSeats blockedSeats = BlockedSeats.builder()
+                .A(A)
+                .B(B)
+                .C(C)
+                .build();
 
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
@@ -99,11 +123,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CheckSeatDto checkSeatBlocked(String seatPositionId) {
-        StringTokenizer st = new StringTokenizer(seatPositionId, "-");
-        int seatX = Integer.parseInt(st.nextToken());
-        int seatY = Integer.parseInt(st.nextToken());
-
-        Optional<UserEntity> seatUser = userRepository.findBySeat(SeatPositionUtil.seatPosToInt(seatX,seatY));
+        Optional<UserEntity> seatUser = userRepository.findBySeat(SeatPositionUtil.seatPosIdToInt(seatPositionId));
         boolean isSelected = seatUser.isPresent();
 
         return CheckSeatDto.builder()
@@ -133,6 +153,31 @@ public class UserServiceImpl implements UserService {
                 .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void blockSeatPosition(String seatPositionId) {
+        int seatInt = SeatPositionUtil.seatPosIdToInt(seatPositionId);
+
+        // 1. 이미 점유된 좌석인지 확인
+        Optional<UserEntity> seatUser = userRepository.findBySeat(seatInt);
+        if (seatUser.isPresent()) {
+            throw new AlreadyBlockedSeatException();
+        }
+
+        // 2. 현재 사용자 정보 가져오기
+        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(InvalidTokenException::new);
+
+        // 3. 사용자가 기존 좌석을 점유하고 있다면 해제
+        if (user.getSeat() != null) {
+            user.setSeat(null);
+        }
+
+        // 4. 새 좌석으로 설정
+        user.setSeat(seatInt);
+    }
+
 
 
 }

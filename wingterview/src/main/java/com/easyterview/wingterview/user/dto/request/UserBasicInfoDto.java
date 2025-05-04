@@ -45,8 +45,5 @@ public class UserBasicInfoDto {
     )
     private String profileImageUrl;
 
-    @Size(min = 2, max = 2, message = "좌표 정보가 유효하지 않음")
-    // TODO : Custom Validator로 seatPosition의 각 요소의 조건 걸기
-    private List<Integer> seatPosition;
-
+    private SeatPosition seatPosition;
 }

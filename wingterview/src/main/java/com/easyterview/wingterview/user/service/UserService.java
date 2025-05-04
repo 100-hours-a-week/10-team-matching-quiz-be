@@ -11,4 +11,6 @@ public interface UserService {
     CheckSeatDto checkSeatBlocked(String seatPositionId);
 
     UserInfoDto getMyInfo();
+
+    void blockSeatPosition(String seatPositionId);
 }

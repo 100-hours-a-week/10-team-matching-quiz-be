@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class SeatPositionDto {
-    private final boolean[][] seats;
+    private final BlockedSeats seats;
     private final int[] mySeatPosition;
 }

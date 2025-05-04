@@ -46,6 +46,11 @@ public class GlobalExceptionHandler {
         return ApiResponse.response(ExceptionMessage.INVALID_USER, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
 
+    @ExceptionHandler(AlreadyBlockedSeatException.class)
+    public ResponseEntity<ApiResponse> handleAlreadyBlockedSeat(AlreadyBlockedSeatException e){
+        return ApiResponse.response(ExceptionMessage.ALREADY_BLOCKED_SEAT, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
+
 
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ApiResponse> invalidTokenException(InvalidTokenException e){

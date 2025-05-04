@@ -33,6 +33,12 @@ public class UserController {
         return ApiResponse.response(UserResponseMessage.SEAT_FETCH_DONE,response);
     }
 
+    @PutMapping("/seats/{seatPositionId}")
+    public ResponseEntity<ApiResponse> blockSeatPosition(@PathVariable String seatPositionId){
+        userService.blockSeatPosition(seatPositionId);
+        return ApiResponse.response(UserResponseMessage.SEAT_BLOCK_DONE);
+    }
+
     @GetMapping("/seats/{seatPositionId}")
     public ResponseEntity<ApiResponse> checkSeatBlocked(@PathVariable String seatPositionId){
         CheckSeatDto response = userService.checkSeatBlocked(seatPositionId);
