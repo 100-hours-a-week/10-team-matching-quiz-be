@@ -48,7 +48,12 @@ public class UserServiceImpl implements UserService {
 
         // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
         SeatPosition seatPosition = userBasicInfo.getSeatPosition();
-        user.setSeat(SeatPositionUtil.seatPosToInt(seatPosition));
+        int seatInt = SeatPositionUtil.seatPosToInt(seatPosition);
+        Optional<UserEntity> seatUserOpt = userRepository.findBySeat(seatInt);
+        // 자리에 누가 있고 그게 내가 아니라면 -> 중복
+        if(seatUserOpt.isPresent() && !seatUserOpt.get().getId().equals(user.getId()))
+            throw new AlreadyBlockedSeatException();
+        user.setSeat(seatInt);
 
         List<UserTechStackEntity> techStacks = userBasicInfo.getTechStack().stream()
                 .map(TechStack::from) // 문자열 → enum
