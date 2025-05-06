@@ -59,8 +59,21 @@ public class SeatPositionUtil {
 
     public static int seatPosIdToInt(String seatPositionId) {
         StringTokenizer st = new StringTokenizer(seatPositionId, "-");
-        int seatX = Integer.parseInt(st.nextToken());
-        int seatY = Integer.parseInt(st.nextToken());
-        return seatPosToInt(seatX,seatY);
+        String section = st.nextToken();
+        int row = Integer.parseInt(st.nextToken());
+        int col = Integer.parseInt(st.nextToken());
+
+        if(section.equals("A")){
+
+        }
+        else if (section.equals("B")){
+            col += 3;
+        }
+        else{
+            col += 6;
+        }
+
+
+        return seatPosToInt(row,col);
     }
 }
