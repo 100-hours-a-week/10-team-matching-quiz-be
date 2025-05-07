@@ -76,16 +76,21 @@ public class InterviewServiceImpl implements InterviewService {
                 .orElseThrow(UserNotParticipatedException::new);
         InterviewEntity interview = interviewParticipant.getInterview();
 
+        // 상대방 정보 가져오기
         InterviewParticipantEntity partnerParticipant = interview.getParticipants()
                 .stream()
                 .filter(i -> !i.getUser().getId().equals(user.getId()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
-
         UserEntity partnerEntity = partnerParticipant.getUser();
 
+        // 남은 시간 계산
         int timeRemain = TimeUtil.getRemainTime(interview.getPhaseAt(), InterviewStatus.builder().round(interview.getRound()).phase(interview.getPhase()).build());
+
+        // 내가 현재 인터뷰어인지 확인
         boolean isInterviewer = InterviewUtil.checkInterviewer(interviewParticipant.getRole(), interview.getRound());
+
+        // 상대방 정보 dto
         Partner partner = Partner.builder()
                 .name(partnerEntity.getName())
                 .nickname(partnerEntity.getNickname())
@@ -95,6 +100,7 @@ public class InterviewServiceImpl implements InterviewService {
                 .curriculum(partnerEntity.getCurriculum())
                 .build();
 
+        // 인터뷰 상태 dto 반환
         return InterviewStatusDto.builder()
                 .interviewId(String.valueOf(interview.getId()))
                 .timeRemain(timeRemain)
@@ -111,7 +117,5 @@ public class InterviewServiceImpl implements InterviewService {
 //                .questionOption()
                 .build();
 
-
-//        InterviewStatusDto
     }
 }
