@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.common.util;
 
+import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.enums.Phase;
 
 public class InterviewUtil {
@@ -51,5 +52,9 @@ public class InterviewUtil {
                         .build();
             }
         }
+    }
+
+    public static boolean checkInterviewer(ParticipantRole role, Integer round) {
+        return (role == ParticipantRole.FIRST_INTERVIEWER) ^ (round % 2 == 0);
     }
 }
