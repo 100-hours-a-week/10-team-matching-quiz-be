@@ -2,8 +2,10 @@ package com.easyterview.wingterview.interview.controller;
 
 import com.easyterview.wingterview.common.constants.InterviewResponseMessage;
 import com.easyterview.wingterview.global.response.ApiResponse;
+import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
+import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
 import com.easyterview.wingterview.interview.service.InterviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,4 +29,9 @@ public class InterviewController {
        InterviewStatusDto interviewStatusDto = interviewService.getInterviewStatus();
        return ApiResponse.response(InterviewResponseMessage.INTERVIEW_PHASE_FETCH_DONE,interviewStatusDto);
     }
+
+//    @PostMapping("/{interviewId}/question")
+//    public ResponseEntity<ApiResponse> makeQuestion(@PathVariable String interviewId, @RequestBody QuestionCreationRequestDto dto){
+//        QuestionCreationResponseDto responseDto = interviewService.makeQuestion(interviewId, dto);
+//    }
 }
