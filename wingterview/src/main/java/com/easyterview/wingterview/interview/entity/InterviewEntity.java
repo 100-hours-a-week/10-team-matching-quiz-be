@@ -6,6 +6,7 @@ import com.easyterview.wingterview.user.enums.JobInterest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
@@ -39,7 +40,7 @@ public class InterviewEntity {
     @Column(name = "keywords", length = 200)
     private String keywords;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "phase_at", nullable = false)
     private Timestamp phaseAt;
 
