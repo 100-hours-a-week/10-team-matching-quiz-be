@@ -8,9 +8,11 @@ import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.global.exception.InvalidUUIDFormatException;
 import com.easyterview.wingterview.global.exception.UserNotParticipatedException;
+import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
 import com.easyterview.wingterview.interview.dto.response.Partner;
+import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.enums.ParticipantRole;
@@ -117,5 +119,17 @@ public class InterviewServiceImpl implements InterviewService {
 //                .questionOption()
                 .build();
 
+    }
+
+    @Override
+    public QuestionCreationResponseDto makeQuestion(String interviewId, QuestionCreationRequestDto dto) {
+        // 1. question == null 메인질문 생성
+        if(dto.getQuestion().isEmpty()){
+
+        }
+        // 2. question != null && keywords == null 꼬리질문 생성(키워드 x)
+
+
+        return null;
     }
 }
