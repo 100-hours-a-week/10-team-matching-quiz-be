@@ -53,10 +53,21 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ApiResponse> invalidTokenException(InvalidTokenException e){
+    public ResponseEntity<ApiResponse> handleInvalidToken(InvalidTokenException e){
         // 에러 메시지 추출
         String errorMessage = e.getMessage();
         log.error(errorMessage);
         return ApiResponse.response(ExceptionMessage.INVALID_TOKEN, CustomExceptionDto.builder().reason(errorMessage).build());
+    }
+
+    @ExceptionHandler(InvalidUUIDFormatException.class)
+    public ResponseEntity<ApiResponse> handleInvalidUUIDFormat(InvalidUUIDFormatException e){
+        return ApiResponse.response(ExceptionMessage.INVALID_UUID, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
+
+
+    @ExceptionHandler(InterviewNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleInterviewNotFound(InterviewNotFoundException e){
+        return ApiResponse.response(ExceptionMessage.INTERVIEW_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
 }
