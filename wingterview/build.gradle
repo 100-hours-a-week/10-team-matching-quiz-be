@@ -34,14 +34,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'               // MVC + REST API
 	implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'     // OAuth2 Client (소셜 로그인)
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'          // 서버 모니터링
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'              // RabbitMQ (AMQP)
+//	implementation 'org.springframework.boot:spring-boot-starter-actuator'          // 서버 모니터링
+//	implementation 'org.springframework.boot:spring-boot-starter-amqp'              // RabbitMQ (AMQP)
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // JPA + Hibernate
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'        // Redis 캐시
+//	implementation 'org.springframework.boot:spring-boot-starter-data-redis'        // Redis 캐시
 	implementation 'org.springframework.boot:spring-boot-starter-validation'        // Validation (@NotBlank 등)
 
 	// --- Cloud, Circuit Breaker ---
-	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j' // Resilience4j
+//	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j' // Resilience4j
 
 	// --- OpenAPI (Swagger 문서 자동화) ---
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
@@ -77,15 +77,15 @@ dependencies {
 
 
 	// --- 테스트 ---
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'         // Spring Boot + Testcontainers
-	testImplementation 'org.springframework.amqp:spring-rabbit-test'                 // RabbitMQ 테스트
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'         // REST Docs
-	testImplementation 'org.springframework.security:spring-security-test'           // Security 테스트
-	testImplementation 'org.testcontainers:junit-jupiter'                            // JUnit5 + Testcontainers
-	testImplementation 'org.testcontainers:mysql'                                    // MySQL 컨테이너
-	testImplementation 'org.testcontainers:rabbitmq'                                 // RabbitMQ 컨테이너
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+//	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//	testImplementation 'org.springframework.boot:spring-boot-testcontainers'         // Spring Boot + Testcontainers
+//	testImplementation 'org.springframework.amqp:spring-rabbit-test'                 // RabbitMQ 테스트
+//	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'         // REST Docs
+//	testImplementation 'org.springframework.security:spring-security-test'           // Security 테스트
+//	testImplementation 'org.testcontainers:junit-jupiter'                            // JUnit5 + Testcontainers
+//	testImplementation 'org.testcontainers:mysql'                                    // MySQL 컨테이너
+//	testImplementation 'org.testcontainers:rabbitmq'                                 // RabbitMQ 컨테이너
+//	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
