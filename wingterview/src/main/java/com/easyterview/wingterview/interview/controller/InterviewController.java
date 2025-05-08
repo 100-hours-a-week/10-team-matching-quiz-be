@@ -3,6 +3,7 @@ package com.easyterview.wingterview.interview.controller;
 import com.easyterview.wingterview.common.constants.InterviewResponseMessage;
 import com.easyterview.wingterview.global.response.ApiResponse;
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
+import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
@@ -30,8 +31,15 @@ public class InterviewController {
        return ApiResponse.response(InterviewResponseMessage.INTERVIEW_PHASE_FETCH_DONE,interviewStatusDto);
     }
 
-//    @PostMapping("/{interviewId}/question")
-//    public ResponseEntity<ApiResponse> makeQuestion(@PathVariable String interviewId, @RequestBody QuestionCreationRequestDto dto){
-//        QuestionCreationResponseDto responseDto = interviewService.makeQuestion(interviewId, dto);
-//    }
+    @PostMapping("/{interviewId}/question")
+    public ResponseEntity<ApiResponse> makeQuestion(@PathVariable String interviewId, @RequestBody QuestionCreationRequestDto dto){
+        QuestionCreationResponseDto responseDto = interviewService.makeQuestion(interviewId, dto);
+        return ApiResponse.response(InterviewResponseMessage.QUESTION_FETCH_DONE, responseDto);
+    }
+
+    @PostMapping("/{interviewId}/selection")
+    public ResponseEntity<ApiResponse> selectQuestion(@PathVariable String interviewId, @RequestBody QuestionSelectionRequestDto dto){
+        interviewService.selectQuestion(interviewId, dto);
+        return ApiResponse.response(InterviewResponseMessage.QUESTION_SELECT_DONE);
+    }
 }

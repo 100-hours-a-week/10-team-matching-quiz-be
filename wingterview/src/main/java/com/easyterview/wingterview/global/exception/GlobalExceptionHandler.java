@@ -70,4 +70,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleInterviewNotFound(InterviewNotFoundException e){
         return ApiResponse.response(ExceptionMessage.INTERVIEW_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(QuestionOptionNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleQuestionNotFound(QuestionOptionNotFoundException e){
+        return ApiResponse.response(ExceptionMessage.QUESTION_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
 }

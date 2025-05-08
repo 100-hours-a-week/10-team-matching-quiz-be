@@ -2,6 +2,7 @@ package com.easyterview.wingterview.user.entity;
 
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
+import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
 import com.easyterview.wingterview.matching.entity.MatchingEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -92,4 +93,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<InterviewParticipantEntity> interviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ReceivedQuestionEntity> receivedQuestionEntityList = new ArrayList<>();
 }

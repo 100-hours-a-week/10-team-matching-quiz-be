@@ -52,4 +52,11 @@ public class InterviewEntity {
     @OneToMany(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<InterviewParticipantEntity> participants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<QuestionOptionsEntity> questionOptionsList = new ArrayList<>();
+
+    @OneToOne(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private QuestionHistoryEntity questionHistory;
 }

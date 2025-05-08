@@ -16,7 +16,7 @@ public class TimeUtil {
         switch (status.getPhase()) {
             case PROGRESS -> totalSeconds = 20 * 60;
             case FEEDBACK -> totalSeconds = 5 * 60;
-            default -> throw new IllegalArgumentException("지원하지 않는 인터뷰 상태입니다.");
+            default -> totalSeconds = 0;
         }
 
         Instant now = Instant.now();
