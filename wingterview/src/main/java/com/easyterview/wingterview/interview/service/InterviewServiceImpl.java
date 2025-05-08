@@ -164,6 +164,7 @@ public class InterviewServiceImpl implements InterviewService {
             UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                     .orElseThrow(InvalidTokenException::new);
 
+            // 희망 직무, 테크스택 관련 메인 질문 뽑아오기
             List<String> jobInterests = user.getUserJobInterest().stream()
                     .map(j -> j.getJobInterest().name())
                     .collect(Collectors.toList());
@@ -177,6 +178,7 @@ public class InterviewServiceImpl implements InterviewService {
                     .map(MainQuestionEntity::getContents)
                     .toList();
 
+            // questionOptions 저장하기
             QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
                     .firstOption(questions.get(0))
                     .secondOption(questions.get(1))
@@ -187,6 +189,7 @@ public class InterviewServiceImpl implements InterviewService {
 
             questionOptionsRepository.save(questionOptions);
 
+            // question responsebody
             return QuestionCreationResponseDto.builder()
                     .questions(questions)
                     .build();
