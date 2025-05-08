@@ -16,7 +16,7 @@ public class UserInfoDto {
     private String curriculum;
     private String seatCode;
     private List<String> jobInterest;
-    private List<String> teckStack;
+    private List<String> techStack;
     private Integer interviewCnt;
     private String profileImageUrl;
 }

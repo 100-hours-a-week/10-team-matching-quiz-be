@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface QuestionHistoryRepository extends JpaRepository<QuestionHistoryEntity, UUID> {
     Optional<QuestionHistoryEntity> findByInterview(InterviewEntity interview);
+
+    void deleteAllByInterview(InterviewEntity interview);
 }

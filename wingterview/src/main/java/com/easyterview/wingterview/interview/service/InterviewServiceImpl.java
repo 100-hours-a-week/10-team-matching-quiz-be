@@ -69,6 +69,10 @@ public class InterviewServiceImpl implements InterviewService {
             interview.setPhase(nextStatus.getPhase());
             interview.setRound(nextStatus.getRound());
 
+            // 인터뷰 관련 options, history 다 지우기(다음 분기를 위해)
+            questionOptionsRepository.deleteAllByInterview(interview);
+            questionHistoryRepository.deleteAllByInterview(interview);
+
             // 바꾼 분기 dto 리턴
             return NextRoundDto.builder()
                     .currentPhase(nextStatus.getPhase().getPhase())
@@ -310,6 +314,8 @@ public class InterviewServiceImpl implements InterviewService {
 
         // 질문 History 덮어쓰기
         Optional<QuestionHistoryEntity> oldQuestionHistoryOpt = questionHistoryRepository.findByInterview(interview);
+
+        // 1. 원래 history 없었다면 questionIdx를 1로 설정
         if(oldQuestionHistoryOpt.isEmpty()){
             questionHistoryRepository.save(QuestionHistoryEntity.builder()
                             .selectedQuestionIdx(1)
@@ -317,21 +323,25 @@ public class InterviewServiceImpl implements InterviewService {
                             .interview(interview)
                     .build()
             );
-            receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
-                            .contents(selectedQuestion)
-                            .receivedAt(Timestamp.valueOf(LocalDateTime.now()))
-                            .user(user)
-                    .build()
-            );
             log.info("*************** 1번 질문 생성 완료");
         }
+        // 2. 원래 있었다면 questionIdx + 1로 설정
         else{
             QuestionHistoryEntity oldQuestionHistory = oldQuestionHistoryOpt.get();
             oldQuestionHistory.setSelectedQuestionIdx(oldQuestionHistory.getSelectedQuestionIdx()+1);
             oldQuestionHistory.setSelectedQuestion(selectedQuestion);
             questionHistoryRepository.save(oldQuestionHistory);
+
             log.info("*************** {}번 질문 생성 완료",oldQuestionHistory.getSelectedQuestionIdx());
         }
+
+        // 받은 질문 목록 테이블에 저장하기
+        receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
+                .contents(selectedQuestion)
+                .receivedAt(Timestamp.valueOf(LocalDateTime.now()))
+                .user(user)
+                .build()
+        );
 
         // 그 인터뷰에 대한 option들(지나친 질문 목록) 삭제
         questionOptionsRepository.deleteAllByInterview(interview);

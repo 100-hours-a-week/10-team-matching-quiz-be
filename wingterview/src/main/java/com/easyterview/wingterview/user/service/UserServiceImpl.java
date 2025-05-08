@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
                 .jobInterest(user.getUserJobInterest().stream()
                         .map(interestEntity -> interestEntity.getJobInterest().getLabel())
                         .collect(Collectors.toList()))
-                .teckStack(user.getUserTechStack().stream()
+                .techStack(user.getUserTechStack().stream()
                         .map(techStackEntity -> techStackEntity.getTechStack().getLabel())
                         .toList())
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
