@@ -158,7 +158,7 @@ public class InterviewServiceImpl implements InterviewService {
     public QuestionCreationResponseDto makeQuestion(String interviewId, QuestionCreationRequestDto dto) {
         // 1. question == null 메인질문 생성
         if (dto.getQuestion().isEmpty()) {
-            // TODO : 메인질문 중복처리를 위한 user_main_question
+            // TODO : 메인질문 중복처리를 위한 user_main_question ??
             InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
                     .orElseThrow(InterviewNotFoundException::new);
             UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
@@ -192,11 +192,9 @@ public class InterviewServiceImpl implements InterviewService {
                     .build();
         } else {
             InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId)).orElseThrow(InterviewNotFoundException::new);
-            // 4. QuestionHistory가 있으면서 이전 Question이 똑같음 -> 꼬리질문 재생성한거임 -> passed Question 넣어서 AI에 보내기. + passed Question 누적
-
+            // 2. QuestionHistory가 있으면서 이전 Question이 똑같음 -> 꼬리질문 재생성한거임 -> passed Question 넣어서 AI에 보내기. + passed Question 누적
             if (interview.getQuestionHistory() != null && dto.getQuestion().equals(interview.getQuestionHistory().getSelectedQuestion())) {
-                log.info("*********** 새 꼬리질문 보내기 전 : {}",interviewId);
-                // 최근 20개를 가져와서 넣기
+                // 최근 20개를 가져와서 passed question 구성하기
                 List<String> passedQuestions = questionOptionsRepository.findTop5ByOrderByCreatedAtDesc()
                         .stream()
                         .flatMap(q -> Stream.of(
@@ -207,7 +205,7 @@ public class InterviewServiceImpl implements InterviewService {
                         ))
                         .collect(Collectors.toList());
 
-
+                // AI에 요청 보내기
                 Map<String, Object> jsonBody = new HashMap<>();
                 jsonBody.put("interview_id", interviewId);
                 jsonBody.put("selected_question", interview.getQuestionHistory().getSelectedQuestion());
@@ -222,7 +220,6 @@ public class InterviewServiceImpl implements InterviewService {
                         .body(new ParameterizedTypeReference<Map<String, Object>>() {});
 
                 // followup_questions 추출 및 안전한 캐스팅
-                log.info("*********** 새 꼬리질문 보낸 후 : {}",response.get("interview_id").toString());
                 Object rawOptions = response.get("followup_questions");
                 if (!(rawOptions instanceof List<?> rawList)) {
                     throw new RuntimeException("응답 형식이 예상과 다릅니다: followup_questions");
@@ -230,6 +227,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                 List<String> options = rawList.stream().map(Object::toString).toList();
 
+                // questionOptions 저장하기
                 QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
                         .firstOption(options.get(0))
                         .secondOption(options.get(1))
@@ -240,15 +238,16 @@ public class InterviewServiceImpl implements InterviewService {
 
                 questionOptionsRepository.save(questionOptions);
 
+                // question responsebody
                 return QuestionCreationResponseDto.builder()
                         .questions(options)
                         .build();
             }
-            // 2. question != null && keywords == null 꼬리질문 생성(키워드 x)
-            // 3. 꼬리질문 생성(키워드 o)
-            else {
-                log.info("*********** 선택 후 꼬리질문 보내기 전 : {}",interviewId);
 
+            // 3. question != null && keywords == null 꼬리질문 생성(키워드 x)
+            // 4. 꼬리질문 생성(키워드 o)
+            else {
+                // AI에 요청 보내기
                 Map<String, Object> jsonBody = new HashMap<>();
                 jsonBody.put("interview_id", interviewId);
                 jsonBody.put("selected_question", interview.getQuestionHistory().getSelectedQuestion());
@@ -261,8 +260,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .retrieve()
                         .body(new ParameterizedTypeReference<Map<String, Object>>() {});
 
-
-                log.info("*********** 선택 후 꼬리질문 보낸 후 : {}",response.get("interview_id").toString());
+                // questionOptions 저장하기
                 Object rawOptions = response.get("followup_questions");
                 if (rawOptions instanceof List<?> rawList) {
                     List<String> options = rawList.stream().map(Object::toString).toList();
@@ -276,6 +274,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                     questionOptionsRepository.save(questionOptions);
 
+                    // question responsebody
                     return QuestionCreationResponseDto.builder()
                             .questions(options)
                             .build();
