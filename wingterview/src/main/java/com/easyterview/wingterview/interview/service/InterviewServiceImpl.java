@@ -31,10 +31,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -48,6 +52,7 @@ import java.util.stream.Stream;
 public class InterviewServiceImpl implements InterviewService {
 
     private final RestClient restClient;
+    private final RestTemplate restTemplate;
     private final InterviewRepository interviewRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
     private final UserRepository userRepository;
@@ -240,12 +245,14 @@ public class InterviewServiceImpl implements InterviewService {
                         .build();
 
                 log.info("**************저기");
-                Map<String, Object> response = restClient.post()
-                        .uri(followUpUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(requestDto)
-                        .retrieve()
-                        .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
+
+                ResponseEntity<Map> responseEntity = restTemplate.postForEntity(followUpUrl, entity, Map.class);
+
+                Map<String, Object> response = responseEntity.getBody();
 
                 log.info("*************** !!!!!!!!!!{}",response.toString());
                 // followup_questions 추출 및 안전한 캐스팅
@@ -284,12 +291,14 @@ public class InterviewServiceImpl implements InterviewService {
                         .build();
 
                 log.info("************여기");
-                Map<String, Object> response = restClient.post()
-                        .uri(followUpUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(requestDto)
-                        .retrieve()
-                        .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
+
+                ResponseEntity<Map> responseEntity = restTemplate.postForEntity(followUpUrl, entity, Map.class);
+
+                Map<String, Object> response = responseEntity.getBody();
 
                 // questionOptions 저장하기
                 Object rawOptions = response.get("followup_questions");
