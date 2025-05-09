@@ -27,7 +27,7 @@ oauth:
   kakao:
     token-request-uri: https://kauth.kakao.com/oauth/token
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
-    redirect-uri: http://localhost:5173/auth/kakao
+    redirect-uri: http://43.203.77.116/auth/kakao
     client-id: ${oauth.kakao.client-id}
 
 ai:
@@ -45,3 +45,4 @@ cloud:
     secret-key: ${secretKey}
     stack:
       auto: false
+

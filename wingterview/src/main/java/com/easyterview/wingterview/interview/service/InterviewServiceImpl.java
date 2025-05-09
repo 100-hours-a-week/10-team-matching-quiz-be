@@ -159,7 +159,6 @@ public class InterviewServiceImpl implements InterviewService {
         }
 
 
-
         // 인터뷰 상태 dto 반환
         return InterviewStatusDto.builder()
                 .interviewId(String.valueOf(interview.getId()))
@@ -244,7 +243,6 @@ public class InterviewServiceImpl implements InterviewService {
                         .passedQuestions(passedQuestions.isEmpty() ? null : passedQuestions)
                         .build();
 
-                log.info("**************저기");
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -254,7 +252,6 @@ public class InterviewServiceImpl implements InterviewService {
 
                 Map<String, Object> response = responseEntity.getBody();
 
-                log.info("*************** !!!!!!!!!!{}",response.toString());
                 // followup_questions 추출 및 안전한 캐스팅
                 Object rawOptions = response.get("followup_questions");
                 if (!(rawOptions instanceof List<?> rawList)) {
@@ -442,6 +439,4 @@ public class InterviewServiceImpl implements InterviewService {
 
         chatRepository.save(newChat);
     }
-
-
 }
