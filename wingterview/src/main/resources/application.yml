@@ -29,3 +29,20 @@ oauth:
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
     redirect-uri: http://43.203.77.116/auth/kakao
     client-id: ${oauth.kakao.client-id}
+
+ai:
+  follow-up-url: http://35.216.28.161:8000/interview/followup-questions
+
+cloud:
+  aws:
+    region:
+      static: ${region}
+    s3:
+      bucket: ${bucket}
+
+  credentials:
+    access-key: ${accessKey}
+    secret-key: ${secretKey}
+    stack:
+      auto: false
+

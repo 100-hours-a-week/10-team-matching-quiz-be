@@ -93,17 +93,18 @@ public class MatchingServiceImpl implements MatchingService {
 
         Interviewer interviewer = Interviewer.builder()
                 .name(interviewerUser.getName())
+                .nickname(interviewerUser.getNickname())
                 .curriculum(interviewerUser.getCurriculum())
                 .jobInterest(interviewerUser.getUserJobInterest().stream()
                         .map(i -> i.getJobInterest().getLabel()).toList())
                 .techStack(interviewerUser.getUserTechStack().stream()
                         .map(i -> i.getTechStack().getLabel()).toList())
                 .seatCode(SeatPositionUtil.seatIdxToSeatCode(interviewerUser.getSeat()))
-                .seatPosition(SeatPositionUtil.seatIdxToSeatPosition(interviewerUser.getSeat()))
                 .build();
 
         Interviewee interviewee = Interviewee.builder()
                 .name(intervieweeUser.getName())
+                .nickname(intervieweeUser.getNickname())
                 .curriculum(intervieweeUser.getCurriculum())
                 .jobInterest(intervieweeUser.getUserJobInterest().stream()
                         .map(i -> i.getJobInterest().getLabel()).toList())
@@ -124,8 +125,6 @@ public class MatchingServiceImpl implements MatchingService {
     public MatchingStatisticsDto getMatchingStatistics() {
         if(!matchingStatusManager.isMatchingOpen())
             throw new MatchingClosedException();
-
-        ;
 
         return MatchingStatisticsDto.builder()
                 .count((int)matchingRepository.count())

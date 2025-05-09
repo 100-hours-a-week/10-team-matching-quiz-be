@@ -9,5 +9,4 @@ import java.util.List;
 @SuperBuilder
 public class Interviewer extends InterviewParticipant {
     private final String seatCode;
-    private final List<Integer> seatPosition;
 }
