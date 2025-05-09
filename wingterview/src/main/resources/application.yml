@@ -32,3 +32,16 @@ oauth:
 
 ai:
   follow-up-url: http://35.216.28.161:8000/interview/followup-questions
+
+cloud:
+  aws:
+    region:
+      static: ${region}
+    s3:
+      bucket: ${bucket}
+
+  credentials:
+    access-key: ${accessKey}
+    secret-key: ${secretKey}
+    stack:
+      auto: false
