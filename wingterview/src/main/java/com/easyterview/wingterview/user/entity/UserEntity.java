@@ -1,7 +1,7 @@
 package com.easyterview.wingterview.user.entity;
 
 import com.easyterview.wingterview.chat.entity.ChatEntity;
-import com.easyterview.wingterview.chat.entity.ChatRoomEntity;
+import com.easyterview.wingterview.chat.entity.ChatroomEntity;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;

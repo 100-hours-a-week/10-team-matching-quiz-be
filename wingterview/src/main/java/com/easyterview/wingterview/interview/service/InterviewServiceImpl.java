@@ -1,9 +1,9 @@
 package com.easyterview.wingterview.interview.service;
 
 import com.easyterview.wingterview.chat.entity.ChatEntity;
-import com.easyterview.wingterview.chat.entity.ChatRoomEntity;
+import com.easyterview.wingterview.chat.entity.ChatroomEntity;
 import com.easyterview.wingterview.chat.repository.ChatRepository;
-import com.easyterview.wingterview.chat.repository.ChatRoomRepository;
+import com.easyterview.wingterview.chat.repository.ChatroomRepository;
 import com.easyterview.wingterview.common.util.InterviewStatus;
 import com.easyterview.wingterview.common.util.InterviewUtil;
 import com.easyterview.wingterview.common.util.TimeUtil;
@@ -53,7 +53,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final ReceivedQuestionRepository receivedQuestionRepository;
     private final MainQuestionRepository mainQuestionRepository;
     private final UserChatroomRepository userChatroomRepository;
-    private final ChatRoomRepository chatRoomRepository;
+    private final ChatroomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
 
 
@@ -390,29 +390,28 @@ public class InterviewServiceImpl implements InterviewService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
 
-        ChatRoomEntity chatRoom;
+        ChatroomEntity chatroom;
 
         // 5. 인터뷰 ID 기준으로 연결된 채팅방이 이미 있는지 확인
         List<UserChatroomEntity> existingUserChatrooms = userChatroomRepository.findAllByInterviewId(interviewUUID);
         if (!existingUserChatrooms.isEmpty()) {
             // 6. 이미 채팅방이 있다면 재사용
-            chatRoom = existingUserChatrooms.getFirst().getChatRoom();
+            chatroom = existingUserChatrooms.getFirst().getChatroom();
         } else {
             // 7. 없으면 새로운 채팅방 생성
-            chatRoom = ChatRoomEntity.builder()
+            chatroom = ChatroomEntity.builder()
                     .title(currentUser.getName() + "와 " + otherUser.getName() + "의 대화방")
                     .build();
-            chatRoomRepository.save(chatRoom); // ID 부여를 위해 먼저 저장
+            chatRoomRepository.save(chatroom); // ID 부여를 위해 먼저 저장
 
             // 8. 새 채팅방을 각 사용자에게 매핑 (UserChatroomEntity)
             userChatroomRepository.save(UserChatroomEntity.builder()
-                    .chatRoom(chatRoom)
+                    .chatroom(chatroom)
                     .interviewId(interviewUUID)
                     .user(currentUser)
                     .build());
 
             userChatroomRepository.save(UserChatroomEntity.builder()
-                    .chatRoom(chatRoom)
                     .interviewId(interviewUUID)
                     .user(otherUser)
                     .build());
@@ -423,7 +422,7 @@ public class InterviewServiceImpl implements InterviewService {
 
         // 10. ChatEntity 생성 및 저장
         ChatEntity newChat = ChatEntity.builder()
-                .chatRoom(chatRoom)
+                .chatroom(chatroom)
                 .contents(message)
                 .sender(currentUser)
                 .build();

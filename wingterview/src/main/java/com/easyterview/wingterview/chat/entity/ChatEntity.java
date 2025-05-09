@@ -47,5 +47,5 @@ public class ChatEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chatroom_id", nullable = false)
-    private ChatRoomEntity chatRoom;
+    private ChatroomEntity chatroom;
 }

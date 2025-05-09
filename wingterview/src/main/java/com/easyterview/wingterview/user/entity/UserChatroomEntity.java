@@ -1,6 +1,6 @@
 package com.easyterview.wingterview.user.entity;
 
-import com.easyterview.wingterview.chat.entity.ChatRoomEntity;
+import com.easyterview.wingterview.chat.entity.ChatroomEntity;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +37,7 @@ public class UserChatroomEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chatroom_id", nullable = false)
-    private ChatRoomEntity chatRoom;
+    private ChatroomEntity chatroom;
 
 
 }

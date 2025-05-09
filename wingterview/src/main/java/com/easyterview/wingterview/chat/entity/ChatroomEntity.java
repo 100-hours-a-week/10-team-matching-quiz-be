@@ -18,7 +18,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "chatroom")
-public class ChatRoomEntity {
+public class ChatroomEntity {
 
     @Id
     @GeneratedValue
