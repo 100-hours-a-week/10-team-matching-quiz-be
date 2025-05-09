@@ -1,10 +1,16 @@
 package com.easyterview.wingterview.interview.service;
 
+import com.easyterview.wingterview.chat.entity.ChatEntity;
+import com.easyterview.wingterview.chat.entity.ChatRoomEntity;
+import com.easyterview.wingterview.chat.repository.ChatRepository;
+import com.easyterview.wingterview.chat.repository.ChatRoomRepository;
 import com.easyterview.wingterview.common.util.InterviewStatus;
 import com.easyterview.wingterview.common.util.InterviewUtil;
 import com.easyterview.wingterview.common.util.TimeUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.*;
+import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
+import com.easyterview.wingterview.interview.dto.request.FollowUpQuestionRequest;
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
@@ -14,7 +20,9 @@ import com.easyterview.wingterview.interview.dto.response.QuestionCreationRespon
 import com.easyterview.wingterview.interview.entity.*;
 import com.easyterview.wingterview.interview.enums.Phase;
 import com.easyterview.wingterview.interview.repository.*;
+import com.easyterview.wingterview.user.entity.UserChatroomEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
+import com.easyterview.wingterview.user.repository.UserChatroomRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +52,15 @@ public class InterviewServiceImpl implements InterviewService {
     private final QuestionHistoryRepository questionHistoryRepository;
     private final ReceivedQuestionRepository receivedQuestionRepository;
     private final MainQuestionRepository mainQuestionRepository;
+    private final UserChatroomRepository userChatroomRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRepository chatRepository;
 
 
     @Value("${ai.follow-up-url}")
     private String followUpUrl;
 
-    private final String tmpUrl = "https://0e28-34-124-213-134.ngrok-free.app/interview/followup-questions";
+//    private final String tmpUrl = "https://zk5vcmm7-8000.asse.devtunnels.ms/api/followup";
 
     @Override
     @Transactional
@@ -71,7 +82,8 @@ public class InterviewServiceImpl implements InterviewService {
 
             // 인터뷰 관련 options, history 다 지우기(다음 분기를 위해)
             questionOptionsRepository.deleteAllByInterview(interview);
-            questionHistoryRepository.deleteAllByInterview(interview);
+            questionHistoryRepository.deleteAllByInterviewId(UUID.fromString(interviewId));
+            log.info("************** 잘 지워짐");
 
             // 바꾼 분기 dto 리턴
             return NextRoundDto.builder()
@@ -160,6 +172,7 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public QuestionCreationResponseDto makeQuestion(String interviewId, QuestionCreationRequestDto dto) {
+
         // 1. question == null 메인질문 생성
         if (dto.getQuestion().isEmpty()) {
             // TODO : 메인질문 중복처리를 위한 user_main_question ??
@@ -212,20 +225,26 @@ public class InterviewServiceImpl implements InterviewService {
                         ))
                         .collect(Collectors.toList());
 
-                // AI에 요청 보내기
-                Map<String, Object> jsonBody = new HashMap<>();
-                jsonBody.put("interview_id", interviewId);
-                jsonBody.put("selected_question", interview.getQuestionHistory().getSelectedQuestion());
-                jsonBody.put("keyword", dto.getKeywords()); // null 가능
-                jsonBody.put("passed_questions", passedQuestions); // List<String>
+                String selectedQuestion = interview.getQuestionHistory().getSelectedQuestion();
 
+                String keyword = dto.getKeywords();
+
+                FollowUpQuestionRequest requestDto = FollowUpQuestionRequest.builder()
+                        .interviewId(interviewId)
+                        .selectedQuestion(selectedQuestion)
+                        .keyword(keyword)
+                        .passedQuestions(passedQuestions.isEmpty() ? null : passedQuestions)
+                        .build();
+
+                log.info("**************저기");
                 Map<String, Object> response = restClient.post()
-                        .uri(tmpUrl)
+                        .uri(followUpUrl)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(jsonBody)
+                        .body(requestDto)
                         .retrieve()
                         .body(new ParameterizedTypeReference<Map<String, Object>>() {});
 
+                log.info("*************** !!!!!!!!!!{}",response.toString());
                 // followup_questions 추출 및 안전한 캐스팅
                 Object rawOptions = response.get("followup_questions");
                 if (!(rawOptions instanceof List<?> rawList)) {
@@ -254,16 +273,18 @@ public class InterviewServiceImpl implements InterviewService {
             // 3. question != null && keywords == null 꼬리질문 생성(키워드 x)
             // 4. 꼬리질문 생성(키워드 o)
             else {
-                // AI에 요청 보내기
-                Map<String, Object> jsonBody = new HashMap<>();
-                jsonBody.put("interview_id", interviewId);
-                jsonBody.put("selected_question", interview.getQuestionHistory().getSelectedQuestion());
-                jsonBody.put("keyword", dto.getKeywords());
+                // 꼬리 질문 요청용 DTO 생성
+                FollowUpQuestionRequest requestDto = FollowUpQuestionRequest.builder()
+                        .interviewId(interviewId)
+                        .selectedQuestion(interview.getQuestionHistory().getSelectedQuestion())
+                        .keyword(dto.getKeywords())
+                        .build();
 
+                log.info("************여기");
                 Map<String, Object> response = restClient.post()
-                        .uri(tmpUrl)
+                        .uri(followUpUrl)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(jsonBody)
+                        .body(requestDto)
                         .retrieve()
                         .body(new ParameterizedTypeReference<Map<String, Object>>() {});
 
@@ -271,6 +292,7 @@ public class InterviewServiceImpl implements InterviewService {
                 Object rawOptions = response.get("followup_questions");
                 if (rawOptions instanceof List<?> rawList) {
                     List<String> options = rawList.stream().map(Object::toString).toList();
+
                     QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
                             .firstOption(options.get(0))
                             .secondOption(options.get(1))
@@ -281,7 +303,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                     questionOptionsRepository.save(questionOptions);
 
-                    // question responsebody
+                    // 응답 DTO 반환
                     return QuestionCreationResponseDto.builder()
                             .questions(options)
                             .build();
@@ -346,4 +368,68 @@ public class InterviewServiceImpl implements InterviewService {
         // 그 인터뷰에 대한 option들(지나친 질문 목록) 삭제
         questionOptionsRepository.deleteAllByInterview(interview);
     }
+
+    @Transactional
+    @Override
+    public void sendFeedback(String interviewId, FeedbackRequestDto dto) {
+        // 1. 문자열 인터뷰 ID를 UUID로 변환
+        UUID interviewUUID = UUID.fromString(interviewId);
+
+        // 2. 인터뷰 정보 조회 (없으면 예외 발생)
+        InterviewEntity interview = interviewRepository.findById(interviewUUID)
+                .orElseThrow(InterviewNotFoundException::new);
+
+        // 3. 현재 로그인된 사용자 조회
+        UserEntity currentUser = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(InvalidTokenException::new);
+
+        // 4. 상대방 유저 찾기 (현재 유저와 ID가 다른 참여자)
+        UserEntity otherUser = interview.getParticipants().stream()
+                .map(InterviewParticipantEntity::getUser)
+                .filter(user -> !user.getId().equals(currentUser.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
+
+        ChatRoomEntity chatRoom;
+
+        // 5. 인터뷰 ID 기준으로 연결된 채팅방이 이미 있는지 확인
+        List<UserChatroomEntity> existingUserChatrooms = userChatroomRepository.findAllByInterviewId(interviewUUID);
+        if (!existingUserChatrooms.isEmpty()) {
+            // 6. 이미 채팅방이 있다면 재사용
+            chatRoom = existingUserChatrooms.getFirst().getChatRoom();
+        } else {
+            // 7. 없으면 새로운 채팅방 생성
+            chatRoom = ChatRoomEntity.builder()
+                    .title(currentUser.getName() + "와 " + otherUser.getName() + "의 대화방")
+                    .build();
+            chatRoomRepository.save(chatRoom); // ID 부여를 위해 먼저 저장
+
+            // 8. 새 채팅방을 각 사용자에게 매핑 (UserChatroomEntity)
+            userChatroomRepository.save(UserChatroomEntity.builder()
+                    .chatRoom(chatRoom)
+                    .interviewId(interviewUUID)
+                    .user(currentUser)
+                    .build());
+
+            userChatroomRepository.save(UserChatroomEntity.builder()
+                    .chatRoom(chatRoom)
+                    .interviewId(interviewUUID)
+                    .user(otherUser)
+                    .build());
+        }
+
+        // 9. 피드백 메시지 구성 ("내용\n(점수: 4.5)" 형태)
+        String message = String.format("%s\n(점수: %.1f)", dto.getFeedback(), dto.getScore());
+
+        // 10. ChatEntity 생성 및 저장
+        ChatEntity newChat = ChatEntity.builder()
+                .chatRoom(chatRoom)
+                .contents(message)
+                .sender(currentUser)
+                .build();
+
+        chatRepository.save(newChat);
+    }
+
+
 }

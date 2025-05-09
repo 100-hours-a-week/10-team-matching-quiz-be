@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.interview.service;
 
+import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
@@ -14,4 +15,6 @@ public interface InterviewService {
     QuestionCreationResponseDto makeQuestion(String interviewId, QuestionCreationRequestDto dto);
 
     void selectQuestion(String interviewId, QuestionSelectionRequestDto dto);
+
+    void sendFeedback(String interviewId, FeedbackRequestDto dto);
 }

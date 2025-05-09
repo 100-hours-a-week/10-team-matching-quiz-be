@@ -1,5 +1,7 @@
 package com.easyterview.wingterview.user.entity;
 
+import com.easyterview.wingterview.chat.entity.ChatEntity;
+import com.easyterview.wingterview.chat.entity.ChatRoomEntity;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
@@ -97,4 +99,12 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ReceivedQuestionEntity> receivedQuestionEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @Builder.Default
+    private List<UserChatroomEntity> userChatroomEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ChatEntity> chatList = new ArrayList<>();
 }

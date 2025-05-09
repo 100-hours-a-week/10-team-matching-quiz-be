@@ -20,16 +20,15 @@ public class RestClientConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
-        // JSON 메시지 컨버터 설정
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(objectMapper);
+        // JSON 메시지 컨버터에 objectMapper 주입
+        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 
-        // RestClient 빌더 반환
         return RestClient.builder()
                 .messageConverters(converters -> {
                     converters.add(new FormHttpMessageConverter());
-                    converters.add(new MappingJackson2HttpMessageConverter());
+                    converters.add(jsonConverter); // ← 이걸 써야 함!
                 })
                 .build();
     }
+
 }

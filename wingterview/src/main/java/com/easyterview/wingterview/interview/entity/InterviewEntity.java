@@ -1,6 +1,7 @@
 package com.easyterview.wingterview.interview.entity;
 
 import com.easyterview.wingterview.interview.enums.Phase;
+import com.easyterview.wingterview.user.entity.UserChatroomEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.enums.JobInterest;
 import jakarta.persistence.*;

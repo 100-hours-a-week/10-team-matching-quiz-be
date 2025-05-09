@@ -2,12 +2,14 @@ package com.easyterview.wingterview.interview.controller;
 
 import com.easyterview.wingterview.common.constants.InterviewResponseMessage;
 import com.easyterview.wingterview.global.response.ApiResponse;
+import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
 import com.easyterview.wingterview.interview.service.InterviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +43,11 @@ public class InterviewController {
     public ResponseEntity<ApiResponse> selectQuestion(@PathVariable String interviewId, @RequestBody QuestionSelectionRequestDto dto){
         interviewService.selectQuestion(interviewId, dto);
         return ApiResponse.response(InterviewResponseMessage.QUESTION_SELECT_DONE);
+    }
+
+    @PostMapping("/{interviewId}/feedback")
+    public ResponseEntity<ApiResponse> sendFeedback(@PathVariable String interviewId, @RequestBody FeedbackRequestDto dto){
+        interviewService.sendFeedback(interviewId, dto);
+        return ApiResponse.response(InterviewResponseMessage.FEEDBACK_SEND_DONE);
     }
 }
