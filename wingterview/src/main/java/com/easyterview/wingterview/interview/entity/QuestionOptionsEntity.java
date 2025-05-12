@@ -42,5 +42,6 @@ public class QuestionOptionsEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_id", nullable = false)
+    @ToString.Exclude
     private InterviewEntity interview;
 }

@@ -22,6 +22,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "user")
+@ToString
 public class UserEntity {
 
     @Id
