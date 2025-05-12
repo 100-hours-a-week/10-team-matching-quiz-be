@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/matching/result").permitAll()
                         // TODO : AI 쪽 API는 permitAll
                         .anyRequest().authenticated()
                 )
