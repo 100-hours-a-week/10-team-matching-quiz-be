@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class InterviewServiceImpl implements InterviewService {
 
-    private final RestClient restClient;
     private final RestTemplate restTemplate;
     private final InterviewRepository interviewRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
@@ -212,7 +211,10 @@ public class InterviewServiceImpl implements InterviewService {
                     .interview(interview)
                     .build();
 
-            questionOptionsRepository.save(questionOptions);
+            log.info("questionOptionsquestionOptionsquestionOptions");
+            log.info(questionOptions.toString());
+
+            questionOptionsRepository.saveAndFlush(questionOptions);
 
             // question responsebody
             return QuestionCreationResponseDto.builder()

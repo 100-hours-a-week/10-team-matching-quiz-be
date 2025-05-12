@@ -16,6 +16,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "question_options")
+@ToString
 public class QuestionOptionsEntity {
     @Id
     @GeneratedValue
