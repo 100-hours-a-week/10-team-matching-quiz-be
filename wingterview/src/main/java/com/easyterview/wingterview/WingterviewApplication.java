@@ -1,0 +1,14 @@
+package com.easyterview.wingterview;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class WingterviewApplication {
+
+	public static void main(String[] args) {
+
+		SpringApplication.run(WingterviewApplication.class, args);
+	}
+
+}

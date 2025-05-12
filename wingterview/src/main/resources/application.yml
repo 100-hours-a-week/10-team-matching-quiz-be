@@ -1,0 +1,48 @@
+
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/wingterview?useUnicode=true&character_set_server=utf8mb4&serverTimezone=Asia/Seoul
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  config:
+    import: application-secret.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+#  redis:
+#    host: localhost
+#    port: 6379
+      
+      
+oauth:
+  kakao:
+    token-request-uri: https://kauth.kakao.com/oauth/token
+    token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
+    redirect-uri: http://43.203.77.116/auth/kakao
+    client-id: ${oauth.kakao.client-id}
+
+ai:
+  follow-up-url: http://35.216.28.161:8000/interview/followup-questions
+
+cloud:
+  aws:
+    region:
+      static: ${region}
+    s3:
+      bucket: ${bucket}
+
+  credentials:
+    access-key: ${accessKey}
+    secret-key: ${secretKey}
+    stack:
+      auto: false
+
