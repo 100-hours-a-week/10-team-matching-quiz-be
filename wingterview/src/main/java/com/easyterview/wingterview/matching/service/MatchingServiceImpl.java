@@ -171,5 +171,6 @@ public class MatchingServiceImpl implements MatchingService {
             interviewer.setInterview(interview);
             interviewRepository.save(interview);
         });
+        matchingParticipantRepository.deleteAllInBatch();
     }
 }
