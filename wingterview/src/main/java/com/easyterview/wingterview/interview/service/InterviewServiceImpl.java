@@ -178,6 +178,8 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public QuestionCreationResponseDto makeQuestion(String interviewId, QuestionCreationRequestDto dto) {
+        log.info("*******Make Question 로그********8");
+        log.info(dto.toString());
 
         // 1. question == null 메인질문 생성
         if (dto.getQuestion().isEmpty()) {
@@ -191,6 +193,7 @@ public class InterviewServiceImpl implements InterviewService {
             List<String> jobInterests = user.getUserJobInterest().stream()
                     .map(j -> j.getJobInterest().name())
                     .collect(Collectors.toList());
+
 
             List<String> techStacks = user.getUserTechStack().stream()
                     .map(t -> t.getTechStack().name())
@@ -210,10 +213,16 @@ public class InterviewServiceImpl implements InterviewService {
                     .interview(interview)
                     .build();
 
-            log.info("questionOptionsquestionOptionsquestionOptions");
-            log.info(questionOptions.toString());
+            interview.getQuestionOptionsList().add(questionOptions);
 
-            questionOptionsRepository.saveAndFlush(questionOptions);
+            log.info("INTERVIEW");
+            log.info(interview.toString());
+
+            questionOptions.setInterview(interview); // 연관관계 주인 설정
+            interview.getQuestionOptionsList().add(questionOptions); // 양방향 연관관계 동기화
+            questionOptionsRepository.save(questionOptions); // 주인 저장
+
+            log.info(String.valueOf(questionOptionsRepository.findTop1ByInterviewOrderByCreatedAtDesc(interview).orElseThrow()));
 
             // question responsebody
             return QuestionCreationResponseDto.builder()
