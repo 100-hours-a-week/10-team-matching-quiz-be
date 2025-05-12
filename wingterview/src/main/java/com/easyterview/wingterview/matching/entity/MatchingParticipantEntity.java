@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "matching_participant")
-public class MatchingEntity {
+public class MatchingParticipantEntity {
     @Id
     @GeneratedValue
     @UuidGenerator

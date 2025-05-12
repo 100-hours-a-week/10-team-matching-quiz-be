@@ -3,7 +3,7 @@ package com.easyterview.wingterview.user.entity;
 import com.easyterview.wingterview.chat.entity.ChatEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
-import com.easyterview.wingterview.matching.entity.MatchingEntity;
+import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -22,6 +22,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "user")
+@ToString
 public class UserEntity {
 
     @Id
@@ -88,7 +89,7 @@ public class UserEntity {
     private InterviewStatEntity interviewStat;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private MatchingEntity matchingParticipant;
+    private MatchingParticipantEntity matchingParticipant;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

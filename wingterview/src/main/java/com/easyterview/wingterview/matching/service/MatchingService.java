@@ -8,4 +8,5 @@ public interface MatchingService {
     void enqueue();
 
     MatchingStatisticsDto getMatchingStatistics();
+    void doMatchingAlgorithm();
 }

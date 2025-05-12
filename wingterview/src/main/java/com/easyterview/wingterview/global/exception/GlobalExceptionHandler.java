@@ -75,4 +75,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleQuestionNotFound(QuestionOptionNotFoundException e){
         return ApiResponse.response(ExceptionMessage.QUESTION_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleUserNotFound(UserNotFoundException e){
+        return ApiResponse.response(ExceptionMessage.USER_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
 }

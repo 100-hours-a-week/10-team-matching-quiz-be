@@ -38,4 +38,10 @@ public class MatchingController {
         MatchingStatisticsDto statistics = matchingService.getMatchingStatistics();
         return ApiResponse.response(MatchingResponseMessage.MATCHING_STATISTICS_FETCH_DONE,statistics);
     }
+
+    @PostMapping("/result")
+    public ResponseEntity<ApiResponse> doMatching(){
+        matchingService.doMatchingAlgorithm();
+        return ApiResponse.response(MatchingResponseMessage.MATCHING_DONE);
+    }
 }
