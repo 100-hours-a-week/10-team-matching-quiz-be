@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<UserEntity> user = userRepository.findByProviderAndProviderId("KAKAO", providerId);
         boolean isNewUser;
 
-        if (user.isEmpty()) {
+        if (user.isEmpty() || user.get().getRefreshToken() == null) {
             // 새 유저 + 리프레시 토큰 생성
             RefreshTokenEntity refreshToken = RefreshTokenEntity.builder()
                     .refreshToken(refreshTokenStr)
