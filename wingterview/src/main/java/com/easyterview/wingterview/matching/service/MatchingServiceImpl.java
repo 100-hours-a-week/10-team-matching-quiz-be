@@ -2,37 +2,38 @@ package com.easyterview.wingterview.matching.service;
 
 import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
-import com.easyterview.wingterview.global.exception.AlreadyEnqueuedException;
-import com.easyterview.wingterview.global.exception.InvalidTokenException;
-import com.easyterview.wingterview.global.exception.MatchingClosedException;
-import com.easyterview.wingterview.global.exception.UserNotParticipatedException;
+import com.easyterview.wingterview.global.exception.*;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.repository.InterviewParticipantRepository;
 import com.easyterview.wingterview.interview.repository.InterviewRepository;
+import com.easyterview.wingterview.matching.algorithm.MatchingAlgorithm;
+import com.easyterview.wingterview.matching.algorithm.MatchingUser;
 import com.easyterview.wingterview.matching.config.MatchingStatusManager;
 import com.easyterview.wingterview.matching.dto.response.Interviewee;
 import com.easyterview.wingterview.matching.dto.response.Interviewer;
 import com.easyterview.wingterview.matching.dto.response.MatchingResultDto;
 import com.easyterview.wingterview.matching.dto.response.MatchingStatisticsDto;
-import com.easyterview.wingterview.matching.entity.MatchingEntity;
-import com.easyterview.wingterview.matching.repository.MatchingRepository;
+import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
+import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService {
 
-    private final MatchingRepository matchingRepository;
+    private final MatchingParticipantRepository matchingParticipantRepository;
+    private final MatchingAlgorithm matchingAlgorithm;
+    private final InterviewRepository interviewRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
     private final MatchingStatusManager matchingStatusManager;
     private final UserRepository userRepository;
@@ -47,9 +48,9 @@ public class MatchingServiceImpl implements MatchingService {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
 
-        Optional<MatchingEntity> matching = matchingRepository.findByUser(user);
+        Optional<MatchingParticipantEntity> matching = matchingParticipantRepository.findByUser(user);
         if(matching.isEmpty()){
-            matchingRepository.save(MatchingEntity.builder()
+            matchingParticipantRepository.save(MatchingParticipantEntity.builder()
                     .user(user)
                     .build());
         }
@@ -67,7 +68,7 @@ public class MatchingServiceImpl implements MatchingService {
 
         // TODO : 인터뷰 참가자가 아닌데 APi 호출하면 UserNotParticipatedException 호출해야하는데
         // 이걸 matchingEntity들을 매칭이 됐다고 지우지 말고 면접이 끝날 때 지우면 되겠네.
-        MatchingEntity matching = matchingRepository.findByUser(user)
+        MatchingParticipantEntity matching = matchingParticipantRepository.findByUser(user)
                 .orElseThrow(UserNotParticipatedException::new);
 
         // 인터뷰가 만들어졌다면 인터뷰 참가자 엔터티가 존재해야함
@@ -127,8 +128,48 @@ public class MatchingServiceImpl implements MatchingService {
             throw new MatchingClosedException();
 
         return MatchingStatisticsDto.builder()
-                .count((int)matchingRepository.count())
+                .count((int) matchingParticipantRepository.count())
                 .build();
     }
 
+    @Transactional
+    public void doMatchingAlgorithm() {
+        List<MatchingParticipantEntity> participantList = matchingParticipantRepository.findAll();
+        List<MatchingUser> matchingUsers = participantList.stream().map(participant -> {
+            UserEntity user = participant.getUser();
+            return
+            MatchingUser.builder()
+                    .userId(String.valueOf(user.getId()))
+                    .jobInterests(user.getUserJobInterest().stream().map(j -> j.getJobInterest().getLabel()).toList())
+                    .techStacks(user.getUserTechStack().stream().map(t -> t.getTechStack().getLabel()).toList())
+                    .curriculum(user.getCurriculum())
+                    .build();
+        }).toList();
+
+        matchingAlgorithm.setParticipants(matchingUsers);
+        List<Pair<String, String>> matchingResults = matchingAlgorithm.performGreedyMatching();
+
+        matchingResults.forEach(p -> {
+            String intervieweeId = p.getLeft();
+            String interviewerId = p.getRight();
+
+            InterviewParticipantEntity interviewer = InterviewParticipantEntity.builder()
+                    .role(ParticipantRole.FIRST_INTERVIEWER)
+                    .user(userRepository.findById(UUID.fromString(interviewerId)).orElseThrow(UserNotFoundException::new))
+                    .build();
+
+            InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
+                    .role(ParticipantRole.SECOND_INTERVIEWER)
+                    .user(userRepository.findById(UUID.fromString(intervieweeId)).orElseThrow(UserNotFoundException::new))
+                    .build();
+
+            InterviewEntity interview = InterviewEntity.builder()
+                    .participants(List.of(interviewer, interviewee))
+                    .build();
+
+            interviewee.setInterview(interview);
+            interviewer.setInterview(interview);
+            interviewRepository.save(interview);
+        });
+    }
 }

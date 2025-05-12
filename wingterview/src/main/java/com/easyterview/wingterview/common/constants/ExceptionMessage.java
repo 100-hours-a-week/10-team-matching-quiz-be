@@ -14,7 +14,8 @@ public enum ExceptionMessage implements ResponseMessage{
     ALREADY_BLOCKED_SEAT(409, "이미 막힌 자리"),
     INVALID_UUID(400, "잘못된 UUID 형식"),
     INTERVIEW_NOT_FOUND(404, "존재하지 않는 인터뷰"),
-    QUESTION_NOT_FOUND(404, "존재하지 않는 질문 목록");
+    QUESTION_NOT_FOUND(404, "존재하지 않는 질문 목록"),
+    USER_NOT_FOUND(404, "유저가 존재하지 않음");
 
     private final int statusCode;
     private final String message;
