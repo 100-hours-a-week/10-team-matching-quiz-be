@@ -17,6 +17,7 @@ import com.easyterview.wingterview.user.entity.UserJobInterestEntity;
 import com.easyterview.wingterview.user.entity.UserTechStackEntity;
 import com.easyterview.wingterview.user.enums.JobInterest;
 import com.easyterview.wingterview.user.enums.TechStack;
+import com.easyterview.wingterview.user.repository.InterviewStatRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final InterviewStatRepository interviewStatRepository;
 
     @Transactional
     @Override
@@ -82,6 +84,9 @@ public class UserServiceImpl implements UserService {
         user.getUserTechStack().clear();
         user.getUserTechStack().addAll(techStacks);
         interviewStat.setUser(user);
+
+        interviewStatRepository.save(interviewStat);
+
         user.setInterviewStat(interviewStat);
 
         userRepository.save(user); // cascade 덕분에 연관 Entity도 저장됨
