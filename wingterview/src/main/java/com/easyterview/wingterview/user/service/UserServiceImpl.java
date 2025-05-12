@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
         user.getUserTechStack().clear();
         user.getUserTechStack().addAll(techStacks);
-
+        interviewStat.setUser(user);
         user.setInterviewStat(interviewStat);
 
         userRepository.save(user); // cascade 덕분에 연관 Entity도 저장됨
