@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Setter
 @Component
 public class MatchingAlgorithm {
 
@@ -144,5 +143,11 @@ public class MatchingAlgorithm {
         }
 
         return pairs;
+    }
+
+    public void setParticipants(List<MatchingUser> participants) {
+        this.participants = participants;
+        this.participantMap = participants.stream()
+                .collect(Collectors.toMap(MatchingUser::getUserId, user -> user));
     }
 }
