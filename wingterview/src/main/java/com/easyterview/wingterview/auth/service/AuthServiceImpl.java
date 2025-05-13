@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<UserEntity> user = userRepository.findByProviderAndProviderId("KAKAO", providerId);
         boolean isNewUser;
 
-        if (user.isEmpty() || user.get().getCurriculum().equals("temp")) {
+        if (user.isEmpty() ) {
             // 새 유저 + 리프레시 토큰 생성
             RefreshTokenEntity refreshToken = RefreshTokenEntity.builder()
                     .refreshToken(refreshTokenStr)
@@ -88,7 +88,10 @@ public class AuthServiceImpl implements AuthService {
             refreshToken.setUser(newUser); // 양방향 연관관계 설정
             userRepository.save(newUser);
             isNewUser = true;
-        } else {
+        } else if(user.get().getCurriculum().equals("temp")) {
+            isNewUser = true;
+        }
+        else {
             // 기존 유저 → 토큰 갱신
             UserEntity existingUser = user.get();
             RefreshTokenEntity existingToken = existingUser.getRefreshToken(); // 연관관계로부터 직접 접근 가능!
@@ -105,12 +108,14 @@ public class AuthServiceImpl implements AuthService {
             }
 
             isNewUser = false;
+
         }
 
         AuthResponseDto authResponseDto = AuthResponseDto.builder()
                 .accessToken((String) tokenResponse.get("access_token"))
                 .isNewUser(isNewUser)
                 .build();
+
         log.info(authResponseDto.toString());
 
         return authResponseDto;
