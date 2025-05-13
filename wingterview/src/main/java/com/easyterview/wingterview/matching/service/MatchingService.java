@@ -9,4 +9,6 @@ public interface MatchingService {
 
     MatchingStatisticsDto getMatchingStatistics();
     void doMatchingAlgorithm();
+
+    void deleteParticipants();
 }

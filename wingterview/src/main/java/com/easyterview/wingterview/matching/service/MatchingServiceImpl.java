@@ -20,6 +20,7 @@ import com.easyterview.wingterview.matching.repository.MatchingParticipantReposi
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService {
@@ -113,6 +115,7 @@ public class MatchingServiceImpl implements MatchingService {
                         .map(i -> i.getTechStack().getLabel()).toList())
                 .build();
 
+
         return MatchingResultDto.builder()
                 .isFirstInterviewer(isFirst)
                 .isAiInterview(interview.getIsAiInterview())
@@ -124,18 +127,23 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public MatchingStatisticsDto getMatchingStatistics() {
-        if(!matchingStatusManager.isMatchingOpen())
+        if (!matchingStatusManager.isMatchingOpen())
             throw new MatchingClosedException();
 
+        Integer notMatchedCount = matchingParticipantRepository.countNotMatchedParticipants();
+
         return MatchingStatisticsDto.builder()
-                .count((int) matchingParticipantRepository.count())
+                .count(notMatchedCount)
                 .build();
     }
 
     @Transactional
     public void doMatchingAlgorithm() {
         List<MatchingParticipantEntity> participantList = matchingParticipantRepository.findAll();
-        List<MatchingUser> matchingUsers = participantList.stream().map(participant -> {
+        List<MatchingParticipantEntity> notMatchedParticipantList = participantList.stream().filter(m ->
+            interviewParticipantRepository.findByUser(m.getUser()).isEmpty()
+        ).toList();
+        List<MatchingUser> matchingUsers = notMatchedParticipantList.stream().map(participant -> {
             UserEntity user = participant.getUser();
             return
             MatchingUser.builder()
@@ -171,6 +179,11 @@ public class MatchingServiceImpl implements MatchingService {
             interviewer.setInterview(interview);
             interviewRepository.save(interview);
         });
+    }
+
+    @Override
+    @Transactional
+    public void deleteParticipants() {
         matchingParticipantRepository.deleteAllInBatch();
     }
 }
