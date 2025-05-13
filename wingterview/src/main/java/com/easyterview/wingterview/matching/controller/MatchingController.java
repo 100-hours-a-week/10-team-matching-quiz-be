@@ -7,10 +7,7 @@ import com.easyterview.wingterview.matching.dto.response.MatchingStatisticsDto;
 import com.easyterview.wingterview.matching.service.MatchingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/matching")
@@ -42,6 +39,12 @@ public class MatchingController {
     @PostMapping("/result")
     public ResponseEntity<ApiResponse> doMatching(){
         matchingService.doMatchingAlgorithm();
+        return ApiResponse.response(MatchingResponseMessage.MATCHING_DONE);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse> deleteParticipants(){
+        matchingService.deleteParticipants();
         return ApiResponse.response(MatchingResponseMessage.MATCHING_DONE);
     }
 }

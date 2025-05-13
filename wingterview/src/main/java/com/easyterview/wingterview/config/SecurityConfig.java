@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/matching/result").permitAll()
+                        .requestMatchers("/api/matching").permitAll()
                         // TODO : AI 쪽 API는 permitAll
                         .anyRequest().authenticated()
                 )
