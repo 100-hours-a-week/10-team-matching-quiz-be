@@ -25,7 +25,7 @@ public class UserBasicInfoDto {
     private String nickname;
 
     @Pattern(
-            regexp = "^[가-힣]{3,4}\\s[가-힣]{2}$",
+            regexp = "^[가-힣]{3,4}$",
             message = "과정명 형식 오류"
     )
     @NotEmpty(message = "커리큘럼 누락")

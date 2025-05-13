@@ -55,9 +55,8 @@ public class UserEntity {
     @Builder.Default
     private String curriculum = "temp";
 
-    @Column(name = "seat", nullable = false)
-    @Builder.Default
-    private Integer seat = 0;
+    @Column(name = "seat")
+    private Integer seat;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
