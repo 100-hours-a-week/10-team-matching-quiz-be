@@ -188,14 +188,19 @@ public class InterviewServiceImpl implements InterviewService {
                     .orElseThrow(InterviewNotFoundException::new);
             UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                     .orElseThrow(InvalidTokenException::new);
+            // 다른 참가자 추출하기(면접관이 아닌 면접자와 관련된 기술스택, 희망직무)
+            List<InterviewParticipantEntity> otherParticipantList = interviewParticipantRepository.findByInterview(interview)
+                    .stream().filter(i -> !i.getUser().getId().equals(user.getId())).toList();
+            UserEntity otherUser = otherParticipantList.getFirst().getUser();
+
 
             // 희망 직무, 테크스택 관련 메인 질문 뽑아오기
-            List<String> jobInterests = user.getUserJobInterest().stream()
+            List<String> jobInterests = otherUser.getUserJobInterest().stream()
                     .map(j -> j.getJobInterest().name())
                     .collect(Collectors.toList());
 
 
-            List<String> techStacks = user.getUserTechStack().stream()
+            List<String> techStacks = otherUser.getUserTechStack().stream()
                     .map(t -> t.getTechStack().name())
                     .collect(Collectors.toList());
 
