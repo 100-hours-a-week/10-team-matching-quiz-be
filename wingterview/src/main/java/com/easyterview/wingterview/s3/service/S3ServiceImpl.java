@@ -50,6 +50,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    @Transactional
     public void saveProfileImageUrl(String objectKey) {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(UserNotFoundException::new);
