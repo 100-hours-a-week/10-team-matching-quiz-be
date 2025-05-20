@@ -22,4 +22,6 @@ public interface MatchingParticipantRepository extends JpaRepository<MatchingPar
                 )
             """)
     Integer countNotMatchedParticipants();
+
+    Optional<MatchingParticipantEntity> findByUserId(UUID id);
 }

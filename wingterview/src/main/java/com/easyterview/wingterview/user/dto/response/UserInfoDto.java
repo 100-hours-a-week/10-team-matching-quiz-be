@@ -19,4 +19,5 @@ public class UserInfoDto {
     private List<String> techStack;
     private Integer interviewCnt;
     private String profileImageUrl;
+    private Boolean isInQueue;
 }

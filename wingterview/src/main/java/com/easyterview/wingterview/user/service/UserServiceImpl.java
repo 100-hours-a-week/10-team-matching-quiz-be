@@ -5,6 +5,9 @@ import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
+import com.easyterview.wingterview.global.exception.UserNotParticipatedException;
+import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
+import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.dto.request.SeatPosition;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
 import com.easyterview.wingterview.user.dto.response.BlockedSeats;
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final InterviewStatRepository interviewStatRepository;
+    private final MatchingParticipantRepository matchingParticipantRepository;
 
     @Transactional
     @Override
@@ -147,6 +151,8 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
 
+        Optional<MatchingParticipantEntity> matchingParticipantEntity = matchingParticipantRepository.findByUserId(user.getId());
+
         return UserInfoDto.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
@@ -161,6 +167,7 @@ public class UserServiceImpl implements UserService {
                         .toList())
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
                 .profileImageUrl(user.getProfileImageUrl())
+                .isInQueue(matchingParticipantEntity.isPresent())
                 .build();
     }
 
