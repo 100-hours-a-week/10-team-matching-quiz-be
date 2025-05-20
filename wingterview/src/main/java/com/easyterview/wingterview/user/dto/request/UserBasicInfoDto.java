@@ -39,10 +39,6 @@ public class UserBasicInfoDto {
     @Size(max = 3, message = "희망 직무 갯수 초과")
     private List<String> techStack;
 
-    @Pattern(
-            regexp = "^(https?://).+\\..+",
-            message = "URL 형식이 유효하지 않음"
-    )
     private String profileImageUrl;
 
     private SeatPosition seatPosition;

@@ -49,22 +49,6 @@ public class S3ServiceImpl implements S3Service {
         return s3Presigner.presignPutObject(presignRequest).url();
     }
 
-    @Override
-    public void saveProfileImageUrl(String objectKey) {
-        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(UserNotFoundException::new);
-
-        String profileImageUrl = String.format(
-                "https://%s.s3.%s.amazonaws.com/%s",
-                bucketName,
-                regionName,
-                objectKey
-        );
-
-        log.info("************ {}",profileImageUrl);
-
-        user.setProfileImageUrl(profileImageUrl);
-    }
 
     private String resolveContentType(String filename) {
         if (filename.endsWith(".png")) return "image/png";

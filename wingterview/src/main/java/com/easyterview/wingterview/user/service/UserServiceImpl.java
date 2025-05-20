@@ -1,10 +1,13 @@
 package com.easyterview.wingterview.user.service;
 
 import com.easyterview.wingterview.common.enums.Seats;
+import com.easyterview.wingterview.common.util.S3Util;
 import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
+import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
+import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.dto.request.SeatPosition;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
 import com.easyterview.wingterview.user.dto.response.BlockedSeats;
@@ -36,6 +39,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final InterviewStatRepository interviewStatRepository;
+    private final MatchingParticipantRepository matchingParticipantRepository;
+    private final S3Util s3Util;
 
     @Transactional
     @Override
@@ -46,7 +51,7 @@ public class UserServiceImpl implements UserService {
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
-        user.setProfileImageUrl(userBasicInfo.getProfileImageUrl());
+        user.setProfileImageUrl(s3Util.getProfileImageUrl(userBasicInfo.getProfileImageUrl()));
 
         // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
         SeatPosition seatPosition = userBasicInfo.getSeatPosition();
@@ -147,6 +152,8 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
 
+        Boolean isMatching = matchingParticipantRepository.findByUser(user).isPresent();
+
         return UserInfoDto.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
@@ -161,6 +168,7 @@ public class UserServiceImpl implements UserService {
                         .toList())
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
                 .profileImageUrl(user.getProfileImageUrl())
+                .isInQueue(isMatching)
                 .build();
     }
 

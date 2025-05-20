@@ -25,9 +25,9 @@ public class S3Controller {
         return ApiResponse.response(S3ResponseMessage.URL_FETCH_DONE, UploadUrlDto.builder().url(url.toString()).build());
     }
 
-    @PostMapping("/presigned-url")
-    public ResponseEntity<ApiResponse> saveProfileImageUrl(@RequestParam String fileName){
-        s3Service.saveProfileImageUrl(fileName);
-        return ApiResponse.response(S3ResponseMessage.URL_SAVE_DONE);
-    }
+//    @PostMapping("/presigned-url")
+//    public ResponseEntity<ApiResponse> saveProfileImageUrl(@RequestParam String fileName){
+//        s3Service.saveProfileImageUrl(fileName);
+//        return ApiResponse.response(S3ResponseMessage.URL_SAVE_DONE);
+//    }
 }

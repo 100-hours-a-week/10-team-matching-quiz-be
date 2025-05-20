@@ -18,6 +18,20 @@ spring:
         format_sql: true
     show-sql: true
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username : ${AMQP_USERNAME}
+    password: ${AMQP_PASSWORD}
+
+rabbitmq:
+  queue:
+    name: ai.request.queue
+  exchange:
+    name: ai.request.exchange
+  routing:
+    key : ai.request.single
+
 #  redis:
 #    host: localhost
 #    port: 6379
@@ -27,7 +41,7 @@ oauth:
   kakao:
     token-request-uri: https://kauth.kakao.com/oauth/token
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
-    redirect-uri: http://wingterview.com/auth/kakao
+    redirect-uri: http://localhost:5173/auth/kakao
     client-id: ${oauth.kakao.client-id}
 
 ai:
