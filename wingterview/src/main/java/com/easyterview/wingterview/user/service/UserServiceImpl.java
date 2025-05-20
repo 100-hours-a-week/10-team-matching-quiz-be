@@ -1,6 +1,7 @@
 package com.easyterview.wingterview.user.service;
 
 import com.easyterview.wingterview.common.enums.Seats;
+import com.easyterview.wingterview.common.util.S3Util;
 import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
@@ -40,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final InterviewStatRepository interviewStatRepository;
     private final MatchingParticipantRepository matchingParticipantRepository;
+    private final S3Util s3Util;
 
     @Transactional
     @Override
@@ -50,7 +52,7 @@ public class UserServiceImpl implements UserService {
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
-        user.setProfileImageUrl(userBasicInfo.getProfileImageUrl());
+        user.setProfileImageUrl(s3Util.getProfileImageUrl(userBasicInfo.getProfileImageUrl()));
 
         // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
         SeatPosition seatPosition = userBasicInfo.getSeatPosition();
@@ -166,7 +168,7 @@ public class UserServiceImpl implements UserService {
                         .map(techStackEntity -> techStackEntity.getTechStack().getLabel())
                         .toList())
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
-                .profileImageUrl(user.getProfileImageUrl())
+                .profileImageUrl(user.getProfileImageUrl())     
                 .isInQueue(matchingParticipantEntity.isPresent())
                 .build();
     }
