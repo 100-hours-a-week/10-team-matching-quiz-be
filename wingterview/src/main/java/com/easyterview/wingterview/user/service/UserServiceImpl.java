@@ -6,6 +6,7 @@ import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
+import com.easyterview.wingterview.global.exception.UserNotParticipatedException;
 import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
 import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.dto.request.SeatPosition;
@@ -152,7 +153,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
 
-        Boolean isMatching = matchingParticipantRepository.findByUser(user).isPresent();
+        Optional<MatchingParticipantEntity> matchingParticipantEntity = matchingParticipantRepository.findByUserId(user.getId());
 
         return UserInfoDto.builder()
                 .nickname(user.getNickname())
@@ -167,8 +168,8 @@ public class UserServiceImpl implements UserService {
                         .map(techStackEntity -> techStackEntity.getTechStack().getLabel())
                         .toList())
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
-                .profileImageUrl(user.getProfileImageUrl())
-                .isInQueue(isMatching)
+                .profileImageUrl(user.getProfileImageUrl())     
+                .isInQueue(matchingParticipantEntity.isPresent())
                 .build();
     }
 
