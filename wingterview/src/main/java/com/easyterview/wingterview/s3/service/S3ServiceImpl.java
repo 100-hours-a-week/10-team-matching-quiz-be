@@ -9,10 +9,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.DeleteObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
 
@@ -22,7 +27,7 @@ import java.time.Duration;
 public class S3ServiceImpl implements S3Service {
 
     private final S3Presigner s3Presigner;
-    private final UserRepository userRepository;
+    private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -32,12 +37,14 @@ public class S3ServiceImpl implements S3Service {
     private String regionName;
 
     @Override
+    @Transactional
     public URL generatePresignedUrl(String objectKey, Duration expiration) {
         String contentType = resolveContentType(objectKey);
 
+
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(objectKey)
+                .key("profile_image/"+objectKey)
                 .contentType(contentType)
                 .build();
 
@@ -72,5 +79,22 @@ public class S3ServiceImpl implements S3Service {
         if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) return "image/jpeg";
         // 필요 시 확장
         return "application/octet-stream"; // fallback
+    }
+
+    public void deleteS3ObjectByUrl(String imageUrl) {
+        String key = extractKeyFromUrl(imageUrl); // profile_image/파일명.png
+
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        s3Client.deleteObject(deleteRequest);
+    }
+
+    private String extractKeyFromUrl(String imageUrl) {
+        // S3 URL에서 key 추출
+        URI uri = URI.create(imageUrl);
+        return uri.getPath().substring(1); // 앞에 '/' 제거
     }
 }

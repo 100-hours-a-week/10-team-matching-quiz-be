@@ -139,10 +139,13 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Transactional
     public void doMatchingAlgorithm() {
+        // 참여자 중 Interview에 들어있지 않은 참가자를 모두 찾아서
         List<MatchingParticipantEntity> participantList = matchingParticipantRepository.findAll();
         List<MatchingParticipantEntity> notMatchedParticipantList = participantList.stream().filter(m ->
             interviewParticipantRepository.findByUser(m.getUser()).isEmpty()
         ).toList();
+
+        // 새로 매칭 알고리즘 돌릴 유저 List로 묶음
         List<MatchingUser> matchingUsers = notMatchedParticipantList.stream().map(participant -> {
             UserEntity user = participant.getUser();
             return
@@ -154,9 +157,12 @@ public class MatchingServiceImpl implements MatchingService {
                     .build();
         }).toList();
 
+        // 매칭 알고리즘 돌리기
         matchingAlgorithm.setParticipants(matchingUsers);
         List<Pair<String, String>> matchingResults = matchingAlgorithm.performGreedyMatching();
 
+        Set<String> matchedUsers = new HashSet<>();
+        // result 적용
         matchingResults.forEach(p -> {
             String intervieweeId = p.getLeft();
             String interviewerId = p.getRight();
@@ -177,8 +183,21 @@ public class MatchingServiceImpl implements MatchingService {
 
             interviewee.setInterview(interview);
             interviewer.setInterview(interview);
+
+            matchedUsers.add(intervieweeId);
+            matchedUsers.add(interviewerId);
+
             interviewRepository.save(interview);
         });
+
+        // 매칭 되지 않은 유저는 큐에서 제외하기(최대 1명)
+        List<MatchingParticipantEntity> matchingFailedParticipants =
+                notMatchedParticipantList.stream()
+                        .filter(p -> !matchedUsers.contains(String.valueOf(p.getUser().getId()))).toList();
+
+        if(!matchingFailedParticipants.isEmpty()){
+            matchingParticipantRepository.deleteAllInBatch(matchingFailedParticipants);
+        }
     }
 
     @Override

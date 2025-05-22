@@ -9,35 +9,25 @@ import com.easyterview.wingterview.common.util.InterviewUtil;
 import com.easyterview.wingterview.common.util.TimeUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.*;
-import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
-import com.easyterview.wingterview.interview.dto.request.FollowUpQuestionRequest;
-import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
-import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
-import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
-import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
-import com.easyterview.wingterview.interview.dto.response.Partner;
-import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
+import com.easyterview.wingterview.interview.dto.request.*;
+import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.entity.*;
 import com.easyterview.wingterview.interview.enums.Phase;
 import com.easyterview.wingterview.interview.repository.*;
+import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserChatroomEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserChatroomRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
@@ -62,6 +52,8 @@ public class InterviewServiceImpl implements InterviewService {
     private final UserChatroomRepository userChatroomRepository;
     private final ChatroomRepository chatroomRepository;
     private final ChatRepository chatRepository;
+
+    private final RabbitMqService rabbitMqService;
 
 
     @Value("${ai.follow-up-url}")
@@ -143,10 +135,10 @@ public class InterviewServiceImpl implements InterviewService {
         int questionIdx = -1;
         String selectedQuestion = "";
         List<String> questionOptions = null;
-        if(interview.getPhase().equals(Phase.PROGRESS)){
+        if (interview.getPhase().equals(Phase.PROGRESS)) {
             Optional<QuestionHistoryEntity> questionHistory = questionHistoryRepository.findByInterview(interview);
             Optional<QuestionOptionsEntity> questionOption = questionOptionsRepository.findTop1ByInterviewOrderByCreatedAtDesc(interview);
-            if(questionOption.isPresent()){
+            if (questionOption.isPresent()) {
                 questionOptions = new ArrayList<>();
                 questionOptions.add(questionOption.get().getFirstOption());
                 questionOptions.add(questionOption.get().getSecondOption());
@@ -218,16 +210,10 @@ public class InterviewServiceImpl implements InterviewService {
                     .interview(interview)
                     .build();
 
-            interview.getQuestionOptionsList().add(questionOptions);
-
-            log.info("INTERVIEW");
-            log.info(interview.toString());
-
             questionOptions.setInterview(interview); // 연관관계 주인 설정
             interview.getQuestionOptionsList().add(questionOptions); // 양방향 연관관계 동기화
             questionOptionsRepository.save(questionOptions); // 주인 저장
 
-            log.info(String.valueOf(questionOptionsRepository.findTop1ByInterviewOrderByCreatedAtDesc(interview).orElseThrow()));
 
             // question responsebody
             return QuestionCreationResponseDto.builder()
@@ -252,44 +238,54 @@ public class InterviewServiceImpl implements InterviewService {
 
                 String keyword = dto.getKeywords();
 
-                FollowUpQuestionRequest requestDto = FollowUpQuestionRequest.builder()
+                FollowUpQuestionRequest request = FollowUpQuestionRequest.builder()
                         .interviewId(interviewId)
                         .selectedQuestion(selectedQuestion)
                         .keyword(keyword)
                         .passedQuestions(passedQuestions.isEmpty() ? null : passedQuestions)
                         .build();
 
+                /* 실험 부분 */
+
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
 
-                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
+                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(request, headers);
 
-                ResponseEntity<Map> responseEntity = restTemplate.postForEntity(followUpUrl, entity, Map.class);
+                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
+                        followUpUrl,
+                        entity,
+                        FollowUpQuestionResponseDto.class
+                );
 
-                Map<String, Object> response = responseEntity.getBody();
-
-                // followup_questions 추출 및 안전한 캐스팅
-                Object rawOptions = response.get("followup_questions");
-                if (!(rawOptions instanceof List<?> rawList)) {
-                    throw new RuntimeException("응답 형식이 예상과 다릅니다: followup_questions");
+                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
                 }
 
-                List<String> options = rawList.stream().map(Object::toString).toList();
 
-                // questionOptions 저장하기
+//                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(request);
+
+
+
+
+                List<String> questions = response.getBody().getFollowupQuestions();
+
                 QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
-                        .firstOption(options.get(0))
-                        .secondOption(options.get(1))
-                        .thirdOption(options.get(2))
-                        .fourthOption(options.get(3))
+                        .firstOption(questions.get(0))
+                        .secondOption(questions.get(1))
+                        .thirdOption(questions.get(2))
+                        .fourthOption(questions.get(3))
                         .interview(interview)
                         .build();
 
+
+
                 questionOptionsRepository.save(questionOptions);
 
-                // question responsebody
+                log.info("✅ 꼬리질문 저장 완료: {}", questionOptions);
+
                 return QuestionCreationResponseDto.builder()
-                        .questions(options)
+                        .questions(questions)
                         .build();
             }
 
@@ -303,38 +299,44 @@ public class InterviewServiceImpl implements InterviewService {
                         .keyword(dto.getKeywords())
                         .build();
 
-                log.info("************여기");
+                /* 실험 부분 */
+
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
 
                 HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
 
-                ResponseEntity<Map> responseEntity = restTemplate.postForEntity(followUpUrl, entity, Map.class);
+                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
+                        followUpUrl,
+                        entity,
+                        FollowUpQuestionResponseDto.class
+                );
 
-                Map<String, Object> response = responseEntity.getBody();
-
-                // questionOptions 저장하기
-                Object rawOptions = response.get("followup_questions");
-                if (rawOptions instanceof List<?> rawList) {
-                    List<String> options = rawList.stream().map(Object::toString).toList();
-
-                    QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
-                            .firstOption(options.get(0))
-                            .secondOption(options.get(1))
-                            .thirdOption(options.get(2))
-                            .fourthOption(options.get(3))
-                            .interview(interview)
-                            .build();
-
-                    questionOptionsRepository.save(questionOptions);
-
-                    // 응답 DTO 반환
-                    return QuestionCreationResponseDto.builder()
-                            .questions(options)
-                            .build();
-                } else {
-                    throw new RuntimeException("응답이 예상과 다릅니다: followup_questions");
+                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
                 }
+
+//                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(requestDto);
+
+                List<String> questions = response.getBody().getFollowupQuestions();
+
+                QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
+                        .firstOption(questions.get(0))
+                        .secondOption(questions.get(1))
+                        .thirdOption(questions.get(2))
+                        .fourthOption(questions.get(3))
+                        .interview(interview)
+                        .build();
+
+
+
+                questionOptionsRepository.save(questionOptions);
+
+                log.info("✅ 꼬리질문 저장 완료: {}", questionOptions);
+
+                return QuestionCreationResponseDto.builder()
+                        .questions(questions)
+                        .build();
             }
         }
     }
@@ -363,23 +365,23 @@ public class InterviewServiceImpl implements InterviewService {
         Optional<QuestionHistoryEntity> oldQuestionHistoryOpt = questionHistoryRepository.findByInterview(interview);
 
         // 1. 원래 history 없었다면 questionIdx를 1로 설정
-        if(oldQuestionHistoryOpt.isEmpty()){
+        if (oldQuestionHistoryOpt.isEmpty()) {
             questionHistoryRepository.save(QuestionHistoryEntity.builder()
-                            .selectedQuestionIdx(1)
-                            .selectedQuestion(selectedQuestion)
-                            .interview(interview)
+                    .selectedQuestionIdx(1)
+                    .selectedQuestion(selectedQuestion)
+                    .interview(interview)
                     .build()
             );
             log.info("*************** 1번 질문 생성 완료");
         }
         // 2. 원래 있었다면 questionIdx + 1로 설정
-        else{
+        else {
             QuestionHistoryEntity oldQuestionHistory = oldQuestionHistoryOpt.get();
-            oldQuestionHistory.setSelectedQuestionIdx(oldQuestionHistory.getSelectedQuestionIdx()+1);
+            oldQuestionHistory.setSelectedQuestionIdx(oldQuestionHistory.getSelectedQuestionIdx() + 1);
             oldQuestionHistory.setSelectedQuestion(selectedQuestion);
             questionHistoryRepository.save(oldQuestionHistory);
 
-            log.info("*************** {}번 질문 생성 완료",oldQuestionHistory.getSelectedQuestionIdx());
+            log.info("*************** {}번 질문 생성 완료", oldQuestionHistory.getSelectedQuestionIdx());
         }
 
         // 받은 질문 목록 테이블에 저장하기
