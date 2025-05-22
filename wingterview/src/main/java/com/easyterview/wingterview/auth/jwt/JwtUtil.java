@@ -118,6 +118,7 @@ public class JwtUtil {
 
     // access_token이 유효한지 확인
     public boolean isTokenValid(String accessToken) {
+        System.out.println(accessToken);
         try {
             requestTokenInfo(accessToken);  // 유효하지 않으면 예외 발생
             return true;
