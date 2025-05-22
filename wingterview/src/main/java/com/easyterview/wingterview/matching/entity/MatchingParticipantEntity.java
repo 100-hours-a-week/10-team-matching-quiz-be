@@ -29,6 +29,5 @@ public class MatchingParticipantEntity {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    // @Unique
     private UserEntity user;
 }

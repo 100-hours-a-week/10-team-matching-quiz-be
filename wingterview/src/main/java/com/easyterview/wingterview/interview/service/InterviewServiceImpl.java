@@ -10,10 +10,7 @@ import com.easyterview.wingterview.common.util.TimeUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.*;
 import com.easyterview.wingterview.interview.dto.request.*;
-import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
-import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
-import com.easyterview.wingterview.interview.dto.response.Partner;
-import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
+import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.entity.*;
 import com.easyterview.wingterview.interview.enums.Phase;
 import com.easyterview.wingterview.interview.repository.*;
@@ -248,22 +245,48 @@ public class InterviewServiceImpl implements InterviewService {
                         .passedQuestions(passedQuestions.isEmpty() ? null : passedQuestions)
                         .build();
 
-                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(request);
+                /* 실험 부분 */
 
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(request, headers);
+
+                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
+                        followUpUrl,
+                        entity,
+                        FollowUpQuestionResponseDto.class
+                );
+
+                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
+                }
+
+
+//                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(request);
+
+
+
+
+                List<String> questions = response.getBody().getFollowupQuestions();
 
                 QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
-                        .firstOption(response.getQuestions().get(0))
-                        .secondOption(response.getQuestions().get(1))
-                        .thirdOption(response.getQuestions().get(2))
-                        .fourthOption(response.getQuestions().get(3))
+                        .firstOption(questions.get(0))
+                        .secondOption(questions.get(1))
+                        .thirdOption(questions.get(2))
+                        .fourthOption(questions.get(3))
                         .interview(interview)
                         .build();
+
+
 
                 questionOptionsRepository.save(questionOptions);
 
                 log.info("✅ 꼬리질문 저장 완료: {}", questionOptions);
 
-                return response;
+                return QuestionCreationResponseDto.builder()
+                        .questions(questions)
+                        .build();
             }
 
             // 3. question != null && keywords == null 꼬리질문 생성(키워드 x)
@@ -276,21 +299,44 @@ public class InterviewServiceImpl implements InterviewService {
                         .keyword(dto.getKeywords())
                         .build();
 
-                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(requestDto);
+                /* 실험 부분 */
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
+
+                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
+                        followUpUrl,
+                        entity,
+                        FollowUpQuestionResponseDto.class
+                );
+
+                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
+                }
+
+//                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(requestDto);
+
+                List<String> questions = response.getBody().getFollowupQuestions();
 
                 QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
-                        .firstOption(response.getQuestions().get(0))
-                        .secondOption(response.getQuestions().get(1))
-                        .thirdOption(response.getQuestions().get(2))
-                        .fourthOption(response.getQuestions().get(3))
+                        .firstOption(questions.get(0))
+                        .secondOption(questions.get(1))
+                        .thirdOption(questions.get(2))
+                        .fourthOption(questions.get(3))
                         .interview(interview)
                         .build();
+
+
 
                 questionOptionsRepository.save(questionOptions);
 
                 log.info("✅ 꼬리질문 저장 완료: {}", questionOptions);
 
-                return response;
+                return QuestionCreationResponseDto.builder()
+                        .questions(questions)
+                        .build();
             }
         }
     }

@@ -46,7 +46,10 @@ public class RabbitMqServiceImpl implements RabbitMqService {
     }
 
     @Override
-    @RabbitListener(queues = "${rabbitmq.queue.name}")
+    @RabbitListener(
+            queues = "ai.request.queue",
+            containerFactory = "rabbitListenerContainerFactory"  // 👈 이거 명시!
+    )
     public QuestionCreationResponseDto receiveFollowupRequest(FollowUpQuestionRequest requestDto) {
         log.info("📩 꼬리질문 요청 수신: {}", requestDto);
 
