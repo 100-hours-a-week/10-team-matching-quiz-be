@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
-        user.setProfileImageUrl(s3Util.getProfileImageUrl(userBasicInfo.getProfileImageUrl()));
+        user.setProfileImageUrl(s3Util.getProfileImageUrl(userBasicInfo.getProfileImageName()));
 
         // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
         SeatPosition seatPosition = userBasicInfo.getSeatPosition();

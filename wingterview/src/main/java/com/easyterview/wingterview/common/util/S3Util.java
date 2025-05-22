@@ -19,6 +19,7 @@ public class S3Util {
     }
 
     public String getProfileImageUrl(String objectKey) {
+        System.out.println("프로필 이미지 url : "+String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, regionName, objectKey));
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, regionName, objectKey);
     }
 }
