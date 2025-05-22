@@ -56,6 +56,23 @@ public class S3ServiceImpl implements S3Service {
         return s3Presigner.presignPutObject(presignRequest).url();
     }
 
+    @Override
+    @Transactional
+    public void saveProfileImageUrl(String objectKey) {
+        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(UserNotFoundException::new);
+
+        String profileImageUrl = String.format(
+                "https://%s.s3.%s.amazonaws.com/%s",
+                bucketName,
+                regionName,
+                objectKey
+        );
+
+        log.info("************ {}",profileImageUrl);
+
+        user.setProfileImageUrl(profileImageUrl);
+    }
 
     private String resolveContentType(String filename) {
         if (filename.endsWith(".png")) return "image/png";
@@ -72,7 +89,7 @@ public class S3ServiceImpl implements S3Service {
                 .key(key)
                 .build();
 
-        s3Client.deleteObject(deleteRequest); // ✅ 실제 삭제 수행
+        s3Client.deleteObject(deleteRequest);
     }
 
     private String extractKeyFromUrl(String imageUrl) {
