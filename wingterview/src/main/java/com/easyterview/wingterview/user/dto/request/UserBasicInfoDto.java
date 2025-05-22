@@ -39,7 +39,7 @@ public class UserBasicInfoDto {
     @Size(max = 3, message = "희망 직무 갯수 초과")
     private List<String> techStack;
 
-    private String profileImageUrl;
+    private String profileImageName;
 
     private SeatPosition seatPosition;
 }

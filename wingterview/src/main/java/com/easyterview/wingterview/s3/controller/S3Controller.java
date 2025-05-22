@@ -19,7 +19,9 @@ public class S3Controller {
     private final S3ServiceImpl s3Service;
 
     @GetMapping("/presigned-url")
-    public ResponseEntity<ApiResponse> getPresignedUrl(@RequestParam String filename) {
+    public ResponseEntity<ApiResponse> getPresignedUrl(
+            @RequestParam String filename
+    ) {
 
         URL url = s3Service.generatePresignedUrl(filename, Duration.ofMinutes(5));
         return ApiResponse.response(S3ResponseMessage.URL_FETCH_DONE, UploadUrlDto.builder().url(url.toString()).build());
