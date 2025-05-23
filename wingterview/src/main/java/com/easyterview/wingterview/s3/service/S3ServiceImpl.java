@@ -28,6 +28,7 @@ public class S3ServiceImpl implements S3Service {
 
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
+    private final UserRepository userRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -56,7 +57,6 @@ public class S3ServiceImpl implements S3Service {
         return s3Presigner.presignPutObject(presignRequest).url();
     }
 
-    @Override
     @Transactional
     public void saveProfileImageUrl(String objectKey) {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
