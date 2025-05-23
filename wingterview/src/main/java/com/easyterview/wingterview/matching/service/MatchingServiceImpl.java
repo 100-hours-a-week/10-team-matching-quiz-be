@@ -198,6 +198,9 @@ public class MatchingServiceImpl implements MatchingService {
         if(!matchingFailedParticipants.isEmpty()){
             matchingParticipantRepository.deleteAllInBatch(matchingFailedParticipants);
         }
+
+        //
+        matchingStatusManager.closeMatching();
     }
 
     @Override
