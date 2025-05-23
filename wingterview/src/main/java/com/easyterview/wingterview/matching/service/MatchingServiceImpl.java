@@ -139,6 +139,9 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Transactional
     public void doMatchingAlgorithm() {
+        // 매칭 큐 닫기
+        matchingStatusManager.closeMatching();
+
         // 참여자 중 Interview에 들어있지 않은 참가자를 모두 찾아서
         List<MatchingParticipantEntity> participantList = matchingParticipantRepository.findAll();
         List<MatchingParticipantEntity> notMatchedParticipantList = participantList.stream().filter(m ->
@@ -199,8 +202,6 @@ public class MatchingServiceImpl implements MatchingService {
             matchingParticipantRepository.deleteAllInBatch(matchingFailedParticipants);
         }
 
-        //
-        matchingStatusManager.closeMatching();
     }
 
     @Override
