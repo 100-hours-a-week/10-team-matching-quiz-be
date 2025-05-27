@@ -17,7 +17,7 @@ public class MatchingScheduler {
     /**
     * 40분에 매칭 큐 open
     * */
-    @Scheduled(cron = "0 40 * * * *") // 초 분 시 일 월 요일
+//    @Scheduled(cron = "0 40 * * * *") // 초 분 시 일 월 요일
     public void openMatchingEveryHour() {
         log.info("🟢 매칭 OPEN 스케쥴러 실행됨");
         matchingStatusManager.openMatching();
@@ -26,7 +26,7 @@ public class MatchingScheduler {
     /**
      * 매 시 정각에 매칭 시작
      */
-    @Scheduled(cron = "0 0 * * * *")
+//    @Scheduled(cron = "0 0 * * * *")
     public void doMatchingAlgorithm(){
         matchingService.doMatchingAlgorithm();
     }

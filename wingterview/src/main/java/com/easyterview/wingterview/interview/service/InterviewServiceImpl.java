@@ -247,28 +247,26 @@ public class InterviewServiceImpl implements InterviewService {
 
                 /* 실험 부분 */
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-
-                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(request, headers);
-
-                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
-                        followUpUrl,
-                        entity,
-                        FollowUpQuestionResponseDto.class
-                );
-
-                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
-                }
-
-
-//                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(request);
+//                HttpHeaders headers = new HttpHeaders();
+//                headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(request, headers);
+//
+//                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
+//                        followUpUrl,
+//                        entity,
+//                        FollowUpQuestionResponseDto.class
+//                );
+//
+//                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+//                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
+//                }
 
 
+                FollowUpQuestionResponseDto response = rabbitMqService.sendFollowUpBlocking(request);
 
 
-                List<String> questions = response.getBody().getFollowupQuestions();
+                List<String> questions = response.getFollowupQuestions();
 
                 QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
                         .firstOption(questions.get(0))
@@ -301,24 +299,24 @@ public class InterviewServiceImpl implements InterviewService {
 
                 /* 실험 부분 */
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
+//                HttpHeaders headers = new HttpHeaders();
+//                headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
+//
+//                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
+//                        followUpUrl,
+//                        entity,
+//                        FollowUpQuestionResponseDto.class
+//                );
+//
+//                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+//                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
+//                }
 
-                HttpEntity<FollowUpQuestionRequest> entity = new HttpEntity<>(requestDto, headers);
+                FollowUpQuestionResponseDto response = rabbitMqService.sendFollowUpBlocking(requestDto);
 
-                ResponseEntity<FollowUpQuestionResponseDto> response = restTemplate.postForEntity(
-                        followUpUrl,
-                        entity,
-                        FollowUpQuestionResponseDto.class
-                );
-
-                if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                    throw new RuntimeException("❌ 꼬리질문 생성 서버 응답 실패");
-                }
-
-//                QuestionCreationResponseDto response = rabbitMqService.sendFollowUpBlocking(requestDto);
-
-                List<String> questions = response.getBody().getFollowupQuestions();
+                List<String> questions = response.getFollowupQuestions();
 
                 QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
                         .firstOption(questions.get(0))

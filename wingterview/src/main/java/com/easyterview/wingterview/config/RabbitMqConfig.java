@@ -66,6 +66,10 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter());
+
+        // ⏱️ 응답 대기 시간 설정 (단위: ms)
+        rabbitTemplate.setReplyTimeout(50000); // 10초까지 기다림
+
         return rabbitTemplate;
     }
 
