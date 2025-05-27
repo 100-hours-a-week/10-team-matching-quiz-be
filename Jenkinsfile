@@ -16,18 +16,22 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                sh './gradlew clean build -x test'
+                dir('wingterview') {
+                    sh './gradlew clean build -x test'
+                }
             }
         }
 
         stage('Docker Build & Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh """
-                    docker build -t ${DOCKER_IMAGE} .
-                    echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
-                    docker push ${DOCKER_IMAGE}
-                    """
+                dir('wingterview') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                        docker build -t ${DOCKER_IMAGE} .
+                        echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
+                        docker push ${DOCKER_IMAGE}
+                        """
+                    }
                 }
             }
         }
