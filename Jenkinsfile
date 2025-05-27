@@ -1,0 +1,48 @@
+pipeline {
+  agent any
+
+  environment {
+    DOCKER_IMAGE = "v1999vvv/wingterview-be"
+  }
+
+  stages {
+    stage('Clone') {
+      steps {
+        git credentialsId: 'github-pat', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git', branch: 'dev'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh './gradlew clean build -x test'
+      }
+    }
+
+    stage('Docker Build & Push') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+          sh """
+            docker build -t \$DOCKER_IMAGE .
+            echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
+            docker push \$DOCKER_IMAGE
+          """
+        }
+      }
+    }
+
+    stage('Deploy to EC2') {
+      steps {
+        sshagent (credentials: ['ec2-user']) {
+          sh """
+            ssh -o StrictHostKeyChecking=no ec2-user@172.31.11.169 '
+              docker pull \$DOCKER_IMAGE
+              docker stop app || true
+              docker rm app || true
+              docker run -d --name app -p 8080:8080 \$DOCKER_IMAGE
+            '
+          """
+        }
+      }
+    }
+  }
+}
