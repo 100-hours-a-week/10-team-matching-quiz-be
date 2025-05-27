@@ -1,54 +1,114 @@
-pipeline {
-    agent any
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+}
 
-    environment {
-        DOCKER_IMAGE = "v1999vvv/wingterview-be"
-        EC2_HOST = "172.31.11.169"
-        APP_PORT = "8080"
-    }
+group = 'com.easyterview'
+version = '0.0.1-SNAPSHOT'
 
-    stages {
-        stage('Clone Repository') {
-            steps {
-                checkout scm
-            }
-        }
+java {
+	toolchain {
+		//languageVersion = JavaLanguageVersion.of(21)
+	}
+}
 
-        stage('Build Application') {
-            steps {
-                dir('wingterview') {
-                    sh './gradlew clean build -x test'
-                }
-            }
-        }
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
 
-        stage('Docker Build & Push') {
-            steps {
-                dir('wingterview') {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                        docker build -t ${DOCKER_IMAGE} .
-                        echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
-                        docker push ${DOCKER_IMAGE}
-                        """
-                    }
-                }
-            }
-        }
+repositories {
+	mavenCentral()
+}
 
-        stage('Deploy to EC2') {
-            steps {
-                sshagent (credentials: ['backend-ec2-key']) {
-                    sh """
-                    ssh -o StrictHostKeyChecking=no ec2-user@${EC2_HOST} '
-                        docker pull ${DOCKER_IMAGE}
-                        docker stop wingterview || true
-                        docker rm wingterview || true
-                        docker run -d -p ${APP_PORT}:${APP_PORT} --name wingterview ${DOCKER_IMAGE}
-                    '
-                    """
-                }
-            }
-        }
-    }
+ext {
+	set('snippetsDir', file("build/generated-snippets"))
+	set('springCloudVersion', "2024.0.1")
+}
+
+dependencies {
+	// --- Spring Boot Starter ---
+	implementation 'org.springframework.boot:spring-boot-starter-web'               // MVC + REST API
+	implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'     // OAuth2 Client (소셜 로그인)
+//	implementation 'org.springframework.boot:spring-boot-starter-actuator'          // 서버 모니터링
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'              // RabbitMQ (AMQP)
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // JPA + Hibernate
+//	implementation 'org.springframework.boot:spring-boot-starter-data-redis'        // Redis 캐시
+	implementation 'org.springframework.boot:spring-boot-starter-validation'        // Validation (@NotBlank 등)
+
+	// --- Cloud, Circuit Breaker ---
+//	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j' // Resilience4j
+
+	// --- OpenAPI (Swagger 문서 자동화) ---
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
+
+	// --- Database Driver ---
+	runtimeOnly 'com.mysql:mysql-connector-j'                                        // MySQL JDBC Driver
+
+	// --- QueryDSL (타입 안전한 쿼리) ---
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+
+	// --- JWT 인증 (토큰 발급/검증) ---
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6' // JSON 직렬화 지원
+
+	// --- AWS S3 Presigned URL 업로드 ---
+	implementation 'software.amazon.awssdk:s3:2.31.16'
+
+	// --- RestClient (간편한 HTTP 클라이언트) ---
+	implementation 'org.springframework:spring-web'
+
+	// --- 개발 편의성 ---
+	compileOnly 'org.projectlombok:lombok'                                            // Lombok
+	annotationProcessor 'org.projectlombok:lombok'
+
+
+	// --- MapStruct (Dto <-> Entity) ---
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+
+	// --- 테스트 ---
+//	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//	testImplementation 'org.springframework.boot:spring-boot-testcontainers'         // Spring Boot + Testcontainers
+//	testImplementation 'org.springframework.amqp:spring-rabbit-test'                 // RabbitMQ 테스트
+//	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'         // REST Docs
+//	testImplementation 'org.springframework.security:spring-security-test'           // Security 테스트
+//	testImplementation 'org.testcontainers:junit-jupiter'                            // JUnit5 + Testcontainers
+//	testImplementation 'org.testcontainers:mysql'                                    // MySQL 컨테이너
+//	testImplementation 'org.testcontainers:rabbitmq'                                 // RabbitMQ 컨테이너
+//	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+tasks.named('test') {
+	outputs.dir snippetsDir
+	useJUnitPlatform()
+}
+
+tasks.named('asciidoctor') {
+	inputs.dir snippetsDir
+	dependsOn test
+}
+
+// --- QueryDSL QClass 경로 설정 ---
+tasks.withType(JavaCompile) {
+	options.annotationProcessorGeneratedSourcesDirectory = layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main").get().asFile
+}
+
+sourceSets {
+	main.java.srcDirs += "$buildDir/generated/sources/annotationProcessor/java/main"
 }
