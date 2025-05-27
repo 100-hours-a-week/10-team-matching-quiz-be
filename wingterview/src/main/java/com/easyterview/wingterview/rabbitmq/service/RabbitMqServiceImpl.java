@@ -29,7 +29,7 @@ public class RabbitMqServiceImpl implements RabbitMqService {
     private final AmqpAdmin amqpAdmin;
 
     private static final long MAX_ALLOWED_TIME_MS = 10_000L;
-    private static final long PER_TASK_TIME_MS = 4_000L;
+    private static final long PER_TASK_TIME_MS = 3_000L;
 
     private static final AtomicLong lastDequeueTime = new AtomicLong(System.currentTimeMillis());
 
@@ -52,10 +52,6 @@ public class RabbitMqServiceImpl implements RabbitMqService {
         int queueSize = (queueProps != null && queueProps.get("QUEUE_MESSAGE_COUNT") != null)
                 ? (Integer) queueProps.get("QUEUE_MESSAGE_COUNT")
                 : 0;
-
-        System.out.println("***********");
-        System.out.println(System.currentTimeMillis());
-        System.out.println(lastDequeueTime.get());
 
         // 2. 예상 응답 시간 계산
         long now = System.currentTimeMillis();
