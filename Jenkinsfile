@@ -8,20 +8,35 @@ pipeline {
     }
 
     stages {
+        stage('Clone Repository') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                    sh """
+                    git clone https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/100-hours-a-week/10-team-matching-quiz-be.git
+                    cd 10-team-matching-quiz-be
+                    """
+                }
+            }
+        }
+
         stage('Build Application') {
             steps {
-                sh './gradlew clean build -x test'
+                dir('10-team-matching-quiz-be') {
+                    sh './gradlew clean build -x test'
+                }
             }
         }
 
         stage('Docker Build & Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh """
-                    docker build -t ${DOCKER_IMAGE} .
-                    echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
-                    docker push ${DOCKER_IMAGE}
-                    """
+                dir('10-team-matching-quiz-be') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                        docker build -t ${DOCKER_IMAGE} .
+                        echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
+                        docker push ${DOCKER_IMAGE}
+                        """
+                    }
                 }
             }
         }
