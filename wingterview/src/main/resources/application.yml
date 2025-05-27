@@ -60,3 +60,10 @@ cloud:
     stack:
       auto: false
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
