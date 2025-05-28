@@ -24,5 +24,6 @@ public class RecordingEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
 
+    @Column(unique = true)
     private String url;
 }

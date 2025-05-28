@@ -78,6 +78,7 @@ public class S3ServiceImpl implements S3Service {
         return "application/octet-stream"; // fallback
     }
 
+    @Transactional
     public void deleteS3ObjectByUrl(String url) {
         String key = extractKeyFromUrl(url); // profile_image/파일명.png
 
@@ -89,6 +90,8 @@ public class S3ServiceImpl implements S3Service {
                 .build();
 
         s3Client.deleteObject(deleteRequest);
+
+        recordRepository.deleteByUrl(url);
     }
 
     private String extractKeyFromUrl(String url) {
