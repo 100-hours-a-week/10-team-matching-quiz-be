@@ -80,4 +80,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseResponse> handleUserNotFound(UserNotFoundException e){
         return BaseResponse.response(ExceptionMessage.USER_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(IllegalFileFormatException.class)
+    public ResponseEntity<BaseResponse> handleIllegalFileFormat(IllegalFileFormatException e){
+        return BaseResponse.response(ExceptionMessage.INVALID_FILE_FORMAT, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
 }

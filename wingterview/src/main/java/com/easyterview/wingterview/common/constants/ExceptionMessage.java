@@ -15,7 +15,8 @@ public enum ExceptionMessage implements ResponseMessage{
     INVALID_UUID(400, "INVALID_UUID"),
     INTERVIEW_NOT_FOUND(404, "INTERVIEW_NOT_FOUND"),
     QUESTION_NOT_FOUND(404, "QUESTION_NOT_FOUND"),
-    USER_NOT_FOUND(404, "USER_NOT_FOUND");
+    USER_NOT_FOUND(404, "USER_NOT_FOUND"),
+    INVALID_FILE_FORMAT(400, "INVALID_FILE_FORMAT");
 
     private final int statusCode;
     private final String message;
