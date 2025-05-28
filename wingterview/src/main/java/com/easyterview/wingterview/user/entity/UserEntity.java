@@ -102,6 +102,10 @@ public class UserEntity {
     @Builder.Default
     private List<UserChatroomEntity> userChatroomEntityList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @Builder.Default
+    private List<RecordingEntity> recordingEntityList = new ArrayList<>();
+
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChatEntity> chatList = new ArrayList<>();

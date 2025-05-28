@@ -61,12 +61,4 @@ public class UserController {
         log.info(response.toString());
         return BaseResponse.response(UserResponseMessage.USER_INFO_FETCH_DONE, response);
     }
-
-//    @GetMapping("/test")
-//    public ResponseEntity<?> test() {
-//        var auth = SecurityContextHolder.getContext().getAuthentication();
-//        return ResponseEntity.ok("ok");
-//    }
-
-
 }
