@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = 'v1999vvv/your-backend-image'  // 수정
+    DOCKER_IMAGE = 'v1999vvv/wingterview-be'  // 수정
   }
 
   stages {
