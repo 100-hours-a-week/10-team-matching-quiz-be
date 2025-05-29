@@ -12,6 +12,7 @@ import com.easyterview.wingterview.global.exception.*;
 import com.easyterview.wingterview.interview.dto.request.*;
 import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.entity.*;
+import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.enums.Phase;
 import com.easyterview.wingterview.interview.repository.*;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
@@ -22,10 +23,6 @@ import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -105,97 +102,147 @@ public class InterviewServiceImpl implements InterviewService {
                 .orElseThrow(UserNotParticipatedException::new);
         InterviewEntity interview = interviewParticipant.getInterview();
 
-        // 상대방 정보 가져오기
-        InterviewParticipantEntity partnerParticipant = interview.getParticipants()
-                .stream()
-                .filter(i -> !i.getUser().getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
-        UserEntity partnerEntity = partnerParticipant.getUser();
+        if (!interview.getIsAiInterview()) {
+            // 상대방 정보 가져오기
+            InterviewParticipantEntity partnerParticipant = interview.getParticipants()
+                    .stream()
+                    .filter(i -> !i.getUser().getId().equals(user.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
+            UserEntity partnerEntity = partnerParticipant.getUser();
 
-        // 남은 시간 계산
-        int timeRemain = TimeUtil.getRemainTime(interview.getPhaseAt(), InterviewStatus.builder().round(interview.getRound()).phase(interview.getPhase()).build());
+            // 남은 시간 계산
+            int timeRemain = TimeUtil.getRemainTime(interview.getPhaseAt(), InterviewStatus.builder().round(interview.getRound()).phase(interview.getPhase()).build());
 
-        // 내가 현재 인터뷰어인지 확인
-        boolean isInterviewer = InterviewUtil.checkInterviewer(interviewParticipant.getRole(), interview.getRound());
+            // 내가 현재 인터뷰어인지 확인
+            boolean isInterviewer = InterviewUtil.checkInterviewer(interviewParticipant.getRole(), interview.getRound());
 
-        // 상대방 정보 dto
-        Partner partner = Partner.builder()
-                .name(partnerEntity.getName())
-                .nickname(partnerEntity.getNickname())
-                .profileImageUrl(partnerEntity.getProfileImageUrl())
-                .techStack(partnerEntity.getUserTechStack().stream().map(t -> t.getTechStack().getLabel()).toList())
-                .jobInterest(partnerEntity.getUserJobInterest().stream().map(j -> j.getJobInterest().getLabel()).toList())
-                .curriculum(partnerEntity.getCurriculum())
-                .build();
+            // 상대방 정보 dto
+            Partner partner = Partner.builder()
+                    .name(partnerEntity.getName())
+                    .nickname(partnerEntity.getNickname())
+                    .profileImageUrl(partnerEntity.getProfileImageUrl())
+                    .techStack(partnerEntity.getUserTechStack().stream().map(t -> t.getTechStack().getLabel()).toList())
+                    .jobInterest(partnerEntity.getUserJobInterest().stream().map(j -> j.getJobInterest().getLabel()).toList())
+                    .curriculum(partnerEntity.getCurriculum())
+                    .build();
 
-        int questionIdx = -1;
-        String selectedQuestion = "";
-        List<String> questionOptions = null;
-        if (interview.getPhase().equals(Phase.PROGRESS)) {
-            Optional<QuestionHistoryEntity> questionHistory = questionHistoryRepository.findByInterview(interview);
-            Optional<QuestionOptionsEntity> questionOption = questionOptionsRepository.findTop1ByInterviewOrderByCreatedAtDesc(interview);
-            if (questionOption.isPresent()) {
-                questionOptions = new ArrayList<>();
-                questionOptions.add(questionOption.get().getFirstOption());
-                questionOptions.add(questionOption.get().getSecondOption());
-                questionOptions.add(questionOption.get().getThirdOption());
-                questionOptions.add(questionOption.get().getFourthOption());
+            int questionIdx = -1;
+            String selectedQuestion = "";
+            List<String> questionOptions = null;
+            if (interview.getPhase().equals(Phase.PROGRESS)) {
+                Optional<QuestionHistoryEntity> questionHistory = questionHistoryRepository.findByInterview(interview);
+                Optional<QuestionOptionsEntity> questionOption = questionOptionsRepository.findTop1ByInterviewOrderByCreatedAtDesc(interview);
+                if (questionOption.isPresent()) {
+                    questionOptions = new ArrayList<>();
+                    questionOptions.add(questionOption.get().getFirstOption());
+                    questionOptions.add(questionOption.get().getSecondOption());
+                    questionOptions.add(questionOption.get().getThirdOption());
+                    questionOptions.add(questionOption.get().getFourthOption());
+                }
+                questionIdx = questionHistory.isPresent() ? questionHistory.get().getSelectedQuestionIdx() : -1;
+                selectedQuestion = questionHistory.isPresent() ? questionHistory.get().getSelectedQuestion() : "";
             }
-            questionIdx = questionHistory.isPresent() ? questionHistory.get().getSelectedQuestionIdx() : -1;
-            selectedQuestion = questionHistory.isPresent() ? questionHistory.get().getSelectedQuestion() : "";
+
+
+            // 인터뷰 상태 dto 반환
+            return InterviewStatusDto.builder()
+                    .interviewId(String.valueOf(interview.getId()))
+                    .timeRemain(timeRemain)
+                    .currentRound(interview.getRound())
+                    .currentPhase(interview.getPhase().getPhase())
+                    .isInterviewer(isInterviewer)
+                    .isAiInterview(interview.getIsAiInterview())
+                    .partner(partner)
+                    .questionIdx(questionIdx)
+                    .selectedQuestion(selectedQuestion)
+                    .questionOption(questionOptions)
+                    .build();
+
+        } else {
+            int questionIdx = -1;
+            String selectedQuestion = "";
+            List<String> questionOptions = null;
+            if (interview.getPhase().equals(Phase.PROGRESS)) {
+                Optional<QuestionHistoryEntity> questionHistory = questionHistoryRepository.findByInterview(interview);
+                Optional<QuestionOptionsEntity> questionOption = questionOptionsRepository.findTop1ByInterviewOrderByCreatedAtDesc(interview);
+                if (questionOption.isPresent()) {
+                    questionOptions = new ArrayList<>();
+                    questionOptions.add(questionOption.get().getFirstOption());
+                    questionOptions.add(questionOption.get().getSecondOption());
+                    questionOptions.add(questionOption.get().getThirdOption());
+                    questionOptions.add(questionOption.get().getFourthOption());
+                }
+                questionIdx = questionHistory.isPresent() ? questionHistory.get().getSelectedQuestionIdx() : -1;
+                selectedQuestion = questionHistory.isPresent() ? questionHistory.get().getSelectedQuestion() : "";
+            }
+
+            return InterviewStatusDto.builder()
+                    .interviewId(String.valueOf(interview.getId()))
+                    .currentRound(interview.getRound())
+                    .currentPhase(interview.getPhase().getPhase())
+                    .isAiInterview(interview.getIsAiInterview())
+                    .questionIdx(questionIdx)
+                    .selectedQuestion(selectedQuestion)
+                    .questionOption(questionOptions)
+                    .build();
         }
-
-
-        // 인터뷰 상태 dto 반환
-        return InterviewStatusDto.builder()
-                .interviewId(String.valueOf(interview.getId()))
-                .timeRemain(timeRemain)
-                .currentRound(interview.getRound())
-                .currentPhase(interview.getPhase().getPhase())
-                .isInterviewer(isInterviewer)
-                .isAiInterview(interview.getIsAiInterview())
-                .partner(partner)
-                .questionIdx(questionIdx)
-                .selectedQuestion(selectedQuestion)
-                .questionOption(questionOptions)
-                .build();
-
     }
 
     @Override
     @Transactional
     public QuestionCreationResponseDto makeQuestion(String interviewId, QuestionCreationRequestDto dto) {
-        log.info("*******Make Question 로그********8");
+        log.info("*******Make Question 로그********");
         log.info(dto.toString());
+
+        InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
+                .orElseThrow(InterviewNotFoundException::new);
+        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(InvalidTokenException::new);
 
         // 1. question == null 메인질문 생성
         if (dto.getQuestion().isEmpty()) {
-            // TODO : 메인질문 중복처리를 위한 user_main_question ??
-            InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
-                    .orElseThrow(InterviewNotFoundException::new);
-            UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                    .orElseThrow(InvalidTokenException::new);
-            // 다른 참가자 추출하기(면접관이 아닌 면접자와 관련된 기술스택, 희망직무)
-            List<InterviewParticipantEntity> otherParticipantList = interviewParticipantRepository.findByInterview(interview)
-                    .stream().filter(i -> !i.getUser().getId().equals(user.getId())).toList();
-            UserEntity otherUser = otherParticipantList.getFirst().getUser();
+            List<String> questions;
+            if (interview.getIsAiInterview()) {
+                // 희망 직무, 테크스택 관련 메인 질문 뽑아오기
+                List<String> jobInterests = user.getUserJobInterest().stream()
+                        .map(j -> j.getJobInterest().name())
+                        .toList();
 
 
-            // 희망 직무, 테크스택 관련 메인 질문 뽑아오기
-            List<String> jobInterests = otherUser.getUserJobInterest().stream()
-                    .map(j -> j.getJobInterest().name())
-                    .collect(Collectors.toList());
+                List<String> techStacks = user.getUserTechStack().stream()
+                        .map(t -> t.getTechStack().name())
+                        .toList();
+
+                questions = mainQuestionRepository
+                        .findRandomMatchingQuestions(jobInterests, techStacks).stream()
+                        .map(MainQuestionEntity::getContents)
+                        .toList();
+            } else {
+
+                // 다른 참가자 추출하기(면접관이 아닌 면접자와 관련된 기술스택, 희망직무)
+                List<InterviewParticipantEntity> otherParticipantList = interviewParticipantRepository.findByInterview(interview)
+                        .stream().filter(i -> !i.getUser().getId().equals(user.getId())).toList();
+                UserEntity otherUser = otherParticipantList.getFirst().getUser();
 
 
-            List<String> techStacks = otherUser.getUserTechStack().stream()
-                    .map(t -> t.getTechStack().name())
-                    .collect(Collectors.toList());
+                // 희망 직무, 테크스택 관련 메인 질문 뽑아오기
+                List<String> jobInterests = otherUser.getUserJobInterest().stream()
+                        .map(j -> j.getJobInterest().name())
+                        .toList();
 
-            List<String> questions = mainQuestionRepository
-                    .findRandomMatchingQuestions(jobInterests, techStacks).stream()
-                    .map(MainQuestionEntity::getContents)
-                    .toList();
+
+                List<String> techStacks = otherUser.getUserTechStack().stream()
+                        .map(t -> t.getTechStack().name())
+                        .toList();
+
+                questions = mainQuestionRepository
+                        .findRandomMatchingQuestions(jobInterests, techStacks).stream()
+                        .map(MainQuestionEntity::getContents)
+                        .toList();
+
+
+            }
 
             // questionOptions 저장하기
             QuestionOptionsEntity questionOptions = QuestionOptionsEntity.builder()
@@ -216,7 +263,6 @@ public class InterviewServiceImpl implements InterviewService {
                     .questions(questions)
                     .build();
         } else {
-            InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId)).orElseThrow(InterviewNotFoundException::new);
             // 2. QuestionHistory가 있으면서 이전 Question이 똑같음 -> 꼬리질문 재생성한거임 -> passed Question 넣어서 AI에 보내기. + passed Question 누적
             if (interview.getQuestionHistory() != null && dto.getQuestion().equals(interview.getQuestionHistory().getSelectedQuestion())) {
                 // 최근 20개를 가져와서 passed question 구성하기
@@ -241,7 +287,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .passedQuestions(passedQuestions.isEmpty() ? null : passedQuestions)
                         .build();
 
-                /* 실험 부분 */
+                /* legacy code */
 
 //                HttpHeaders headers = new HttpHeaders();
 //                headers.setContentType(MediaType.APPLICATION_JSON);
@@ -273,7 +319,6 @@ public class InterviewServiceImpl implements InterviewService {
                         .build();
 
 
-
                 questionOptionsRepository.save(questionOptions);
 
                 log.info("✅ 꼬리질문 저장 완료: {}", questionOptions);
@@ -293,7 +338,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .keyword(dto.getKeywords())
                         .build();
 
-                /* 실험 부분 */
+                /* legacy code */
 
 //                HttpHeaders headers = new HttpHeaders();
 //                headers.setContentType(MediaType.APPLICATION_JSON);
@@ -321,7 +366,6 @@ public class InterviewServiceImpl implements InterviewService {
                         .fourthOption(questions.get(3))
                         .interview(interview)
                         .build();
-
 
 
                 questionOptionsRepository.save(questionOptions);
@@ -450,5 +494,32 @@ public class InterviewServiceImpl implements InterviewService {
                 .build();
 
         chatRepository.save(newChat);
+    }
+
+    @Override
+    @Transactional
+    public AiInterviewResponseDto startAiInterview() {
+        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(InvalidTokenException::new);
+
+        InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
+                .user(user)
+                .role(ParticipantRole.SECOND_INTERVIEWER)
+                .build();
+
+        List<InterviewParticipantEntity> participants = List.of(interviewee);
+
+        InterviewEntity interview = InterviewEntity.builder()
+                .participants(participants)
+                .isAiInterview(true)
+                .build();
+
+        interviewee.setInterview(interview);
+
+        UUID interviewId = interviewRepository.save(interview).getId();
+
+        return AiInterviewResponseDto.builder()
+                .interviewId(String.valueOf(interviewId))
+                .build();
     }
 }

@@ -5,6 +5,7 @@ import com.easyterview.wingterview.global.response.BaseResponse;
 import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
+import com.easyterview.wingterview.interview.dto.response.AiInterviewResponseDto;
 import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
@@ -60,6 +61,12 @@ public class InterviewController {
     public ResponseEntity<BaseResponse> sendFeedback(@PathVariable String interviewId, @RequestBody FeedbackRequestDto dto){
         interviewService.sendFeedback(interviewId, dto);
         return BaseResponse.response(InterviewResponseMessage.FEEDBACK_SEND_DONE);
+    }
+
+    @PostMapping("/ai")
+    public ResponseEntity<BaseResponse> startAiInterview(){
+        AiInterviewResponseDto dto = interviewService.startAiInterview();
+        return BaseResponse.response(InterviewResponseMessage.AI_INTERVIEW_STARTED, dto);
     }
 
 }
