@@ -59,8 +59,6 @@ public class InterviewServiceImpl implements InterviewService {
     @Value("${ai.follow-up-url}")
     private String followUpUrl;
 
-//    private final String tmpUrl = "https://zk5vcmm7-8000.asse.devtunnels.ms/api/followup";
-
     @Override
     @Transactional
     public NextRoundDto goNextStage(String interviewId) {
@@ -82,7 +80,6 @@ public class InterviewServiceImpl implements InterviewService {
             // 인터뷰 관련 options, history 다 지우기(다음 분기를 위해)
             questionOptionsRepository.deleteAllByInterview(interview);
             questionHistoryRepository.deleteAllByInterviewId(UUID.fromString(interviewId));
-            log.info("************** 잘 지워짐");
 
             // 바꾼 분기 dto 리턴
             return NextRoundDto.builder()
@@ -154,7 +151,6 @@ public class InterviewServiceImpl implements InterviewService {
         return InterviewStatusDto.builder()
                 .interviewId(String.valueOf(interview.getId()))
                 .timeRemain(timeRemain)
-                // TODO : 시간에 맞게 round, phase 계산해주기 ??
                 .currentRound(interview.getRound())
                 .currentPhase(interview.getPhase().getPhase())
                 .isInterviewer(isInterviewer)

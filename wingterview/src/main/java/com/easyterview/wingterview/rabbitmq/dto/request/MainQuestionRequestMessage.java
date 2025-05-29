@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.rabbitmq.dto;
+package com.easyterview.wingterview.rabbitmq.dto.request;
 
 import lombok.Builder;
 import lombok.Getter;
