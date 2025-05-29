@@ -46,6 +46,8 @@ oauth:
 
 ai:
   follow-up-url: http://35.216.28.161:8000/interview/followup-questions
+  api-key: {ai.api-key}
+  api-url: {ai.api-url}
 
 cloud:
   aws:
