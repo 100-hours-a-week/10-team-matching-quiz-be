@@ -1,9 +1,7 @@
 package com.easyterview.wingterview.interview.entity;
 
-import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
@@ -15,24 +13,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "question_options")
-@ToString
-public class QuestionOptionsEntity {
+@Table(name = "interview_time")
+public class InterviewTimeEntity {
     @Id
     @GeneratedValue
     @UuidGenerator
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "question_option", length = 100, nullable = false)
-    private String option;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private Timestamp createdAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_id", nullable = false)
-    @ToString.Exclude
     private InterviewEntity interview;
+
+    @Column(name = "end_at", nullable = false)
+    private Timestamp endAt;
 }

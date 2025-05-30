@@ -5,6 +5,7 @@ import com.easyterview.wingterview.global.response.BaseResponse;
 import com.easyterview.wingterview.matching.dto.response.MatchingResultDto;
 import com.easyterview.wingterview.matching.dto.response.MatchingStatisticsDto;
 import com.easyterview.wingterview.matching.service.MatchingService;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

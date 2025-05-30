@@ -5,6 +5,7 @@ import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.*;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
+import com.easyterview.wingterview.interview.entity.InterviewTimeEntity;
 import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.repository.InterviewParticipantRepository;
 import com.easyterview.wingterview.interview.repository.InterviewRepository;
@@ -25,6 +26,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -183,6 +186,7 @@ public class MatchingServiceImpl implements MatchingService {
             InterviewEntity interview = InterviewEntity.builder()
                     .participants(List.of(interviewer, interviewee))
                     .build();
+
 
             interviewee.setInterview(interview);
             interviewer.setInterview(interview);

@@ -90,6 +90,9 @@ public class UserEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private MatchingParticipantEntity matchingParticipant;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    private RecordingEntity recordingEntity;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<InterviewParticipantEntity> interviews = new ArrayList<>();
@@ -101,10 +104,6 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @Builder.Default
     private List<UserChatroomEntity> userChatroomEntityList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    @Builder.Default
-    private List<RecordingEntity> recordingEntityList = new ArrayList<>();
 
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
