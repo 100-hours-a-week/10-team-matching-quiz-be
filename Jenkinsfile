@@ -12,11 +12,10 @@ pipeline {
       }
     }
 
-    // 🔽 이 부분 추가!
     stage('Prepare Secret Config') {
       steps {
-        withCredentials([string(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML')]) {
-          sh 'echo "$APP_SECRET_YML" > ./wingterview/src/main/resources/application-secret.yml'
+        withCredentials([file(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML')]) {
+          sh 'cp $APP_SECRET_YML ./wingterview/src/main/resources/application-secret.yml'
         }
       }
     }
