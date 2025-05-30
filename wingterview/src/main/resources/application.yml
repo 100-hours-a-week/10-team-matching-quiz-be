@@ -45,7 +45,7 @@ oauth:
     client-id: ${oauth.kakao.client-id}
 
 ai:
-  follow-up-url: http://35.216.28.161:8000/interview/followup-questions
+  follow-up-url: https://ai.wingterview.com/interview/followup-questions
   api-key: {ai.api-key}
   api-url: {ai.api-url}
 

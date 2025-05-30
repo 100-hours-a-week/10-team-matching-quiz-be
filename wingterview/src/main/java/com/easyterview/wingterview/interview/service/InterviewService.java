@@ -1,9 +1,6 @@
 package com.easyterview.wingterview.interview.service;
 
-import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
-import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
-import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
-import com.easyterview.wingterview.interview.dto.request.TimeInitializeRequestDto;
+import com.easyterview.wingterview.interview.dto.request.*;
 import com.easyterview.wingterview.interview.dto.response.AiInterviewResponseDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
@@ -24,4 +21,6 @@ public interface InterviewService {
     void initializeInterviewTime(String interviewId, TimeInitializeRequestDto dto);
 
     void exitInterview(String interviewId);
+
+    void getFeedbackFromAI(String userId, FeedbackCallbackDto dto);
 }

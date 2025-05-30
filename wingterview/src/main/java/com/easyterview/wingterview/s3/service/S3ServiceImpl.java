@@ -3,9 +3,10 @@ package com.easyterview.wingterview.s3.service;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.IllegalFileFormatException;
 import com.easyterview.wingterview.global.exception.UserNotFoundException;
+import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
-import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.RecordRepository;
+import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,8 @@ public class S3ServiceImpl implements S3Service {
         if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) return "image/jpeg";
         if (filename.endsWith(".m4a")) return "audio/mp4";
         if (filename.endsWith(".mp3")) return "audio/mpeg";
+        if (filename.endsWith(".webm")) return "audio/webm";
+
         // 필요 시 확장
         return "application/octet-stream"; // fallback
     }
@@ -124,8 +127,10 @@ public class S3ServiceImpl implements S3Service {
 
         log.info("🎙️ 녹음 파일 URL 저장: {}", recordingUrl);
 
+        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken()).orElseThrow(UserNotFoundException::new);
+
         recordRepository.save(RecordingEntity.builder()
-                        .user(userRepository.findById(UUIDUtil.getUserIdFromToken()).orElseThrow(UserNotFoundException::new))
+                        .user(user)
                         .url(recordingUrl)
                 .build());
     }

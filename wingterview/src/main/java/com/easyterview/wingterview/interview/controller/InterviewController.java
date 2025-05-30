@@ -2,10 +2,7 @@ package com.easyterview.wingterview.interview.controller;
 
 import com.easyterview.wingterview.common.constants.InterviewResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
-import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
-import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
-import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
-import com.easyterview.wingterview.interview.dto.request.TimeInitializeRequestDto;
+import com.easyterview.wingterview.interview.dto.request.*;
 import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.service.InterviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,16 +70,17 @@ public class InterviewController {
         return BaseResponse.response(InterviewResponseMessage.INTERVIEW_TIME_INITIALIZED);
     }
 
-    @DeleteMapping("{interviewId}")
+    @DeleteMapping("/{interviewId}")
     public ResponseEntity<BaseResponse> exitInterview(@PathVariable String interviewId){
         interviewService.exitInterview(interviewId);
         return BaseResponse.response(InterviewResponseMessage.INTERVIEW_DELETE_DONE);
     }
 
+    @PostMapping("/{userId}/voice/feedback")
+    public ResponseEntity<BaseResponse> feedbackCallback(@PathVariable String userId, @RequestBody FeedbackCallbackDto dto){
+        interviewService.getFeedbackFromAI(userId, dto);
+        return BaseResponse.response(InterviewResponseMessage.FEEDBACK_FETCH_DONE);
+    }
 
-
-    // 인터뷰 피드백 콜백 API 구현해야함
-    // 상태가 complete일 때 음성피드백 요청을 FE로부터 받아서 AI에 전송해줘야하거든요
-    // user -> recording에 저장해놨다가 콜백 받으면 삭제하기
 
 }

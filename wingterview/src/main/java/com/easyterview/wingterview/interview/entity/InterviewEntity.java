@@ -1,16 +1,11 @@
 package com.easyterview.wingterview.interview.entity;
 
 import com.easyterview.wingterview.interview.enums.Phase;
-import com.easyterview.wingterview.user.entity.UserChatroomEntity;
-import com.easyterview.wingterview.user.entity.UserEntity;
-import com.easyterview.wingterview.user.enums.JobInterest;
+import com.easyterview.wingterview.user.entity.RecordingEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -60,4 +55,5 @@ public class InterviewEntity {
 
     @OneToOne(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private QuestionHistoryEntity questionHistory;
+
 }

@@ -16,6 +16,7 @@ import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.enums.Phase;
 import com.easyterview.wingterview.interview.repository.*;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
+import com.easyterview.wingterview.user.entity.RecordingEntity;
 import com.easyterview.wingterview.user.entity.UserChatroomEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserChatroomRepository;
@@ -30,8 +31,6 @@ import org.springframework.web.client.RestTemplate;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -595,7 +594,17 @@ public class InterviewServiceImpl implements InterviewService {
     public void exitInterview(String interviewId) {
         InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
                 .orElseThrow(InterviewNotFoundException::new);
+        UserEntity user = interview.getParticipants().getFirst().getUser();
+
+        RecordingEntity recording = user.getRecordingEntity();
+        String userId = String.valueOf(user.getId());
+        // TODO : STT 분석 요청하기
 
         interviewRepository.delete(interview);
+    }
+
+    @Override
+    public void getFeedbackFromAI(String userId, FeedbackCallbackDto dto) {
+        // TODO : 피드백 결과를 어떻게 저장할지 entity, api 구성해야함
     }
 }
