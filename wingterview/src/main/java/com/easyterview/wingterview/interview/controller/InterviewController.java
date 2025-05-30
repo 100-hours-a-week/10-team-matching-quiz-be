@@ -5,16 +5,14 @@ import com.easyterview.wingterview.global.response.BaseResponse;
 import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;
-import com.easyterview.wingterview.interview.dto.response.AiInterviewResponseDto;
-import com.easyterview.wingterview.interview.dto.response.InterviewStatusDto;
-import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
-import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
+import com.easyterview.wingterview.interview.dto.request.TimeInitializeRequestDto;
+import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.service.InterviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,14 +36,14 @@ public class InterviewController {
     @Operation(summary = "면접 상태 조회", description = "현재 면접의 단계와 라운드 정보를 조회합니다.")
     @GetMapping("/status")
     public ResponseEntity<BaseResponse> getInterviewStatus(){
-       InterviewStatusDto interviewStatusDto = interviewService.getInterviewStatus();
-       return BaseResponse.response(InterviewResponseMessage.INTERVIEW_PHASE_FETCH_DONE,interviewStatusDto);
+        Object interviewStatusDto = interviewService.getInterviewStatus();
+        return BaseResponse.response(InterviewResponseMessage.INTERVIEW_PHASE_FETCH_DONE,interviewStatusDto);
     }
 
     @Operation(summary = "면접 질문 생성", description = "메인 또는 꼬리질문을 생성합니다.")
     @PostMapping("/{interviewId}/question")
     public ResponseEntity<BaseResponse> makeQuestion(@PathVariable String interviewId, @RequestBody QuestionCreationRequestDto dto){
-        QuestionCreationResponseDto responseDto = interviewService.makeQuestion(interviewId, dto);
+        Object responseDto = interviewService.makeQuestion(interviewId, dto);
         return BaseResponse.response(InterviewResponseMessage.QUESTION_FETCH_DONE, responseDto);
     }
 
@@ -66,7 +64,25 @@ public class InterviewController {
     @PostMapping("/ai")
     public ResponseEntity<BaseResponse> startAiInterview(){
         AiInterviewResponseDto dto = interviewService.startAiInterview();
-        return BaseResponse.response(InterviewResponseMessage.AI_INTERVIEW_STARTED, dto);
+        return BaseResponse.response(InterviewResponseMessage.AI_INTERVIEW_CREATED, dto);
     }
+
+    @PutMapping("/ai/{interviewId}/time")
+    public ResponseEntity<BaseResponse> initializeInterviewTime(@PathVariable String interviewId, @RequestBody TimeInitializeRequestDto dto){
+        interviewService.initializeInterviewTime(interviewId, dto);
+        return BaseResponse.response(InterviewResponseMessage.INTERVIEW_TIME_INITIALIZED);
+    }
+
+    @DeleteMapping("{interviewId}")
+    public ResponseEntity<BaseResponse> exitInterview(@PathVariable String interviewId){
+        interviewService.exitInterview(interviewId);
+        return BaseResponse.response(InterviewResponseMessage.INTERVIEW_DELETE_DONE);
+    }
+
+
+
+    // 인터뷰 피드백 콜백 API 구현해야함
+    // 상태가 complete일 때 음성피드백 요청을 FE로부터 받아서 AI에 전송해줘야하거든요
+    // user -> recording에 저장해놨다가 콜백 받으면 삭제하기
 
 }

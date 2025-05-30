@@ -42,10 +42,6 @@ public class InterviewEntity {
     @Column(name = "keywords", length = 200)
     private String keywords;
 
-    @UpdateTimestamp
-    @Column(name = "phase_at", nullable = false)
-    private Timestamp phaseAt;
-
     @Column(name = "is_ai_interview", nullable = false)
     @Builder.Default
     private Boolean isAiInterview = false;
@@ -57,7 +53,10 @@ public class InterviewEntity {
 
     @OneToMany(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<QuestionOptionsEntity> questionOptionsList = new ArrayList<>();
+    private List<QuestionOptionsEntity> questionOptions = new ArrayList<>();
+
+    @OneToOne(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private InterviewTimeEntity interviewTime;
 
     @OneToOne(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private QuestionHistoryEntity questionHistory;
