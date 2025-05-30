@@ -2,11 +2,11 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = 'v1999vvv/wingterview-be'  // 수정
+    DOCKER_IMAGE = 'v1999vvv/wingterview-be'
   }
 
   stages {
-    stage('Clone Repository') {
+    stage('Checkout') {
       steps {
         git credentialsId: 'github-pat', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git', branch: 'dev'
       }
@@ -14,33 +14,38 @@ pipeline {
 
     stage('Gradle Build') {
       steps {
-        sh './gradlew clean build -x test'
+        dir('wingterview') {
+          sh 'chmod +x ./gradlew'
+          sh './gradlew clean build -x test'
+        }
       }
     }
 
     stage('Docker Build & Push') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-          sh """
-            docker build -t $DOCKER_IMAGE .
-            echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
-            docker push $DOCKER_IMAGE
-          """
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          dir('wingterview') {
+            sh '''
+              docker build -t $DOCKER_IMAGE .
+              echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+              docker push $DOCKER_IMAGE
+            '''
+          }
         }
       }
     }
 
     stage('Deploy to Backend EC2') {
       steps {
-        sshagent (credentials: ['backend-ec2-key']) {
-          sh """
+        sshagent(credentials: ['backend-ec2-key']) {
+          sh '''
             ssh -o StrictHostKeyChecking=no ec2-user@172.31.2.198 '
               docker pull $DOCKER_IMAGE
-              docker stop backend || true
-              docker rm backend || true
-              docker run -d --name backend -p 8080:8080 $DOCKER_IMAGE
+              docker stop wingterview || true
+              docker rm wingterview || true
+              docker run -d --name wingterview -p 8080:8080 $DOCKER_IMAGE
             '
-          """
+          '''
         }
       }
     }
