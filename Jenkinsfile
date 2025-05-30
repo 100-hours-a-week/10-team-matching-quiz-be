@@ -34,7 +34,7 @@ pipeline {
       steps {
         sshagent (credentials: ['backend-ec2-key']) {
           sh """
-            ssh -o StrictHostKeyChecking=no ec2-user@<백엔드-EC2-IP> '
+            ssh -o StrictHostKeyChecking=no ec2-user@172.31.2.198 '
               docker pull \$DOCKER_IMAGE
               docker stop wingterview-be || true
               docker rm wingterview-be || true
