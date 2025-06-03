@@ -110,6 +110,7 @@ public class S3ServiceImpl implements S3Service {
     @Transactional
     public void saveRecordingUrl(String fileName) {
         final String contentType = resolveContentType(fileName);
+        log.info(fileName);
         if(!contentType.startsWith("audio")){
             throw new IllegalFileFormatException();
         }
@@ -128,8 +129,10 @@ public class S3ServiceImpl implements S3Service {
         log.info("🎙️ 녹음 파일 URL 저장: {}", recordingUrl);
 
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken()).orElseThrow(UserNotFoundException::new);
+        InterviewEntity interview = user.getInterviews().getFirst().getInterview();
 
         recordRepository.save(RecordingEntity.builder()
+                        .interviewId(interview.getId())
                         .user(user)
                         .url(recordingUrl)
                 .build());

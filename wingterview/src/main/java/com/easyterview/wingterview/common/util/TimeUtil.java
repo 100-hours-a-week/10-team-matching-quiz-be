@@ -17,4 +17,12 @@ public class TimeUtil {
 
         return (int) Math.max(0, remainSeconds);
     }
+
+    public static Integer getTime(Timestamp startAt, Timestamp when){
+        Instant start = startAt.toInstant();
+        Instant end = when.toInstant();
+        long seconds = ChronoUnit.SECONDS.between(start, end);
+
+        return (int) seconds;
+    }
 }

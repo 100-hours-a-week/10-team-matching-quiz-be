@@ -19,6 +19,7 @@ import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
 import com.easyterview.wingterview.user.entity.UserChatroomEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
+import com.easyterview.wingterview.user.repository.RecordRepository;
 import com.easyterview.wingterview.user.repository.UserChatroomRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,8 @@ public class InterviewServiceImpl implements InterviewService {
     private final ChatroomRepository chatroomRepository;
     private final ChatRepository chatRepository;
     private final InterviewTimeRepository interviewTimeRepository;
+    private final InterviewHistoryRepository interviewHistoryRepository;
+    private final RecordRepository recordRepository;
 
     private final RabbitMqService rabbitMqService;
 
@@ -232,7 +235,17 @@ public class InterviewServiceImpl implements InterviewService {
                     questionHistory.setSelectedQuestion(questions.getFirst());
                     questionHistory.setSelectedQuestionIdx(questionIdx+1);
                     questionHistoryRepository.save(questionHistory);
+
+                    // 아마 마지막 질문 녹음은 따로 처리해야할듯
+                    interviewHistoryRepository.save(InterviewHistoryEntity.builder()
+                            .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                            .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                            .interviewId(UUID.fromString(interviewId))
+                            .selectedQuestion(questions.getFirst())
+                            .build());
                 }
+
+
 
                 receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
                         .contents(questions.getFirst())
@@ -341,13 +354,24 @@ public class InterviewServiceImpl implements InterviewService {
                             .selectedQuestionIdx(1)
                             .build()
                     );
+
+
                 }
                 else{
                     Integer questionIdx = questionHistory.getSelectedQuestionIdx();
                     questionHistory.setSelectedQuestion(questions.getFirst());
                     questionHistory.setSelectedQuestionIdx(questionIdx+1);
                     questionHistoryRepository.save(questionHistory);
+
+                    interviewHistoryRepository.save(InterviewHistoryEntity.builder()
+                            .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                            .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                            .interviewId(UUID.fromString(interviewId))
+                            .selectedQuestion(questions.getFirst())
+                            .build());
                 }
+
+
 
                 receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
                         .contents(questions.getFirst())
@@ -420,7 +444,21 @@ public class InterviewServiceImpl implements InterviewService {
                     questionHistory.setSelectedQuestion(questions.getFirst());
                     questionHistory.setSelectedQuestionIdx(questionIdx+1);
                     questionHistoryRepository.save(questionHistory);
+
+                    interviewHistoryRepository.save(InterviewHistoryEntity.builder()
+                            .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                            .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                            .interviewId(UUID.fromString(interviewId))
+                            .selectedQuestion(questions.getFirst())
+                            .build());
                 }
+
+                interviewHistoryRepository.save(InterviewHistoryEntity.builder()
+                        .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                        .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                        .interviewId(UUID.fromString(interviewId))
+                        .selectedQuestion(questions.getFirst())
+                        .build());
 
                 receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
                         .contents(questions.getFirst())
@@ -552,6 +590,9 @@ public class InterviewServiceImpl implements InterviewService {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
 
+        if(interviewParticipantRepository.findByUser(user).isPresent())
+            throw new AlreadyEnqueuedException();
+
         InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
                 .user(user)
                 .role(ParticipantRole.SECOND_INTERVIEWER)
@@ -596,8 +637,8 @@ public class InterviewServiceImpl implements InterviewService {
                 .orElseThrow(InterviewNotFoundException::new);
         UserEntity user = interview.getParticipants().getFirst().getUser();
 
-        RecordingEntity recording = user.getRecordingEntity();
-        String userId = String.valueOf(user.getId());
+        RecordingEntity recording = recordRepository.findByInterviewId(UUID.fromString(interviewId));
+//        String userId = String.valueOf(user.getId());
         // TODO : STT 분석 요청하기
 
         interviewRepository.delete(interview);
@@ -606,5 +647,11 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     public void getFeedbackFromAI(String userId, FeedbackCallbackDto dto) {
         // TODO : 피드백 결과를 어떻게 저장할지 entity, api 구성해야함
+
+        // 1. userId를 통해 recording table를 조회
+        // 2. 그것들에 딸린 interviewId를 이용하여
+        // 3. interview history를 조회할 수 있다. 거기서 from, to를 꺼내올 수 있고,
+        // 4. 추후에 feedback entity를 구성하여 거기다가 저장해두자(mvp2)
+
     }
 }
