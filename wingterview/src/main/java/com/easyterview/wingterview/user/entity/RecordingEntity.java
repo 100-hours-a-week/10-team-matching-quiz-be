@@ -20,8 +20,11 @@ public class RecordingEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, unique = true, name = "interview_id")
+    private UUID interviewId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     @Column(unique = true)

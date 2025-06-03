@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface RecordRepository extends JpaRepository<RecordingEntity, UUID> {
     void deleteByUrl(String url);
+
+    RecordingEntity findByInterviewId(UUID interviewId);
 }

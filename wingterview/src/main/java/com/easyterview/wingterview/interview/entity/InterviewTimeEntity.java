@@ -2,6 +2,7 @@ package com.easyterview.wingterview.interview.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
@@ -24,6 +25,10 @@ public class InterviewTimeEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_id", nullable = false)
     private InterviewEntity interview;
+
+    @Column(name = "start_at", nullable = false)
+    @CreationTimestamp
+    private Timestamp startAt;
 
     @Column(name = "end_at", nullable = false)
     private Timestamp endAt;
