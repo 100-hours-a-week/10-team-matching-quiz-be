@@ -4,6 +4,7 @@ import com.easyterview.wingterview.chat.entity.ChatEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
 import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
+import com.easyterview.wingterview.quiz.entity.QuizEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -108,4 +109,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChatEntity> chatList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @Builder.Default
+    private List<QuizEntity> quizEntityList = new ArrayList<>();
 }
