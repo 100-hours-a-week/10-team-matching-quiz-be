@@ -6,5 +6,5 @@ import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
 public interface QuizService {
     QuizStatsResponse getQuizStats(String userId);
 
-    QuizListResponse getQuizList(String userId, Boolean wrong, Integer cursor, Integer limit);
+    QuizListResponse getQuizList(String userId, Boolean wrong, String cursor, Integer limit);
 }

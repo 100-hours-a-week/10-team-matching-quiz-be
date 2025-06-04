@@ -6,6 +6,7 @@ import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
 import com.easyterview.wingterview.quiz.entity.QuizEntity;
 import com.easyterview.wingterview.quiz.repository.QuizRepository;
+import com.easyterview.wingterview.quiz.repository.QuizRepositoryCustom;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,7 +22,7 @@ public class QuizServiceImpl implements QuizService{
 
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
-//    private final JPAQueryFactory queryFactory;
+    private final QuizRepositoryCustom quizRepositoryCustom;
 
     @Override
     public QuizStatsResponse getQuizStats(String userId) {
@@ -38,9 +39,12 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @Override
-    public QuizListResponse getQuizList(String userId, Boolean wrong, Integer cursor, Integer limit) {
-        // List<QuizEntity> quiz = wrong ? /* findAllWrongFromCursorToCursorPlusLimitByUserId findAllFromCursorToCursorPlusLimitByUserId */
-        // TODO : QueryDSL
-        return null;
+    public QuizListResponse getQuizList(String userId, Boolean wrong, String cursor, Integer limit) {
+        System.out.println("*************** input **************");
+        System.out.println(userId);
+        System.out.println(wrong);
+        System.out.println(cursor);
+        System.out.println(limit);
+        return quizRepositoryCustom.findByCursorWithLimit(UUID.fromString(userId),wrong,cursor == null ? null : UUID.fromString(cursor),limit);
     }
 }

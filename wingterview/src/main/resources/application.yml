@@ -12,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
@@ -41,14 +41,14 @@ oauth:
   kakao:
     token-request-uri: https://kauth.kakao.com/oauth/token
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
-#    redirect-uri: https://dev.s3.wingterview.com/auth/kakao
+    redirect-uri: https://dev.s3.wingterview.com/auth/kakao
 #    redirect-uri: http://localhost:5173/auth/kakao
-    redirect-uri: http://wingterview.com/auth/kakao
+#    redirect-uri: http://wingterview.com/auth/kakao
     client-id: ${oauth.kakao.client-id}
 
 ai:
-#  follow-up-url: https://ai.wingterview.com/interview/followup-questions
-  follow-up-url: http://34.64.33.21:8000/interview/followup-questions
+  follow-up-url: https://ai.wingterview.com/interview/followup-questions
+#  follow-up-url: http://34.64.33.21:8000/interview/followup-questions
   api-key: {ai.api-key}
   api-url: {ai.api-url}
 

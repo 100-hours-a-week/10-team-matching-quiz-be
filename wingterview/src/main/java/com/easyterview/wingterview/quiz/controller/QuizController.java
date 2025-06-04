@@ -24,7 +24,16 @@ public class QuizController {
     }
 
     @GetMapping("/user/{userId}/quizzes")
-    public ResponseEntity<BaseResponse> getQuizList(@PathVariable String userId, @RequestParam Boolean wrong, @RequestParam Integer cursor, @RequestParam Integer limit ){
+    public ResponseEntity<BaseResponse> getQuizList(@PathVariable String userId,
+                                                    @RequestParam(required = false) Boolean wrong,
+                                                    @RequestParam(required = false) String cursor,
+                                                    @RequestParam(defaultValue = "5") Integer limit ){
+        System.out.println("*************** Controller **************");
+        System.out.println(userId);
+        System.out.println(wrong);
+        System.out.println(cursor);
+        System.out.println(limit);
+
         QuizListResponse quizListResponse = quizService.getQuizList(userId, wrong, cursor, limit);
         return BaseResponse.response(QuizResponseMessage.QUIZ_LIST_FETCH_DONE,quizListResponse);
     }

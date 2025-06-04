@@ -32,6 +32,4 @@ public class InterviewHistoryEntity {
 
     @Column(name = "to_time", nullable = false)
     private Integer to;
-
-
 }
