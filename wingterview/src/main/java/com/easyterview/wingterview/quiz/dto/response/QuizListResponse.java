@@ -4,11 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
 public class QuizListResponse {
-    private List<QuizInfo> quizInfoList;
-    private Boolean hasNext;
-    private Integer nextCursor;
+    private final List<QuizInfo> quizInfoList;
+    private final Boolean hasNext;
+    private final String nextCursor;
 }

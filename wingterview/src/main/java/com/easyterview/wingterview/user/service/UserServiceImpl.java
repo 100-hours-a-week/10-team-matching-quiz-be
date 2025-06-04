@@ -168,6 +168,7 @@ public class UserServiceImpl implements UserService {
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
                 .profileImageUrl(user.getProfileImageUrl())     
                 .isInQueue(matchingParticipantEntity.isPresent())
+                .myId(user.getId().toString())
                 .build();
     }
 

@@ -20,4 +20,5 @@ public class UserInfoDto {
     private Integer interviewCnt;
     private String profileImageUrl;
     private Boolean isInQueue;
+    private String myId;
 }

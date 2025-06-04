@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.quiz.dto.response;
 
+import com.easyterview.wingterview.quiz.entity.QuizEntity;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,4 +13,15 @@ public class QuizInfo {
     private final String correctAnswer;
     private final String commentary;
     private final Boolean isCorrect;
+
+    public static QuizInfo fromEntity(QuizEntity entity, Integer questionIdx) {
+        return QuizInfo.builder()
+                .questionIdx(questionIdx)
+                .question(entity.getQuestion())
+                .commentary(entity.getCommentary())
+                .userAnswer(entity.getUserAnswer())
+                .correctAnswer(entity.getCorrectAnswer())
+                .isCorrect(entity.getIsCorrect())
+                .build();
+    }
 }
