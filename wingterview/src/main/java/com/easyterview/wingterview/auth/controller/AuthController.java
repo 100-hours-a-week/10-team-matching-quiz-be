@@ -38,6 +38,7 @@ public class AuthController {
     })
     @PostMapping("/oauth/{provider}")
     public ResponseEntity<BaseResponse> authLogin(@Parameter(description = "OAuth 제공자", example = "kakao") @PathVariable String provider, @RequestBody AuthRequestDto authRequest){
+        log.info("*************** {}",authRequest.getCode());
 
         // 카카오가 아닌 경우 예외처리
         if(!"kakao".equals(provider))

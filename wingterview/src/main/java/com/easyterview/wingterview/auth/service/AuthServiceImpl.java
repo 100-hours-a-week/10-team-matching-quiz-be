@@ -57,6 +57,8 @@ public class AuthServiceImpl implements AuthService {
                 .body(new ParameterizedTypeReference<Map<String, Object>>() {
                 });
 
+        log.info("************ 여기 들어왔냐?");
+
         return response;
     }
 
