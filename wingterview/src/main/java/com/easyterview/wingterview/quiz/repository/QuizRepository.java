@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface QuizRepository extends JpaRepository<QuizEntity, UUID> {
-    List<QuizEntity> findAllByUserId(String userId);
+    List<QuizEntity> findAllByUserId(UUID userId);
 }
