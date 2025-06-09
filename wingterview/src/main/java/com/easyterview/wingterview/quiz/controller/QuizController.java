@@ -4,6 +4,7 @@ import com.easyterview.wingterview.common.constants.QuizResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
+import com.easyterview.wingterview.quiz.dto.response.TodayQuizListResponse;
 import com.easyterview.wingterview.quiz.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,14 @@ public class QuizController {
                                                     @RequestParam(required = false) Boolean wrong,
                                                     @RequestParam(required = false) String cursor,
                                                     @RequestParam(defaultValue = "5") Integer limit ){
-        System.out.println("*************** Controller **************");
-        System.out.println(userId);
-        System.out.println(wrong);
-        System.out.println(cursor);
-        System.out.println(limit);
-
         QuizListResponse quizListResponse = quizService.getQuizList(userId, wrong, cursor, limit);
         return BaseResponse.response(QuizResponseMessage.QUIZ_LIST_FETCH_DONE,quizListResponse);
     }
+
+    @GetMapping("/today-quiz/{userId}")
+    public ResponseEntity<BaseResponse> getTodayQuiz(@PathVariable String userId){
+        TodayQuizListResponse response = quizService.getTodayQuiz(userId);
+        return BaseResponse.response(QuizResponseMessage.TODAY_QUIZ_FETCH_DONE, response);
+    }
+
 }

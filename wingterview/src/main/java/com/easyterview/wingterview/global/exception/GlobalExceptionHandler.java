@@ -85,4 +85,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseResponse> handleIllegalFileFormat(IllegalFileFormatException e){
         return BaseResponse.response(ExceptionMessage.INVALID_FILE_FORMAT, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(QuizNotFoundException.class)
+    public ResponseEntity<BaseResponse> handleQuizNotFound(QuizNotFoundException e){
+        return BaseResponse.response(ExceptionMessage.QUIZ_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
 }
