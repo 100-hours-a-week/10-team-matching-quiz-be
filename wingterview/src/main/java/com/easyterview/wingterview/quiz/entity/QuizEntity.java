@@ -16,11 +16,10 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "quiz")
-@ToString
 public class QuizEntity {
     @Id
     @GeneratedValue
-    @UuidGenerator
+    @UuidGenerator(style = UuidGenerator.Style.TIME) // 👈 UUIDv7 방식으로 생성
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
