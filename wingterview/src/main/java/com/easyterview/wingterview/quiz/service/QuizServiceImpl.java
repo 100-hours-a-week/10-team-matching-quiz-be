@@ -40,11 +40,6 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     public QuizListResponse getQuizList(String userId, Boolean wrong, String cursor, Integer limit) {
-        System.out.println("*************** input **************");
-        System.out.println(userId);
-        System.out.println(wrong);
-        System.out.println(cursor);
-        System.out.println(limit);
         return quizRepositoryCustom.findByCursorWithLimit(UUID.fromString(userId),wrong,cursor == null ? null : UUID.fromString(cursor),limit);
     }
 }

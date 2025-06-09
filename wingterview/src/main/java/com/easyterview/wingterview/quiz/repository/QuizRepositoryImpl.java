@@ -33,48 +33,41 @@ public class QuizRepositoryImpl implements QuizRepositoryCustom {
             baseCondition.and(q.isCorrect.eq(false));
         }
 
-        System.out.println("*****************************************************************");
-        System.out.println(baseCondition.toString());
-
-        Timestamp cursorCreatedAt = null;
-        if (cursor != null) {
-            cursorCreatedAt = queryFactory
-                    .select(q.solvedAt)
-                    .from(q)
-                    .where(q.id.eq(cursor))
-                    .fetchOne();
-        }
-
         // createdAt기준 커서보다 최신 갯수( == index) 계산
         Long prevCount = 0L;
-        if (cursorCreatedAt != null) {
-            BooleanBuilder afterCursorCond = new BooleanBuilder(baseCondition)
-                    .and(q.solvedAt.gt(cursorCreatedAt)); // 최신 기준
+        if (cursor != null) {
+
+            // 이게 baseConditiond에 곧바로 and연산을 쳐 해버리면 문제가 생기네 ㅅㅂ
+            // deep copy해서 해야함
+            BooleanBuilder countCondition = new BooleanBuilder(baseCondition);
+            countCondition.and(q.id.gt(cursor));
+
             prevCount = queryFactory
                     .select(q.count())
                     .from(q)
-                    .where(afterCursorCond)
+                    .where(countCondition)
                     .fetchOne();
         }
 
+
         // 3. where 조건에 커서 이전만 포함
         BooleanBuilder where = new BooleanBuilder(baseCondition);
-        if (cursorCreatedAt != null) {
-            where.and(q.solvedAt.lt(cursorCreatedAt)); // 과거 기준
+        if (cursor != null) {
+            where.and(q.id.loe(cursor));
         }
+
 
         List<QuizEntity> result = queryFactory
                 .selectFrom(q)
                 .where(where)
-                .orderBy(q.id.desc())  // 최신순
+                .orderBy(q.id.desc())  // 시간순 정렬
                 .limit(limit + 1)
                 .fetch();
 
-        System.out.println("***********************result : \n"+result);
 
         boolean hasNext = result.size() > limit;
         List<QuizEntity> content = hasNext ? result.subList(0, limit) : result;
-        UUID nextCursor = hasNext ? content.getLast().getId() : null;
+        UUID nextCursor = hasNext ? result.getLast().getId() : null;
 
         // 5. questionIdx 부여
         List<QuizInfo> quizInfoList = new ArrayList<>();
