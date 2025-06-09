@@ -5,4 +5,5 @@ import java.time.Duration;
 
 public interface S3Service {
     URL generatePresignedUrl(String objectKey, Duration expiration);
+    void saveProfileImageUrl(String objectKey);
 }
