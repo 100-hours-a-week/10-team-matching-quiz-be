@@ -5,6 +5,7 @@ import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
 import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
 import com.easyterview.wingterview.quiz.entity.QuizEntity;
+import com.easyterview.wingterview.quiz.entity.TodayQuizEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -91,7 +92,8 @@ public class UserEntity {
     private MatchingParticipantEntity matchingParticipant;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private List<RecordingEntity> recordingEntities;
+    @Builder.Default
+    private List<RecordingEntity> recordingEntities = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -112,4 +114,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @Builder.Default
     private List<QuizEntity> quizEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @Builder.Default
+    private List<TodayQuizEntity> todayQuizEntityList = new ArrayList<>();
 }
