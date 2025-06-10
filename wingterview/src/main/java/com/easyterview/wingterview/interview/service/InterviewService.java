@@ -3,7 +3,6 @@ package com.easyterview.wingterview.interview.service;
 import com.easyterview.wingterview.interview.dto.request.*;
 import com.easyterview.wingterview.interview.dto.response.AiInterviewResponseDto;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
-import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
 
 public interface InterviewService {
     NextRoundDto goNextStage(String interviewId);
@@ -16,9 +15,9 @@ public interface InterviewService {
 
     void sendFeedback(String interviewId, FeedbackRequestDto dto);
 
-    AiInterviewResponseDto startAiInterview();
+    AiInterviewResponseDto startAiInterview(TimeInitializeRequestDto requestDto);
 
-    void initializeInterviewTime(String interviewId, TimeInitializeRequestDto dto);
+//    void initializeInterviewTime(String interviewId, TimeInitializeRequestDto dto);
 
     void exitInterview(String interviewId);
 

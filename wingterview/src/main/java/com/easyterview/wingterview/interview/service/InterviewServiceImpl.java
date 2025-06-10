@@ -586,27 +586,39 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     @Transactional
-    public AiInterviewResponseDto startAiInterview() {
+    public AiInterviewResponseDto startAiInterview(TimeInitializeRequestDto requestDto) {
+        // 1. 사용자 인증
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
 
-        if(interviewParticipantRepository.findByUser(user).isPresent())
+        // 2. 대기열 중복 여부 확인
+        if (interviewParticipantRepository.findByUser(user).isPresent()) {
             throw new AlreadyEnqueuedException();
+        }
 
+        // 3. 참여자 엔티티 생성
         InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
                 .user(user)
                 .role(ParticipantRole.SECOND_INTERVIEWER)
                 .build();
 
-        List<InterviewParticipantEntity> participants = List.of(interviewee);
-
+        // 4. 인터뷰 엔티티 생성 (아직 참여자/시간 연결 전)
         InterviewEntity interview = InterviewEntity.builder()
-                .participants(participants)
                 .isAiInterview(true)
                 .build();
 
+        // 5. 양방향 관계 설정
         interviewee.setInterview(interview);
+        interview.setParticipants(List.of(interviewee)); // 여기가 뒤에 오는 게 더 자연스럽습니다.
 
+        // 6. 시간 설정
+        InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
+                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(requestDto.getTime())))
+                .interview(interview)
+                .build();
+        interview.setInterviewTime(interviewTime);
+
+        // 7. 저장 및 응답 반환
         UUID interviewId = interviewRepository.save(interview).getId();
 
         return AiInterviewResponseDto.builder()
@@ -614,21 +626,22 @@ public class InterviewServiceImpl implements InterviewService {
                 .build();
     }
 
-    @Override
-    @Transactional
-    public void initializeInterviewTime(String interviewId, TimeInitializeRequestDto dto) {
-        InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
-                .orElseThrow(InterviewNotFoundException::new);
 
-        InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
-                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(dto.getTime())))
-                .interview(interview)
-                .build();
-
-        interview.setInterviewTime(interviewTime);
-
-        interviewTimeRepository.save(interviewTime);
-    }
+//    @Override
+//    @Transactional
+//    public void initializeInterviewTime(String interviewId, TimeInitializeRequestDto dto) {
+//        InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
+//                .orElseThrow(InterviewNotFoundException::new);
+//
+//        InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
+//                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(dto.getTime())))
+//                .interview(interview)
+//                .build();
+//
+//        interview.setInterviewTime(interviewTime);
+//
+//        interviewTimeRepository.save(interviewTime);
+//    }
 
     @Override
     @Transactional

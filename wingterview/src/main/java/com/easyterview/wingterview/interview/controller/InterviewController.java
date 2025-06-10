@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,16 +58,16 @@ public class InterviewController {
     }
 
     @PostMapping("/ai")
-    public ResponseEntity<BaseResponse> startAiInterview(){
-        AiInterviewResponseDto dto = interviewService.startAiInterview();
+    public ResponseEntity<BaseResponse> startAiInterview(@RequestBody TimeInitializeRequestDto requestDto){
+        AiInterviewResponseDto dto = interviewService.startAiInterview(requestDto);
         return BaseResponse.response(InterviewResponseMessage.AI_INTERVIEW_CREATED, dto);
     }
 
-    @PutMapping("/ai/{interviewId}/time")
-    public ResponseEntity<BaseResponse> initializeInterviewTime(@PathVariable String interviewId, @RequestBody TimeInitializeRequestDto dto){
-        interviewService.initializeInterviewTime(interviewId, dto);
-        return BaseResponse.response(InterviewResponseMessage.INTERVIEW_TIME_INITIALIZED);
-    }
+//    @PutMapping("/ai/{interviewId}/time")
+//    public ResponseEntity<BaseResponse> initializeInterviewTime(@PathVariable String interviewId, @RequestBody TimeInitializeRequestDto dto){
+//        interviewService.initializeInterviewTime(interviewId, dto);
+//        return BaseResponse.response(InterviewResponseMessage.INTERVIEW_TIME_INITIALIZED);
+//    }
 
     @DeleteMapping("/{interviewId}")
     public ResponseEntity<BaseResponse> exitInterview(@PathVariable String interviewId){
