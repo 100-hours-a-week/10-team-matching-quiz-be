@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/health").permitAll()  // ← 추가!
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/matching/result").permitAll()
                         .requestMatchers("/api/matching").permitAll()
