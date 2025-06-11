@@ -24,17 +24,8 @@ public class QuestionOptionsEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "first_option", length = 100, nullable = false)
-    private String firstOption;
-
-    @Column(name = "second_option", length = 100, nullable = false)
-    private String secondOption;
-
-    @Column(name = "third_option", length = 100, nullable = false)
-    private String thirdOption;
-
-    @Column(name = "fourth_option", length = 100, nullable = false)
-    private String fourthOption;
+    @Column(name = "question_option", length = 100, nullable = false)
+    private String option;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/10-team-matching-quiz-be.iml" filepath="$PROJECT_DIR$/.idea/10-team-matching-quiz-be.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/wingterview.main.iml" filepath="$PROJECT_DIR$/.idea/modules/wingterview.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wingterview.test.iml" filepath="$PROJECT_DIR$/.idea/modules/wingterview.test.iml" />
     </modules>
   </component>
 </project>

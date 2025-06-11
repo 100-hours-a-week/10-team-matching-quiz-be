@@ -27,17 +27,10 @@ public class InterviewUtil {
             }
             case "progress" -> {
                 if (isAiInterview) {
-                    if (round == 4) {
-                        return InterviewStatus.builder()
-                                .phase(Phase.COMPLETE)
-                                .round(round)
-                                .build();
-                    } else {
-                        return InterviewStatus.builder()
-                                .phase(Phase.PENDING)
-                                .round(round + 1)
-                                .build();
-                    }
+                    return InterviewStatus.builder()
+                            .phase(Phase.COMPLETE)
+                            .round(round)
+                            .build();
                 } else {
                     return InterviewStatus.builder()
                             .phase(Phase.FEEDBACK)

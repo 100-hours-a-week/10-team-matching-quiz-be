@@ -46,6 +46,8 @@ oauth:
 
 ai:
   follow-up-url: https://ai.wingterview.com/interview/followup-questions
+  api-key: {ai.api-key}
+  api-url: {ai.api-url}
 
 cloud:
   aws:
@@ -60,3 +62,10 @@ cloud:
     stack:
       auto: false
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method

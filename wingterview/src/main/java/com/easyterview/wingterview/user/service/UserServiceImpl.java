@@ -6,7 +6,6 @@ import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
-import com.easyterview.wingterview.global.exception.UserNotParticipatedException;
 import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
 import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.dto.request.SeatPosition;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,7 +50,7 @@ public class UserServiceImpl implements UserService {
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
         user.setCurriculum(userBasicInfo.getCurriculum());
-        user.setProfileImageUrl(s3Util.getProfileImageUrl(userBasicInfo.getProfileImageName()));
+        user.setProfileImageUrl(s3Util.getUrl(userBasicInfo.getProfileImageName()));
 
         // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
         SeatPosition seatPosition = userBasicInfo.getSeatPosition();
@@ -95,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
         user.setInterviewStat(interviewStat);
 
-        userRepository.save(user); // cascade 덕분에 연관 Entity도 저장됨
+        userRepository.save(user);
     }
 
     @Override
@@ -170,6 +168,7 @@ public class UserServiceImpl implements UserService {
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
                 .profileImageUrl(user.getProfileImageUrl())     
                 .isInQueue(matchingParticipantEntity.isPresent())
+                .myId(user.getId().toString())
                 .build();
     }
 

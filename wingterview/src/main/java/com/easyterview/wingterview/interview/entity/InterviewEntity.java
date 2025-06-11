@@ -1,16 +1,11 @@
 package com.easyterview.wingterview.interview.entity;
 
 import com.easyterview.wingterview.interview.enums.Phase;
-import com.easyterview.wingterview.user.entity.UserChatroomEntity;
-import com.easyterview.wingterview.user.entity.UserEntity;
-import com.easyterview.wingterview.user.enums.JobInterest;
+import com.easyterview.wingterview.user.entity.RecordingEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -42,10 +37,6 @@ public class InterviewEntity {
     @Column(name = "keywords", length = 200)
     private String keywords;
 
-    @UpdateTimestamp
-    @Column(name = "phase_at", nullable = false)
-    private Timestamp phaseAt;
-
     @Column(name = "is_ai_interview", nullable = false)
     @Builder.Default
     private Boolean isAiInterview = false;
@@ -57,8 +48,12 @@ public class InterviewEntity {
 
     @OneToMany(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<QuestionOptionsEntity> questionOptionsList = new ArrayList<>();
+    private List<QuestionOptionsEntity> questionOptions = new ArrayList<>();
+
+    @OneToOne(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private InterviewTimeEntity interviewTime;
 
     @OneToOne(mappedBy = "interview", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private QuestionHistoryEntity questionHistory;
+
 }

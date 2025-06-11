@@ -1,6 +1,5 @@
 package com.easyterview.wingterview.common.util;
 
-import com.easyterview.wingterview.interview.enums.Phase;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -10,23 +9,20 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class TimeUtil {
 
-    public static Integer getRemainTime(Timestamp phaseAt, InterviewStatus status) {
-        long totalSeconds;
-
-        switch (status.getPhase()) {
-            case PROGRESS -> totalSeconds = 20 * 60;
-            case FEEDBACK -> totalSeconds = 5 * 60;
-            default -> totalSeconds = 0;
-        }
-
+    public static Integer getRemainTime(Timestamp endAt) {
         Instant now = Instant.now();
-        Instant phaseStart = phaseAt.toInstant();
-        long elapsedSeconds = ChronoUnit.SECONDS.between(phaseStart, now);
-        log.info("***************  {} ", totalSeconds);
-        log.info("**************** {} ",elapsedSeconds);
+        Instant end = endAt.toInstant();
+        long remainSeconds = ChronoUnit.SECONDS.between(now, end);
+        log.info("**************** remain: {} seconds", remainSeconds);
 
-        long remainSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+        return (int) Math.max(0, remainSeconds);
+    }
 
-        return (int) remainSeconds;
+    public static Integer getTime(Timestamp startAt, Timestamp when){
+        Instant start = startAt.toInstant();
+        Instant end = when.toInstant();
+        long seconds = ChronoUnit.SECONDS.between(start, end);
+
+        return (int) seconds;
     }
 }

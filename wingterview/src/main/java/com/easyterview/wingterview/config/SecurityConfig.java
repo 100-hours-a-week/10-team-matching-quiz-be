@@ -37,6 +37,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/matching/result").permitAll()
                         .requestMatchers("/api/matching").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/api-docs/**"
+                        ).permitAll()
                         // TODO : AI 쪽 API는 permitAll
                         .anyRequest().authenticated()
                 )
