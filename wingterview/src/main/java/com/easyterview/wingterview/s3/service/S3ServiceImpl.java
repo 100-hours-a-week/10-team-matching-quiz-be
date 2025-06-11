@@ -33,7 +33,6 @@ public class S3ServiceImpl implements S3Service {
     private final UserRepository userRepository;
     private final S3Client s3Client;
     private final RecordRepository recordRepository;
-    private final UserRepository userRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
