@@ -10,5 +10,5 @@ public interface S3Service {
 
     void deleteS3ObjectByUrl(String url);
 
-    void saveProfileImageUrl(String objectKey);
+//    void saveProfileImageUrl(String objectKey);
 }
