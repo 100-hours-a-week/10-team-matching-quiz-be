@@ -39,4 +39,10 @@ public class QuizController {
         return BaseResponse.response(QuizResponseMessage.TODAY_QUIZ_FETCH_DONE, response);
     }
 
+    @PostMapping("/quiz/generate")
+    public ResponseEntity<BaseResponse> makeTodayQuiz(){
+        quizService.createTodayQuiz();
+        return BaseResponse.response(QuizResponseMessage.TODAY_QUIZ_FETCH_DONE);
+    }
+
 }

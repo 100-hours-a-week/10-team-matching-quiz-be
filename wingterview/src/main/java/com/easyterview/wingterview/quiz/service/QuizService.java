@@ -10,4 +10,6 @@ public interface QuizService {
     QuizListResponse getQuizList(String userId, Boolean wrong, String cursor, Integer limit);
 
     TodayQuizListResponse getTodayQuiz(String userId);
+
+    void createTodayQuiz();
 }

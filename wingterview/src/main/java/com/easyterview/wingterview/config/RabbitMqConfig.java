@@ -100,4 +100,9 @@ public class RabbitMqConfig {
                 .recoverer(new RejectAndDontRequeueRecoverer()) // 실패 시 재큐하지 않음
                 .build();
     }
+
+    @Bean
+    public Queue quizResponseQueue() {
+        return new Queue("quiz.response.queue", true); // durable = true
+    }
 }

@@ -3,6 +3,8 @@ package com.easyterview.wingterview.quiz.service;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.global.exception.QuizNotFoundException;
+import com.easyterview.wingterview.interview.repository.ReceivedQuestionRepository;
+import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
 import com.easyterview.wingterview.quiz.dto.response.TodayQuiz;
@@ -14,18 +16,19 @@ import com.easyterview.wingterview.quiz.repository.QuizRepository;
 import com.easyterview.wingterview.quiz.repository.QuizRepositoryCustom;
 import com.easyterview.wingterview.quiz.repository.QuizSelectionRepository;
 import com.easyterview.wingterview.quiz.repository.TodayQuizRepository;
+import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuizServiceImpl implements QuizService{
 
     private final QuizRepository quizRepository;
@@ -33,6 +36,8 @@ public class QuizServiceImpl implements QuizService{
     private final QuizRepositoryCustom quizRepositoryCustom;
     private final TodayQuizRepository todayQuizRepository;
     private final QuizSelectionRepository quizSelectionRepository;
+    private final ReceivedQuestionRepository receivedQuestionRepository;
+    private final RabbitMqService rabbitMqService;
 
     @Override
     public QuizStatsResponse getQuizStats(String userId) {
@@ -85,5 +90,19 @@ public class QuizServiceImpl implements QuizService{
         return TodayQuizListResponse.builder()
                 .quizList(todayQuizList)
                 .build();
+    }
+
+    @Override
+    public void createTodayQuiz() {
+        UUID userId = UUIDUtil.getUserIdFromToken();
+        List<String> questionHistoryList = receivedQuestionRepository.findByUserId(userId);
+        QuizCreationRequestDto request = QuizCreationRequestDto.builder()
+                .questionHistoryList(questionHistoryList)
+                .userId(userId.toString())
+                .build();
+
+
+        rabbitMqService.sendQuizCreation(request);
+        log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
     }
 }

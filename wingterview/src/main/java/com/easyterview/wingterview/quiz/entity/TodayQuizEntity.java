@@ -32,6 +32,9 @@ public class TodayQuizEntity {
     @Column(name = "correct_answer_idx", nullable = false)
     private Integer correctAnswerIdx;
 
+    @Column(length = 5, nullable = false)
+    private String difficulty;
+
     @Lob
     @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String commentary;
