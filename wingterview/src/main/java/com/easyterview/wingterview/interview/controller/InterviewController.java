@@ -75,11 +75,9 @@ public class InterviewController {
         return BaseResponse.response(InterviewResponseMessage.INTERVIEW_DELETE_DONE);
     }
 
-    @PostMapping("/{userId}/voice/feedback")
-    public ResponseEntity<BaseResponse> feedbackCallback(@PathVariable String userId, @RequestBody FeedbackCallbackDto dto){
+    @PostMapping("/voice/feedback")
+    public ResponseEntity<BaseResponse> getSttFeedback(@PathVariable String userId, @RequestBody FeedbackCallbackDto dto){
         interviewService.getFeedbackFromAI(userId, dto);
         return BaseResponse.response(InterviewResponseMessage.FEEDBACK_FETCH_DONE);
     }
-
-
 }

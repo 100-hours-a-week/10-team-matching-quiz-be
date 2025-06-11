@@ -90,4 +90,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseResponse> handleQuizNotFound(QuizNotFoundException e){
         return BaseResponse.response(ExceptionMessage.QUIZ_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(RecordNotFoundException.class)
+    public  ResponseEntity<BaseResponse> handleRecordNotFound(RecordNotFoundException e){
+        return BaseResponse.response(ExceptionMessage.RECORD_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
 }

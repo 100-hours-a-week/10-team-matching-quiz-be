@@ -41,7 +41,10 @@ oauth:
   kakao:
     token-request-uri: https://kauth.kakao.com/oauth/token
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
-    redirect-uri: https://wingterview.com/auth/kakao
+#    redirect-uri: https://wingterview.com/auth/kakao
+    redirect-uri: http://localhost:5173/auth/kakao
+#    redirect-uri: http://wingterview.com/auth/kakao
+
     client-id: ${oauth.kakao.client-id}
 
 ai:

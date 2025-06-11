@@ -51,6 +51,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final ChatRepository chatRepository;
     private final InterviewTimeRepository interviewTimeRepository;
     private final InterviewHistoryRepository interviewHistoryRepository;
+    private final InterviewSegmentRepository interviewSegmentRepository;
     private final RecordRepository recordRepository;
 
     private final RabbitMqService rabbitMqService;
@@ -74,13 +75,26 @@ public class InterviewServiceImpl implements InterviewService {
             // 인터뷰 다음 분기로 바꾸기
             InterviewEntity interview = interviewOpt.get();
             InterviewStatus nextStatus = InterviewUtil.nextPhase(interview.getRound(), interview.getPhase(), interview.getIsAiInterview());
-            if(!interview.getIsAiInterview() && nextStatus.getPhase().getPhase().equals("progress")){
+            if (!interview.getIsAiInterview() && nextStatus.getPhase().getPhase().equals("progress")) {
                 InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
                         .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(20)))
                         .build();
 
                 interviewTime.setInterview(interview);
                 interview.setInterviewTime(interviewTime);
+            } else if (interview.getIsAiInterview() && interview.getPhase().getPhase().equals("progress")) {
+                UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
+                        .orElseThrow(InvalidTokenException::new);
+                InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
+                InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
+                        .interviewHistory(interviewHistory)
+                        .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
+                        .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                        .build();
+
+                interviewSegmentRepository.save(interviewSegment);
             }
             interview.setPhase(nextStatus.getPhase());
             interview.setRound(nextStatus.getRound());
@@ -222,29 +236,32 @@ public class InterviewServiceImpl implements InterviewService {
                         .toList();
 
                 QuestionHistoryEntity questionHistory = interview.getQuestionHistory();
-                if(questionHistory == null){
+                if (questionHistory == null) {
                     questionHistoryRepository.save(QuestionHistoryEntity.builder()
                             .interview(interview)
                             .selectedQuestion(questions.getFirst())
                             .selectedQuestionIdx(1)
                             .build()
                     );
-                }
-                else{
+                } else {
+                    // 아마 마지막 질문 녹음은 따로 처리해야할듯
+                    InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
+                    InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
+                            .interviewHistory(interviewHistory)
+                            .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
+                            .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                            .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                            .build();
+
+                    interviewSegmentRepository.save(interviewSegment);
+
                     Integer questionIdx = questionHistory.getSelectedQuestionIdx();
                     questionHistory.setSelectedQuestion(questions.getFirst());
-                    questionHistory.setSelectedQuestionIdx(questionIdx+1);
+                    questionHistory.setSelectedQuestionIdx(questionIdx + 1);
                     questionHistoryRepository.save(questionHistory);
 
-                    // 아마 마지막 질문 녹음은 따로 처리해야할듯
-                    interviewHistoryRepository.save(InterviewHistoryEntity.builder()
-                            .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                            .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .interviewId(UUID.fromString(interviewId))
-                            .selectedQuestion(questions.getFirst())
-                            .build());
                 }
-
 
 
                 receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
@@ -331,7 +348,7 @@ public class InterviewServiceImpl implements InterviewService {
                 FollowUpQuestionResponseDto response = rabbitMqService.sendFollowUpBlocking(request);
                 List<String> questions = response.getFollowupQuestions();
 
-                if(!interview.getIsAiInterview()){
+                if (!interview.getIsAiInterview()) {
                     // questionOptions 저장하기
                     questions.forEach(q -> {
                         QuestionOptionsEntity questionOption = QuestionOptionsEntity.builder().option(q).build();
@@ -347,7 +364,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                 // ai라면 생성과 동시에 history에 저장해야함. -> select가 분리되어 있지 않기때문
                 QuestionHistoryEntity questionHistory = interview.getQuestionHistory();
-                if(questionHistory == null){
+                if (questionHistory == null) {
                     questionHistoryRepository.save(QuestionHistoryEntity.builder()
                             .interview(interview)
                             .selectedQuestion(questions.getFirst())
@@ -356,21 +373,23 @@ public class InterviewServiceImpl implements InterviewService {
                     );
 
 
-                }
-                else{
+                } else {
+                    InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
+                    InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
+                            .interviewHistory(interviewHistory)
+                            .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
+                            .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                            .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                            .build();
+
+                    interviewSegmentRepository.save(interviewSegment);
+
                     Integer questionIdx = questionHistory.getSelectedQuestionIdx();
                     questionHistory.setSelectedQuestion(questions.getFirst());
-                    questionHistory.setSelectedQuestionIdx(questionIdx+1);
+                    questionHistory.setSelectedQuestionIdx(questionIdx + 1);
                     questionHistoryRepository.save(questionHistory);
-
-                    interviewHistoryRepository.save(InterviewHistoryEntity.builder()
-                            .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                            .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .interviewId(UUID.fromString(interviewId))
-                            .selectedQuestion(questions.getFirst())
-                            .build());
                 }
-
 
 
                 receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
@@ -416,7 +435,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                 List<String> questions = response.getFollowupQuestions();
 
-                if(!interview.getIsAiInterview()){
+                if (!interview.getIsAiInterview()) {
                     // questionOptions 저장하기
                     questions.forEach(q -> {
                         QuestionOptionsEntity questionOption = QuestionOptionsEntity.builder().option(q).build();
@@ -429,36 +448,34 @@ public class InterviewServiceImpl implements InterviewService {
                             .build();
                 }
 
+
+                InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
+                InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
+                        .interviewHistory(interviewHistory)
+                        .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
+                        .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                        .build();
+
+                interviewSegmentRepository.save(interviewSegment);
+
                 // ai라면 생성과 동시에 history에 저장해야함. -> select가 분리되어 있지 않기때문
                 QuestionHistoryEntity questionHistory = interview.getQuestionHistory();
-                if(questionHistory == null){
+                if (questionHistory == null) {
                     questionHistoryRepository.save(QuestionHistoryEntity.builder()
                             .interview(interview)
                             .selectedQuestion(questions.getFirst())
                             .selectedQuestionIdx(1)
                             .build()
                     );
-                }
-                else{
+                } else {
                     Integer questionIdx = questionHistory.getSelectedQuestionIdx();
                     questionHistory.setSelectedQuestion(questions.getFirst());
-                    questionHistory.setSelectedQuestionIdx(questionIdx+1);
+                    questionHistory.setSelectedQuestionIdx(questionIdx + 1);
                     questionHistoryRepository.save(questionHistory);
 
-                    interviewHistoryRepository.save(InterviewHistoryEntity.builder()
-                            .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                            .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .interviewId(UUID.fromString(interviewId))
-                            .selectedQuestion(questions.getFirst())
-                            .build());
                 }
-
-                interviewHistoryRepository.save(InterviewHistoryEntity.builder()
-                        .from(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                        .to(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                        .interviewId(UUID.fromString(interviewId))
-                        .selectedQuestion(questions.getFirst())
-                        .build());
 
                 receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
                         .contents(questions.getFirst())
@@ -481,8 +498,6 @@ public class InterviewServiceImpl implements InterviewService {
         InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
                 .orElseThrow(InterviewNotFoundException::new);
         List<QuestionOptionsEntity> questionOptions = questionOptionsRepository.findTop4ByInterviewOrderByCreatedAtDesc(interview);
-        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(InvalidTokenException::new);
 
         // 선택한 질문 골라내기
         String selectedQuestion = questionOptions.get(dto.getSelectedIdx()).getOption();
@@ -514,7 +529,8 @@ public class InterviewServiceImpl implements InterviewService {
         receivedQuestionRepository.save(ReceivedQuestionEntity.builder()
                 .contents(selectedQuestion)
                 .receivedAt(Timestamp.valueOf(LocalDateTime.now()))
-                .user(user)
+                .user(interview.getParticipants().stream().filter(participant ->
+                        !participant.getUser().getId().equals(UUIDUtil.getUserIdFromToken())).toList().getFirst().getUser())
                 .build()
         );
 
@@ -596,33 +612,44 @@ public class InterviewServiceImpl implements InterviewService {
             throw new AlreadyEnqueuedException();
         }
 
-        // 3. 참여자 엔티티 생성
-        InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
-                .user(user)
-                .role(ParticipantRole.SECOND_INTERVIEWER)
-                .build();
-
-        // 4. 인터뷰 엔티티 생성 (아직 참여자/시간 연결 전)
+        // 3. 인터뷰 엔티티 생성
         InterviewEntity interview = InterviewEntity.builder()
                 .isAiInterview(true)
                 .build();
 
-        // 5. 양방향 관계 설정
-        interviewee.setInterview(interview);
-        interview.setParticipants(List.of(interviewee)); // 여기가 뒤에 오는 게 더 자연스럽습니다.
+        InterviewHistoryEntity interviewHistory = InterviewHistoryEntity.builder()
+                .user(user)
+                .build();
+
+        // 4. 인터뷰 엔티티 먼저 저장 (ID 생성)
+        interviewRepository.save(interview);
+        user.getInterviewHistoryEntityList().add(interviewHistory);
+        interviewHistoryRepository.save(interviewHistory);
+
+        // 5. 참여자 엔티티 생성 및 연결
+        InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
+                .user(user)
+                .role(ParticipantRole.SECOND_INTERVIEWER)
+                .interview(interview) // 이미 저장된 interview 연결
+                .build();
 
         // 6. 시간 설정
         InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
                 .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(requestDto.getTime())))
-                .interview(interview)
+                .interview(interview) // 이미 저장된 interview 연결
                 .build();
+
+        // 7. 양방향 관계 설정
+        interview.setParticipants(List.of(interviewee));
         interview.setInterviewTime(interviewTime);
 
-        // 7. 저장 및 응답 반환
-        UUID interviewId = interviewRepository.save(interview).getId();
+        // 8. 나머지 엔티티 저장
+        interviewParticipantRepository.save(interviewee);
+        interviewTimeRepository.save(interviewTime);
 
+        // 9. 응답 반환x
         return AiInterviewResponseDto.builder()
-                .interviewId(String.valueOf(interviewId))
+                .interviewId(String.valueOf(interview.getId()))
                 .build();
     }
 
@@ -650,15 +677,16 @@ public class InterviewServiceImpl implements InterviewService {
                 .orElseThrow(InterviewNotFoundException::new);
         UserEntity user = interview.getParticipants().getFirst().getUser();
 
-        RecordingEntity recording = recordRepository.findByInterviewId(UUID.fromString(interviewId));
 //        String userId = String.valueOf(user.getId());
-        // TODO : STT 분석 요청하기
+        // TODO : STT 분석 요청하기 -?
 
         interviewRepository.delete(interview);
     }
 
     @Override
     public void getFeedbackFromAI(String userId, FeedbackCallbackDto dto) {
+        RecordingEntity recording = recordRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(RecordNotFoundException::new);
+        InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(InterviewNotFoundException::new);
         // TODO : 피드백 결과를 어떻게 저장할지 entity, api 구성해야함
 
         // 1. userId를 통해 recording table를 조회
