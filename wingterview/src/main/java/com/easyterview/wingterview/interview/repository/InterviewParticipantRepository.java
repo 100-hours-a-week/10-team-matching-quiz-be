@@ -13,4 +13,6 @@ public interface InterviewParticipantRepository extends JpaRepository<InterviewP
     Optional<InterviewParticipantEntity> findByUser(UserEntity user);
 
     List<InterviewParticipantEntity> findByInterview(InterviewEntity interview);
+
+    Optional<InterviewParticipantEntity> findByUserId(UUID uuid);
 }

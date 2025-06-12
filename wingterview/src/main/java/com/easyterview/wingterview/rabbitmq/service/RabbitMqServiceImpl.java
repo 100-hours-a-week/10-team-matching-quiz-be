@@ -1,6 +1,6 @@
 package com.easyterview.wingterview.rabbitmq.service;
 
-import com.easyterview.wingterview.interview.dto.request.AiFeedbackRequestDto;
+//import com.easyterview.wingterview.interview.dto.request.AiFeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.FollowUpQuestionRequest;
 import com.easyterview.wingterview.interview.dto.response.FollowUpQuestionResponseDto;
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
@@ -203,10 +203,10 @@ public class RabbitMqServiceImpl implements RabbitMqService {
         return response.getBody();
     }
 
-    @Override
-    public void sendFeedbackRequest(AiFeedbackRequestDto dto) {
-        rabbitTemplate.convertAndSend("feedback.request.exchange", "feedback.request.routingKey", dto);
-    }
+//    @Override
+//    public void sendFeedbackRequest(AiFeedbackRequestDto dto) {
+//        rabbitTemplate.convertAndSend("feedback.request.exchange", "feedback.request.routingKey", dto);
+//    }
 
     @Override
     public void sendQuizCreation(QuizCreationRequestDto request) {
