@@ -17,7 +17,9 @@ public enum ExceptionMessage implements ResponseMessage{
     QUESTION_NOT_FOUND(404, "QUESTION_NOT_FOUND"),
     USER_NOT_FOUND(404, "USER_NOT_FOUND"),
     INVALID_FILE_FORMAT(400, "INVALID_FILE_FORMAT"),
-    QUIZ_NOT_FOUND(404, "QUIZ_NOT_FOUND");
+    QUIZ_NOT_FOUND(404, "QUIZ_NOT_FOUND"),
+    RECORD_NOT_FOUND(404, "RECORD_NOT_FOUND"),
+    FEEDBACK_NOT_READY(404, "FEEDBACK_NOT_READY");
 
     private final int statusCode;
     private final String message;

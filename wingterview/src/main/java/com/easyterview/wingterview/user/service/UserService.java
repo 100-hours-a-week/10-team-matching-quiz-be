@@ -1,9 +1,7 @@
 package com.easyterview.wingterview.user.service;
 
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
-import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
-import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
-import com.easyterview.wingterview.user.dto.response.UserInfoDto;
+import com.easyterview.wingterview.user.dto.response.*;
 
 public interface UserService {
     void saveUserInfo(UserBasicInfoDto userBasicInfo);
@@ -13,4 +11,8 @@ public interface UserService {
     UserInfoDto getMyInfo();
 
     void blockSeatPosition(String seatPositionId);
+
+    InterviewHistoryDto getInterviewList(String userId, String cursor, Integer limit);
+
+    InterviewDetailDto getInterviewDetail(String userId, String interviewId);
 }

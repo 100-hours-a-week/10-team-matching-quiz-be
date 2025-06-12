@@ -1,8 +1,11 @@
 package com.easyterview.wingterview.rabbitmq.service;
 
+import com.easyterview.wingterview.interview.dto.request.AiFeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.FollowUpQuestionRequest;
 import com.easyterview.wingterview.interview.dto.response.FollowUpQuestionResponseDto;
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
+import com.easyterview.wingterview.interview.entity.InterviewFeedbackEntity;
+import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
 import com.easyterview.wingterview.rabbitmq.dto.request.ChatMessage;
 import com.easyterview.wingterview.rabbitmq.dto.request.ChatRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,12 +36,9 @@ public class RabbitMqServiceImpl implements RabbitMqService {
     private final RabbitTemplate rabbitTemplate;
     private final RestTemplate restTemplate;
     private final RestClient restClient;
-    private final AmqpAdmin amqpAdmin;
 
     private static final long MAX_ALLOWED_TIME_MS = 10_000L;
     private static final long PER_TASK_TIME_MS = 3_000L;
-
-    private final AtomicLong lastDequeueTime = new AtomicLong(System.currentTimeMillis());
 
     private final AtomicInteger localQueueTracker = new AtomicInteger(0);
 
@@ -202,6 +202,37 @@ public class RabbitMqServiceImpl implements RabbitMqService {
         log.info("📤 꼬리질문 응답 전송: {}", response.getBody());
         return response.getBody();
     }
+
+    @Override
+    public void sendFeedbackRequest(AiFeedbackRequestDto dto) {
+        rabbitTemplate.convertAndSend("feedback.request.exchange", "feedback.request.routingKey", dto);
+    }
+
+    @Override
+    public void sendQuizCreation(QuizCreationRequestDto request) {
+        rabbitTemplate.convertAndSend("quiz.request.exchange", "quiz.request.routingKey", request);
+        log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
+    }
+
+//    @RabbitListener(queues = "feedback.response.queue")
+//    public void handleFeedback(AiFeedbackResponseDto response) {
+//        log.info("📩 피드백 응답 수신: {}", response);
+//
+//        // 1. 최신 InterviewHistory 찾기
+//        InterviewHistoryEntity interviewHistory = interviewHistoryRepository
+//                .findFirstByUserIdOrderByCreatedAtDesc(response.getUserId())
+//                .orElseThrow(() -> new RuntimeException("InterviewHistory not found"));
+//
+//        // 2. FeedbackEntity 저장 (이건 너가 만들 구조에 맞게!)
+//        InterviewFeedbackEntity feedback = InterviewFeedbackEntity.builder()
+//                .interviewHistory(interviewHistory)
+//                .feedback(response.getFeedback())
+//                .score(response.getScore())
+//                .build();
+//
+//        feedbackRepository.save(feedback);
+//        log.info("✅ 피드백 저장 완료");
+//    }
 }
 
 

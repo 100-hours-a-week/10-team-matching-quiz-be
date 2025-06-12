@@ -21,6 +21,9 @@ public class QuizSelectionEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @Column(name = "selection_idx", nullable = false)
+    private Integer selectionIdx;
+
     @Column(length = 50, nullable = false)
     private String selection;
 

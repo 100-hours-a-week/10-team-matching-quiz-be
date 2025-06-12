@@ -1,9 +1,13 @@
 package com.easyterview.wingterview.interview.entity;
 
+import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -13,7 +17,6 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "interview_history")
-@ToString
 public class InterviewHistoryEntity {
     @Id
     @GeneratedValue
@@ -21,15 +24,18 @@ public class InterviewHistoryEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(columnDefinition = "BINARY(16)", name = "interview_id")
-    private UUID interviewId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
-    @Column(name = "selected_question", length = 100, nullable = false)
-    private String selectedQuestion;
+    // 양방향 관계 설정
+    @OneToMany(mappedBy = "interviewHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InterviewSegmentEntity> segments;
 
-    @Column(name = "from_time", nullable = false)
-    private Integer from;
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    private Timestamp createdAt;
 
-    @Column(name = "to_time", nullable = false)
-    private Integer to;
+    @Column(name = "end_at")
+    private Timestamp endAt;
 }

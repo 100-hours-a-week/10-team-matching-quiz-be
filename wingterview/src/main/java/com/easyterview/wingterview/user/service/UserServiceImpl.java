@@ -4,23 +4,21 @@ import com.easyterview.wingterview.common.enums.Seats;
 import com.easyterview.wingterview.common.util.S3Util;
 import com.easyterview.wingterview.common.util.SeatPositionUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
-import com.easyterview.wingterview.global.exception.AlreadyBlockedSeatException;
-import com.easyterview.wingterview.global.exception.InvalidTokenException;
+import com.easyterview.wingterview.global.exception.*;
+import com.easyterview.wingterview.interview.entity.InterviewFeedbackEntity;
+import com.easyterview.wingterview.interview.entity.InterviewHistoryEntity;
+import com.easyterview.wingterview.interview.repository.InterviewHistoryRepository;
+import com.easyterview.wingterview.interview.repository.InterviewHistoryRepositoryCustom;
 import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
 import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.dto.request.SeatPosition;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
-import com.easyterview.wingterview.user.dto.response.BlockedSeats;
-import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
-import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
-import com.easyterview.wingterview.user.dto.response.UserInfoDto;
-import com.easyterview.wingterview.user.entity.InterviewStatEntity;
-import com.easyterview.wingterview.user.entity.UserEntity;
-import com.easyterview.wingterview.user.entity.UserJobInterestEntity;
-import com.easyterview.wingterview.user.entity.UserTechStackEntity;
+import com.easyterview.wingterview.user.dto.response.*;
+import com.easyterview.wingterview.user.entity.*;
 import com.easyterview.wingterview.user.enums.JobInterest;
 import com.easyterview.wingterview.user.enums.TechStack;
 import com.easyterview.wingterview.user.repository.InterviewStatRepository;
+import com.easyterview.wingterview.user.repository.RecordRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,6 +38,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final InterviewStatRepository interviewStatRepository;
     private final MatchingParticipantRepository matchingParticipantRepository;
+    private final InterviewHistoryRepositoryCustom interviewHistoryRepositoryCustom;
+    private final InterviewHistoryRepository interviewHistoryRepository;
+    private final RecordRepository recordRepository;
     private final S3Util s3Util;
 
     @Transactional
@@ -196,6 +198,37 @@ public class UserServiceImpl implements UserService {
         user.setSeat(seatInt);
     }
 
+    @Override
+    public InterviewHistoryDto getInterviewList(String userId, String cursor, Integer limit) {
+        return interviewHistoryRepositoryCustom.findByCursorWithLimit(userId,cursor == null ? null : UUID.fromString(cursor),limit);
+    }
+
+    @Override
+    public InterviewDetailDto getInterviewDetail(String userId, String interviewHistoryId) {
+        InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findById(UUID.fromString(interviewHistoryId)).orElseThrow(InterviewNotFoundException::new);
+        RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(UUID.fromString(interviewHistoryId)).orElseThrow(RecordNotFoundException::new);
+
+        List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
+            if(s.getFeedback() == null)
+                throw new FeedbackNotReadyException();
+            InterviewFeedbackEntity interviewFeedback = s.getFeedback();
+            return
+            FeedbackItem.builder()
+                    .commentary(interviewFeedback.getCommentary())
+                    .endAt(s.getToTime())
+                    .modelAnswer(interviewFeedback.getCorrectAnswer())
+                    .startAt(s.getFromTime())
+                    .build();
+        }).toList();
+
+
+        return InterviewDetailDto.builder()
+                .feedback(feedbackItemList)
+                .recordingUrl(recordingEntity.getUrl())
+                .createdAt(interviewHistory.getCreatedAt())
+                .duration((interviewHistory.getEndAt().getTime() - interviewHistory.getCreatedAt().getTime()) / 1000)
+                .build();
+    }
 
 
 }

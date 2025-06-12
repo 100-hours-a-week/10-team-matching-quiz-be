@@ -3,9 +3,7 @@ package com.easyterview.wingterview.user.controller;
 import com.easyterview.wingterview.common.constants.UserResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
-import com.easyterview.wingterview.user.dto.response.CheckSeatDto;
-import com.easyterview.wingterview.user.dto.response.SeatPositionDto;
-import com.easyterview.wingterview.user.dto.response.UserInfoDto;
+import com.easyterview.wingterview.user.dto.response.*;
 import com.easyterview.wingterview.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -60,5 +58,18 @@ public class UserController {
         UserInfoDto response = userService.getMyInfo();
         log.info(response.toString());
         return BaseResponse.response(UserResponseMessage.USER_INFO_FETCH_DONE, response);
+    }
+
+    @GetMapping("/{userId}/interview")
+    public ResponseEntity<BaseResponse> getInterviewList(@PathVariable String userId, @RequestParam(required = false) String cursor, @RequestParam(defaultValue = "5") Integer limit){
+        log.info("HI?");
+        InterviewHistoryDto response = userService.getInterviewList(userId, cursor, limit);
+        return BaseResponse.response(UserResponseMessage.USER_INTERVIEW_HISTORY_FETCH_DONE, response);
+    }
+
+    @GetMapping("/{userId}/interview/{interviewId}")
+    public ResponseEntity<BaseResponse> getInterviewDetail(@PathVariable String userId, @PathVariable String interviewId){
+        InterviewDetailDto response = userService.getInterviewDetail(userId, interviewId);
+        return BaseResponse.response(UserResponseMessage.USER_INTERVIEW_DETAIL_FETCH_DONE, response);
     }
 }
