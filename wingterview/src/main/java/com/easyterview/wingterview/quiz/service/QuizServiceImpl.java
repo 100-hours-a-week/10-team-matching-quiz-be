@@ -5,6 +5,8 @@ import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.global.exception.QuizNotFoundException;
 import com.easyterview.wingterview.interview.repository.ReceivedQuestionRepository;
 import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
+import com.easyterview.wingterview.quiz.dto.request.QuizResultItem;
+import com.easyterview.wingterview.quiz.dto.request.TodayQuizResultRequestDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
 import com.easyterview.wingterview.quiz.dto.response.TodayQuiz;
@@ -20,11 +22,15 @@ import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +72,7 @@ public class QuizServiceImpl implements QuizService{
         List<TodayQuizEntity> todayQuizEntityList = todayQuizRepository.findByUser(user);
 
         if (todayQuizEntityList.isEmpty()) {
-            throw new QuizNotFoundException(); // 혹은 return 빈 응답
+            throw new QuizNotFoundException();
         }
 
         // TODO : 오늘의 퀴즈 이미 제출했을 떄 -> joy랑 이야기해보기
@@ -79,9 +85,11 @@ public class QuizServiceImpl implements QuizService{
             return
             TodayQuiz.builder()
                     .question(e.getQuestion())
+                    .quizIdx(e.getQuestionIdx())
                     .commentary(e.getCommentary())
                     .options(quizSelectionEntityList.stream().map(QuizSelectionEntity::getSelection).toList())
                     .answerIdx(e.getCorrectAnswerIdx())
+                    .difficulty(e.getDifficulty())
                     .build();
         }).toList();
 
@@ -104,5 +112,50 @@ public class QuizServiceImpl implements QuizService{
 
         rabbitMqService.sendQuizCreation(request);
         log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
+    }
+
+    @Override
+    @Transactional
+    public void sendTodayQuizResult(String userId, TodayQuizResultRequestDto request) {
+        List<TodayQuizEntity> todayQuizEntityList = todayQuizRepository.findByUserId(UUID.fromString(userId));
+        Map<Integer, TodayQuizEntity> quizMap = todayQuizEntityList.stream()
+                .collect(Collectors.toMap(TodayQuizEntity::getQuestionIdx, q -> q));
+
+        List<QuizEntity> solvedQuizzes = new ArrayList<>();
+        for (QuizResultItem item : request.getQuizzes()) {
+            TodayQuizEntity entity = quizMap.get(item.getQuizIdx());
+
+            if (entity != null) {
+                entity.setUserSelection(item.getUserSelection());
+                entity.setIsCorrect(item.getIsCorrect());
+
+                solvedQuizzes.add(QuizEntity.builder()
+                        .question(entity.getQuestion())
+                        .correctAnswer(
+                                entity.getQuizSelectionEntityList()
+                                        .stream()
+                                        .filter(e -> e.getSelectionIdx().equals(entity.getCorrectAnswerIdx()))
+                                        .findFirst()
+                                        .orElseThrow(() -> new IllegalArgumentException("정답 선택지를 찾을 수 없습니다."))
+                                        .getSelection()
+                        )
+                        .user(entity.getUser())
+                        .commentary(entity.getCommentary())
+                        .isCorrect(item.getIsCorrect())
+                        .solvedAt(Timestamp.valueOf(LocalDateTime.now()))
+                        .userAnswer(
+                                entity.getQuizSelectionEntityList()
+                                        .stream()
+                                        .filter(e -> e.getSelectionIdx().equals(item.getUserSelection()))
+                                        .findFirst()
+                                        .orElseThrow(() -> new IllegalArgumentException("선택지를 찾을 수 없습니다."))
+                                        .getSelection()
+                        )
+                        .build());
+            }
+        }
+
+        todayQuizRepository.saveAllAndFlush(todayQuizEntityList);
+        quizRepository.saveAllAndFlush(solvedQuizzes);
     }
 }

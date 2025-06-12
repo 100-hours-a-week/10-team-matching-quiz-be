@@ -2,6 +2,7 @@ package com.easyterview.wingterview.quiz.controller;
 
 import com.easyterview.wingterview.common.constants.QuizResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
+import com.easyterview.wingterview.quiz.dto.request.TodayQuizResultRequestDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
 import com.easyterview.wingterview.quiz.dto.response.TodayQuizListResponse;
@@ -38,6 +39,13 @@ public class QuizController {
         TodayQuizListResponse response = quizService.getTodayQuiz(userId);
         return BaseResponse.response(QuizResponseMessage.TODAY_QUIZ_FETCH_DONE, response);
     }
+
+    @PostMapping("/today-quiz/{userId}")
+    public ResponseEntity<BaseResponse> sendTodayQuizResult(@PathVariable String userId, @RequestBody TodayQuizResultRequestDto request){
+        quizService.sendTodayQuizResult(userId, request);
+        return BaseResponse.response(QuizResponseMessage.QUIZ_RESULT_SEND_DONE);
+    }
+
 
     @PostMapping("/quiz/generate")
     public ResponseEntity<BaseResponse> makeTodayQuiz(){
