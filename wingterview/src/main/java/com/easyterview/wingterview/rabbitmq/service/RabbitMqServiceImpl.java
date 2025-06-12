@@ -1,10 +1,7 @@
 package com.easyterview.wingterview.rabbitmq.service;
 
-import com.easyterview.wingterview.interview.dto.request.AiFeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.FollowUpQuestionRequest;
 import com.easyterview.wingterview.interview.dto.response.FollowUpQuestionResponseDto;
-import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
-import com.easyterview.wingterview.interview.entity.InterviewFeedbackEntity;
 import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
 import com.easyterview.wingterview.rabbitmq.dto.request.ChatMessage;
 import com.easyterview.wingterview.rabbitmq.dto.request.ChatRequest;
@@ -13,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +19,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RequiredArgsConstructor
 @Service
@@ -203,10 +196,10 @@ public class RabbitMqServiceImpl implements RabbitMqService {
         return response.getBody();
     }
 
-    @Override
-    public void sendFeedbackRequest(AiFeedbackRequestDto dto) {
-        rabbitTemplate.convertAndSend("feedback.request.exchange", "feedback.request.routingKey", dto);
-    }
+//    @Override
+//    public void sendFeedbackRequest(AiFeedbackRequestDto dto) {
+//        rabbitTemplate.convertAndSend("feedback.request.exchange", "feedback.request.routingKey", dto);
+//    }
 
     @Override
     public void sendQuizCreation(QuizCreationRequestDto request) {
