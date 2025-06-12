@@ -95,4 +95,10 @@ public class GlobalExceptionHandler {
     public  ResponseEntity<BaseResponse> handleRecordNotFound(RecordNotFoundException e){
         return BaseResponse.response(ExceptionMessage.RECORD_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(FeedbackNotReadyException.class)
+    public  ResponseEntity<BaseResponse> handleFeedbackNotReady(FeedbackNotReadyException e){
+        return BaseResponse.response(ExceptionMessage.FEEDBACK_NOT_READY, CustomExceptionDto.builder().reason(e.getMessage()).build());
+
+    }
 }

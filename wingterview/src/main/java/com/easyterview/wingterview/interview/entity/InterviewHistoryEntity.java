@@ -35,4 +35,7 @@ public class InterviewHistoryEntity {
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private Timestamp createdAt;
+
+    @Column(name = "end_at")
+    private Timestamp endAt;
 }

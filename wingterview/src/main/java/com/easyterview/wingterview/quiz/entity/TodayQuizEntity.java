@@ -26,11 +26,20 @@ public class TodayQuizEntity {
     @Column(length = 100, nullable = false)
     private String question;
 
+    @Column(name = "question_idx", nullable = false)
+    private Integer questionIdx;
+
     @Column(name = "user_selection")
     private Integer userSelection;
 
     @Column(name = "correct_answer_idx", nullable = false)
     private Integer correctAnswerIdx;
+
+    @Column(name = "is_correct")
+    private Boolean isCorrect;
+
+    @Column(length = 5, nullable = false)
+    private String difficulty;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT", nullable = false)

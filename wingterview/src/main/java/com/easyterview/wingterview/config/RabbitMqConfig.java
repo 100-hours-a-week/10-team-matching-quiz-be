@@ -100,4 +100,40 @@ public class RabbitMqConfig {
                 .recoverer(new RejectAndDontRequeueRecoverer()) // 실패 시 재큐하지 않음
                 .build();
     }
+
+    @Bean
+    public Queue quizRequestQueue() {
+        return new Queue("quiz.request.queue", true); // durable = true
+    }
+
+    @Bean
+    public TopicExchange quizRequestExchange() {
+        return new TopicExchange("quiz.request.exchange");
+    }
+
+    @Bean
+    public Binding quizRequestBinding() {
+        return BindingBuilder
+                .bind(quizRequestQueue())
+                .to(quizRequestExchange())
+                .with("quiz.request.routingKey");
+    }
+
+    @Bean
+    public Queue quizResponseQueue() {
+        return new Queue("quiz.response.queue", true); // durable = true
+    }
+
+    @Bean
+    public TopicExchange quizResponseExchange() {
+        return new TopicExchange("quiz.response.exchange");
+    }
+
+    @Bean
+    public Binding quizResponseBinding() {
+        return BindingBuilder
+                .bind(quizResponseQueue())
+                .to(quizResponseExchange())
+                .with("quiz.response.routingKey");
+    }
 }

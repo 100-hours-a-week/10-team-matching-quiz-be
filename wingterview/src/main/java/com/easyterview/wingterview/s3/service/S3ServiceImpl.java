@@ -2,8 +2,11 @@ package com.easyterview.wingterview.s3.service;
 
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.IllegalFileFormatException;
+import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
 import com.easyterview.wingterview.global.exception.UserNotFoundException;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
+import com.easyterview.wingterview.interview.entity.InterviewHistoryEntity;
+import com.easyterview.wingterview.interview.repository.InterviewHistoryRepository;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
 import com.easyterview.wingterview.user.repository.RecordRepository;
 import com.easyterview.wingterview.user.entity.UserEntity;
@@ -33,6 +36,7 @@ public class S3ServiceImpl implements S3Service {
     private final UserRepository userRepository;
     private final S3Client s3Client;
     private final RecordRepository recordRepository;
+    private final InterviewHistoryRepository interviewHistoryRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -129,10 +133,10 @@ public class S3ServiceImpl implements S3Service {
         log.info("🎙️ 녹음 파일 URL 저장: {}", recordingUrl);
 
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken()).orElseThrow(UserNotFoundException::new);
-        InterviewEntity interview = user.getInterviews().getFirst().getInterview();
+        InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
 
         recordRepository.save(RecordingEntity.builder()
-                        .interviewId(interview.getId())
+                        .interviewHistoryId(interviewHistory.getId())
                         .user(user)
                         .url(recordingUrl)
                 .build());

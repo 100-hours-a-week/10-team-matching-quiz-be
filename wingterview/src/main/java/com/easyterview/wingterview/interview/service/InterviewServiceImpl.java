@@ -86,6 +86,8 @@ public class InterviewServiceImpl implements InterviewService {
                 UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                         .orElseThrow(InvalidTokenException::new);
                 InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
+                interviewHistory.setEndAt(Timestamp.valueOf(LocalDateTime.now()));
+
                 InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
                         .interviewHistory(interviewHistory)
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
@@ -654,31 +656,11 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
 
-//    @Override
-//    @Transactional
-//    public void initializeInterviewTime(String interviewId, TimeInitializeRequestDto dto) {
-//        InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
-//                .orElseThrow(InterviewNotFoundException::new);
-//
-//        InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
-//                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(dto.getTime())))
-//                .interview(interview)
-//                .build();
-//
-//        interview.setInterviewTime(interviewTime);
-//
-//        interviewTimeRepository.save(interviewTime);
-//    }
-
     @Override
     @Transactional
     public void exitInterview(String interviewId) {
         InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
                 .orElseThrow(InterviewNotFoundException::new);
-        UserEntity user = interview.getParticipants().getFirst().getUser();
-
-//        String userId = String.valueOf(user.getId());
-        // TODO : STT 분석 요청하기 -?
 
         interviewRepository.delete(interview);
     }
@@ -687,12 +669,14 @@ public class InterviewServiceImpl implements InterviewService {
     public void getFeedbackFromAI(String userId, FeedbackCallbackDto dto) {
         RecordingEntity recording = recordRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(RecordNotFoundException::new);
         InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(InterviewNotFoundException::new);
-        // TODO : 피드백 결과를 어떻게 저장할지 entity, api 구성해야함
+        AiFeedbackRequestDto requestDto = AiFeedbackRequestDto.builder().build();
+        rabbitMqService.sendFeedbackRequest(requestDto);
+        // request 보낼거임 대충 이런식으로
 
-        // 1. userId를 통해 recording table를 조회
-        // 2. 그것들에 딸린 interviewId를 이용하여
-        // 3. interview history를 조회할 수 있다. 거기서 from, to를 꺼내올 수 있고,
-        // 4. 추후에 feedback entity를 구성하여 거기다가 저장해두자(mvp2)
+        // 그 다음 비동기적으로 피드백을 받아올건데(consume? subscribe?)
+        // 그걸 코드로 어떻게 짜지?
+
+
 
     }
 }
