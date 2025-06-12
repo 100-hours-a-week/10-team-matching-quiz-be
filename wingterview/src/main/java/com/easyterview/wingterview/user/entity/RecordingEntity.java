@@ -22,8 +22,8 @@ public class RecordingEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(columnDefinition = "BINARY(16)", nullable = false, unique = true, name = "interview_id")
-    private UUID interviewId;
+    @Column(columnDefinition = "BINARY(16)", nullable = false, unique = true, name = "interview_history_id")
+    private UUID interviewHistoryId;
 
     @Column(unique = true)
     private String url;
