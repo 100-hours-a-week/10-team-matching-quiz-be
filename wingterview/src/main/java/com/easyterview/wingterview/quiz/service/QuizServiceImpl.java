@@ -7,10 +7,7 @@ import com.easyterview.wingterview.interview.repository.ReceivedQuestionReposito
 import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
 import com.easyterview.wingterview.quiz.dto.request.QuizResultItem;
 import com.easyterview.wingterview.quiz.dto.request.TodayQuizResultRequestDto;
-import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
-import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
-import com.easyterview.wingterview.quiz.dto.response.TodayQuiz;
-import com.easyterview.wingterview.quiz.dto.response.TodayQuizListResponse;
+import com.easyterview.wingterview.quiz.dto.response.*;
 import com.easyterview.wingterview.quiz.entity.QuizEntity;
 import com.easyterview.wingterview.quiz.entity.QuizSelectionEntity;
 import com.easyterview.wingterview.quiz.entity.TodayQuizEntity;
@@ -24,6 +21,7 @@ import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,6 +110,11 @@ public class QuizServiceImpl implements QuizService{
 
         rabbitMqService.sendQuizCreation(request);
         log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
+    }
+
+    @RabbitListener(queues = "quiz.response.queue")
+    public void handleQuizResponse(QuizCreationResponseDto responseDto) {
+        log.info("📥 복습 퀴즈 생성 응답 수신: {}", responseDto);
     }
 
     @Override
