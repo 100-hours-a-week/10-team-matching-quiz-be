@@ -2,22 +2,17 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = 'v1999vvv/wingterview-be'
-    IMAGE_TAG = 'prod'
+    EC2_USER = 'ec2-user'
+    EC2_HOST = '172.31.1.177'
+    DOCKER_IMAGE = 'v1999vvv/backend:latest'
+    REMOTE_WORK_DIR = '/home/ec2-user'
+    IMAGE_TAG = 'dev'
   }
-    
-  stage('Prepare Secret Config') {
-      steps {
-        withCredentials([file(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML')]) {
-          sh 'cp $APP_SECRET_YML ./wingterview/src/main/resources/application-secret.yml'
-        }
-      }
-    }
-  
+
   stages {
     stage('Clone Code') {
       steps {
-        git 'https://github.com/your-org/your-backend-repo.git'
+        git 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
       }
     }
 
@@ -31,13 +26,15 @@ pipeline {
       }
     }
 
-    stage('Deploy to EC2 via SSH') {
+    stage('Deploy to EC2') {
       steps {
         sshagent(credentials: ['backend-ssh-key']) {
           sh """
-            docker build -t $DOCKER_IMAGE:$IMAGE_TAG ./wingterview
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push $DOCKER_IMAGE:$IMAGE_TAG
+            ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+              cd ${REMOTE_WORK_DIR}
+              docker compose pull
+              docker compose up -d
+            EOF
           """
         }
       }
