@@ -33,7 +33,7 @@ pipeline {
 
     stage('Deploy to EC2') {
       steps {
-        sshagent(credentials: ['backend-ssh-key']) {
+        sshagent(credentials: ['backend-ec2-key']) {
           sh """
             ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
               cd ${REMOTE_WORK_DIR}
