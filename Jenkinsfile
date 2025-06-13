@@ -4,7 +4,7 @@ pipeline {
   environment {
     DOCKER_IMAGE = 'v1999vvv/backend:latest'
     EC2_USER = 'ec2-user'
-    EC2_HOST = '172.31.1.177'
+    EC2_HOST = '43.201.251.197'
     REMOTE_WORK_DIR = '/home/ec2-user'
     IAMGE_TAG = 'dev'
   }
