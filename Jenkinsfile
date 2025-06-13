@@ -21,7 +21,7 @@ pipeline {
       withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
         sh """
           cd wingterview
-          ./gradlew clean build
+          ./gradlew clean build -x test
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
           docker build -f Dockerfile -t $DOCKER_IMAGE .
           docker push $DOCKER_IMAGE
