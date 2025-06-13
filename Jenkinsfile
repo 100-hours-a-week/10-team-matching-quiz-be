@@ -2,19 +2,19 @@ pipeline {
   agent any
 
   environment {
+    DOCKER_IMAGE = 'v1999vvv/backend:latest'
     EC2_USER = 'ec2-user'
     EC2_HOST = '172.31.1.177'
-    DOCKER_IMAGE = 'v1999vvv/backend:latest'
     REMOTE_WORK_DIR = '/home/ec2-user'
     IMAGE_TAG = 'dev'
   }
 
-  stage('Clone Code') {
-    steps {
-      git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
+  stages {
+    stage('Clone Code') {
+      steps {
+        git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
+      }
     }
-  }
-
 
     stage('Build & Push Docker Image') {
       steps {
@@ -39,5 +39,5 @@ pipeline {
         }
       }
     }
-  }
-}
+  } 
+} 
