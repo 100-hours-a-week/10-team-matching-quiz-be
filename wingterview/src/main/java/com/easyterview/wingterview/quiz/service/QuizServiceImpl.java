@@ -116,7 +116,7 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @RabbitListener(queues = "quiz.response.queue")
-    public void handleQuizResponse(FollowupResponse responseDto) {
+    public void handleQuizResponse(QuizCreationResponseDto responseDto) {
         log.info("📥 복습 퀴즈 생성 응답 수신: {}", responseDto);
         quizConsumer.consumeQuiz(responseDto);
     }
