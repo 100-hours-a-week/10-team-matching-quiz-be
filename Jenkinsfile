@@ -16,17 +16,18 @@ pipeline {
       }
     }
 
-    stage('Build & Push Docker Image') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-          sh """
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
-            docker build -t $DOCKER_IMAGE .
-            docker push $DOCKER_IMAGE
-          """
-        }
+  stage('Build & Push Docker Image') {
+    steps {
+      withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+        sh """
+          echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+          docker build -f wingterview/Dockerfile -t $DOCKER_IMAGE wingterview/
+          docker push $DOCKER_IMAGE
+        """
       }
     }
+  }
+
 
     stage('Deploy to EC2') {
       steps {
