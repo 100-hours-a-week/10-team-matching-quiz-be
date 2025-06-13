@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Clone') {
       steps {
-        git credentialsId: 'github-pat', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git', branch: 'dev'
+        git credentialsId: 'github-pat', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git', branch: 'main'
       }
     }
 
@@ -35,21 +35,6 @@ pipeline {
             docker build -t $DOCKER_IMAGE ./wingterview
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             docker push $DOCKER_IMAGE
-          """
-        }
-      }
-    }
-
-    stage('Deploy to Backend EC2') {
-      steps {
-        sshagent (credentials: ['backend-ec2-key']) {
-          sh """
-            ssh -o StrictHostKeyChecking=no ec2-user@172.31.2.198 '
-              docker pull $DOCKER_IMAGE
-              docker stop wingterview-be || true
-              docker rm wingterview-be || true
-              docker run -d --name wingterview-be -p 8081:8080 $DOCKER_IMAGE
-            '
           """
         }
       }

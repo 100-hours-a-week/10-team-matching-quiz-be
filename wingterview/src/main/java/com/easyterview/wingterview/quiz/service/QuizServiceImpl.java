@@ -3,6 +3,7 @@ package com.easyterview.wingterview.quiz.service;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.global.exception.QuizNotFoundException;
+import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
 import com.easyterview.wingterview.interview.repository.ReceivedQuestionRepository;
 import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
 import com.easyterview.wingterview.quiz.dto.request.QuizResultItem;
@@ -103,7 +104,7 @@ public class QuizServiceImpl implements QuizService{
     @Override
     public void createTodayQuiz() {
         UUID userId = UUIDUtil.getUserIdFromToken();
-        List<String> questionHistoryList = receivedQuestionRepository.findByUserId(userId);
+        List<String> questionHistoryList = receivedQuestionRepository.findByUserId(userId).stream().map(ReceivedQuestionEntity::getContents).toList();
         QuizCreationRequestDto request = QuizCreationRequestDto.builder()
                 .questionHistoryList(questionHistoryList)
                 .userId(userId.toString())

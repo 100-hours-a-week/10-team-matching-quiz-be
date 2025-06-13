@@ -665,20 +665,7 @@ public class InterviewServiceImpl implements InterviewService {
         interviewRepository.delete(interview);
     }
 
-//    @Override
-//    public void getFeedbackFromAI(String userId, FeedbackCallbackDto dto) {
-//        RecordingEntity recording = recordRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(RecordNotFoundException::new);
-//        InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(InterviewNotFoundException::new);
-//        AiFeedbackRequestDto requestDto = AiFeedbackRequestDto.builder().build();
-//        rabbitMqService.sendFeedbackRequest(requestDto);
-//        // request 보낼거임 대충 이런식으로
-//
-//        // 그 다음 비동기적으로 피드백을 받아올건데(consume? subscribe?)
-//        // 그걸 코드로 어떻게 짜지?
-//
-//
-//
-//    }
+
 
     @Override
     public InterviewIdResponse getInterviewId(String userId) {

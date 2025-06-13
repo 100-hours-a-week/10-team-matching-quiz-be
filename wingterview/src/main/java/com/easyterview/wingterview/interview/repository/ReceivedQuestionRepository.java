@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ReceivedQuestionRepository extends JpaRepository<ReceivedQuestionEntity, UUID> {
-    List<String> findByUserId(UUID userId);
+    List<ReceivedQuestionEntity> findByUserId(UUID userId);
 }

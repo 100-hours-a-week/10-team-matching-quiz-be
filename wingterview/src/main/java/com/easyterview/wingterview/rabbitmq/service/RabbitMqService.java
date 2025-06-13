@@ -1,9 +1,7 @@
 package com.easyterview.wingterview.rabbitmq.service;
 
-//import com.easyterview.wingterview.interview.dto.request.AiFeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.FollowUpQuestionRequest;
 import com.easyterview.wingterview.interview.dto.response.FollowUpQuestionResponseDto;
-import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
 import com.easyterview.wingterview.quiz.dto.request.QuizCreationRequestDto;
 
 public interface RabbitMqService {

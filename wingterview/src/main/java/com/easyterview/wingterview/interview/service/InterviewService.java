@@ -22,7 +22,6 @@ public interface InterviewService {
 
     void exitInterview(String interviewId);
 
-//    void getFeedbackFromAI(String userId, FeedbackCallbackDto dto);
 
     InterviewIdResponse getInterviewId(String userId);
 }
