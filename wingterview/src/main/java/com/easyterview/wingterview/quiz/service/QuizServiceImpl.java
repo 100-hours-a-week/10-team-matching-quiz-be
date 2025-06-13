@@ -16,6 +16,7 @@ import com.easyterview.wingterview.quiz.repository.QuizRepository;
 import com.easyterview.wingterview.quiz.repository.QuizRepositoryCustom;
 import com.easyterview.wingterview.quiz.repository.QuizSelectionRepository;
 import com.easyterview.wingterview.quiz.repository.TodayQuizRepository;
+import com.easyterview.wingterview.rabbitmq.consumer.QuizConsumer;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
@@ -43,6 +44,7 @@ public class QuizServiceImpl implements QuizService{
     private final QuizSelectionRepository quizSelectionRepository;
     private final ReceivedQuestionRepository receivedQuestionRepository;
     private final RabbitMqService rabbitMqService;
+    private final QuizConsumer quizConsumer;
 
     @Override
     public QuizStatsResponse getQuizStats(String userId) {
@@ -114,8 +116,9 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @RabbitListener(queues = "quiz.response.queue")
-    public void handleQuizResponse(QuizCreationResponseDto responseDto) {
+    public void handleQuizResponse(FollowupResponse responseDto) {
         log.info("📥 복습 퀴즈 생성 응답 수신: {}", responseDto);
+        quizConsumer.consumeQuiz(responseDto);
     }
 
     @Override

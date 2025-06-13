@@ -2,6 +2,7 @@ package com.easyterview.wingterview.interview.service;
 
 import com.easyterview.wingterview.interview.dto.request.*;
 import com.easyterview.wingterview.interview.dto.response.AiInterviewResponseDto;
+import com.easyterview.wingterview.interview.dto.response.InterviewIdResponse;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
 
 public interface InterviewService {
@@ -21,5 +22,6 @@ public interface InterviewService {
 
     void exitInterview(String interviewId);
 
-//    void getFeedbackFromAI(String userId, FeedbackCallbackDto dto);
+
+    InterviewIdResponse getInterviewId(String userId);
 }
