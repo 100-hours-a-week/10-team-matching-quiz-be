@@ -10,27 +10,31 @@ pipeline {
   }
 
   stages {
-    stage('Clone Code') {
+    stage('Clone') {
       steps {
-        git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
+        git credentialsId: 'github-pat', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git', branch: 'main'
       }
     }
 
-    stage('Build & Push Docker Image') {
+    stage('Prepare Secret Config') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-          sh """
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
-            docker build -t $DOCKER_IMAGE .
-            docker push $DOCKER_IMAGE
-          """
+        withCredentials([file(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML')]) {
+          sh 'cp $APP_SECRET_YML ./wingterview/src/main/resources/application-secret.yml'
         }
       }
     }
 
-    stage('Deploy to EC2') {
+    stage('Build') {
       steps {
-        sshagent(credentials: ['backend-ssh-key']) {
+        dir('wingterview') {
+          sh './gradlew clean build -x test'
+        }
+      }
+    }
+
+    stage('Docker Build & Push') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh """
             ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
               cd ${REMOTE_WORK_DIR}
