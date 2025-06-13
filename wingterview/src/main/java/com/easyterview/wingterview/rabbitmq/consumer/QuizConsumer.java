@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,7 @@ public class QuizConsumer {
     private final QuizSelectionRepository quizSelectionRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void consumeQuiz(QuizCreationResponseDto response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
