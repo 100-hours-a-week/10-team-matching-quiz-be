@@ -2,10 +2,8 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = 'v1999vvv/backend:latest'
-    EC2_USER = 'ec2-user'
-    EC2_HOST = '172.31.1.177'              // ← Dev VPC EC2의 private IP 또는 public IP
-    REMOTE_WORK_DIR = '/home/ec2-user'
+    DOCKER_IMAGE = 'v1999vvv/wingterview-be'
+    IMAGE_TAG = 'prod'
   }
     
   stage('Prepare Secret Config') {
@@ -37,11 +35,9 @@ pipeline {
       steps {
         sshagent(credentials: ['backend-ssh-key']) {
           sh """
-            ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
-              cd ${REMOTE_WORK_DIR}
-              docker compose pull
-              docker compose up -d
-            EOF
+            docker build -t $DOCKER_IMAGE:$IMAGE_TAG ./wingterview
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            docker push $DOCKER_IMAGE:$IMAGE_TAG
           """
         }
       }
