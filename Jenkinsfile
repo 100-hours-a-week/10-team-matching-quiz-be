@@ -2,8 +2,11 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = 'v1999vvv/wingterview-be'
-    IMAGE_TAG = 'prod'
+    DOCKER_IMAGE = 'v1999vvv/backend:latest'
+    EC2_USER = 'ec2-user'
+    EC2_HOST = '172.31.1.177'
+    REMOTE_WORK_DIR = '/home/ec2-user'
+    IAMGE_TAG = 'dev'
   }
 
   stages {
@@ -33,9 +36,11 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh """
-            docker build -t $DOCKER_IMAGE:$IMAGE_TAG ./wingterview
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push $DOCKER_IMAGE:$IMAGE_TAG
+            ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+              cd ${REMOTE_WORK_DIR}
+              docker compose pull
+              docker compose up -d
+            EOF
           """
         }
       }
