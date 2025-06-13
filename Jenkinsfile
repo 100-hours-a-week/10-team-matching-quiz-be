@@ -15,13 +15,15 @@ pipeline {
         git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
       }
     }
-
+  
   stage('Build & Push Docker Image') {
     steps {
       withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
         sh """
+          cd wingterview
+          ./gradlew clean build
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
-          docker build -f wingterview/Dockerfile -t $DOCKER_IMAGE wingterview/
+          docker build -f Dockerfile -t $DOCKER_IMAGE .
           docker push $DOCKER_IMAGE
         """
       }
