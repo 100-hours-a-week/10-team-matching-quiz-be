@@ -28,7 +28,6 @@ public class QuizConsumer {
     private final QuizSelectionRepository quizSelectionRepository;
     private final UserRepository userRepository;
 
-    @RabbitListener(queues = "quiz.response.queue")
     public void consumeQuiz(FollowupResponse response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
