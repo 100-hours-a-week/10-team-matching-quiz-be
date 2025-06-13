@@ -9,12 +9,12 @@ pipeline {
     IMAGE_TAG = 'dev'
   }
 
-  stages {
-    stage('Clone Code') {
-      steps {
-        git 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
-      }
+  stage('Clone Code') {
+    steps {
+      git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
     }
+  }
+
 
     stage('Build & Push Docker Image') {
       steps {
