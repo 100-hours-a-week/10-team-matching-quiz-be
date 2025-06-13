@@ -121,6 +121,7 @@ public class QuizServiceImpl implements QuizService{
         quizConsumer.consumeQuiz(responseDto.getData());
     }
 
+
     @Override
     @Transactional
     public void sendTodayQuizResult(String userId, TodayQuizResultRequestDto request) {

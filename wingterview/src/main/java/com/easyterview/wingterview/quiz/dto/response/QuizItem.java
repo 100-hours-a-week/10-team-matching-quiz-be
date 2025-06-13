@@ -25,7 +25,7 @@ public class QuizItem {
             @JsonProperty("difficulty") String difficulty,
             @JsonProperty("question") String question,
             @JsonProperty("options") List<String> options,
-            @JsonProperty("answerIndex") Integer answerIndex,
+            @JsonProperty("answer_index") Integer answerIndex,
             @JsonProperty("explanation") String explanation
     ) {
         this.difficulty = difficulty;
