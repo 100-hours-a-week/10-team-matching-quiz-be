@@ -5,33 +5,35 @@ pipeline {
     DOCKER_IMAGE = 'v1999vvv/wingterview-be'
     IMAGE_TAG = 'prod'
   }
-
-  stages {
-    stage('Clone') {
-      steps {
-        git credentialsId: 'github-pat', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git', branch: 'main'
-      }
-    }
-
-    stage('Prepare Secret Config') {
+    
+  stage('Prepare Secret Config') {
       steps {
         withCredentials([file(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML')]) {
           sh 'cp $APP_SECRET_YML ./wingterview/src/main/resources/application-secret.yml'
         }
       }
     }
-
-    stage('Build') {
+  
+  stages {
+    stage('Clone Code') {
       steps {
-        dir('wingterview') {
-          sh './gradlew clean build -x test'
+        git 'https://github.com/your-org/your-backend-repo.git'
+      }
+    }
+
+    stage('Build & Push Docker Image') {
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
+            docker.build("${DOCKER_IMAGE}").push()
+          }
         }
       }
     }
 
-    stage('Docker Build & Push') {
+    stage('Deploy to EC2 via SSH') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        sshagent(credentials: ['backend-ssh-key']) {
           sh """
             docker build -t $DOCKER_IMAGE:$IMAGE_TAG ./wingterview
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin

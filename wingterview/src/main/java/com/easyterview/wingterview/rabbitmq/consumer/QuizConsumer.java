@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.rabbitmq.consumer;
 
+import com.easyterview.wingterview.global.exception.UserNotFoundException;
 import com.easyterview.wingterview.quiz.dto.response.FollowupResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizCreationResponseDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizItem;
@@ -28,17 +29,12 @@ public class QuizConsumer {
     private final QuizSelectionRepository quizSelectionRepository;
     private final UserRepository userRepository;
 
-    public void consumeQuiz(FollowupResponse response) {
+    public void consumeQuiz(QuizCreationResponseDto response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
-        UUID userId = UUID.fromString(response.getData().getInterviewId());
-        UserEntity user = userRepository.findById(userId).orElseThrow();
-
-        QuizCreationResponseDto responseBody = response.getData();
-        for (QuizItem item : responseBody.getQuestions()) {
-
+        for (QuizItem item : response.getQuestions()) {
             TodayQuizEntity quiz = TodayQuizEntity.builder()
-                    .user(user)
+                    .user(userRepository.findById(UUID.fromString(response.getInterviewId())).orElseThrow(UserNotFoundException::new))
                     .question(item.getQuestion())
                     .correctAnswerIdx(item.getAnswerIndex())
                     .commentary(item.getExplanation())
@@ -58,9 +54,9 @@ public class QuizConsumer {
             quizSelectionRepository.saveAll(selections);
 
             quiz.getQuizSelectionEntityList().addAll(selections);
-            }
+        }
 
 
-        log.info("✅ 퀴즈 저장 완료 ({}개)", responseBody.getQuestions().size());
+        log.info("✅ 퀴즈 저장 완료 ({}개)", response.getQuestions().size());
     }
 }
