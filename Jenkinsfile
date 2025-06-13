@@ -6,7 +6,7 @@ pipeline {
     EC2_USER = 'ec2-user'
     EC2_HOST = '172.31.1.177'
     REMOTE_WORK_DIR = '/home/ec2-user'
-    IMAGE_TAG = 'dev'
+    IAMGE_TAG = 'dev'
   }
 
   stages {
@@ -18,10 +18,12 @@ pipeline {
 
     stage('Build & Push Docker Image') {
       steps {
-        script {
-          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
-            docker.build("${DOCKER_IMAGE}").push()
-          }
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+          sh """
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+            docker build -t $DOCKER_IMAGE .
+            docker push $DOCKER_IMAGE
+          """
         }
       }
     }
@@ -39,5 +41,5 @@ pipeline {
         }
       }
     }
-  } 
-} 
+  }
+}
