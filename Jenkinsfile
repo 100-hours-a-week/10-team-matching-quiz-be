@@ -46,10 +46,8 @@ pipeline {
         sshagent (credentials: ['backend-ec2-key']) {
           sh """
             ssh -o StrictHostKeyChecking=no ec2-user@43.203.77.116 '
-              ssh -i ~/ci-cd-key.pem -o StrictHostKeyChecking=no ubuntu@172.30.11.7 "
-                cd ~/ansible-deploy &&
-                ansible-playbook -vvv -i inventory.ini deploy.yml
-              "
+              cd ~/ansible-deploy &&
+              ansible-playbook -vvv -i inventory.ini deploy.yml
             '
           """
         }
