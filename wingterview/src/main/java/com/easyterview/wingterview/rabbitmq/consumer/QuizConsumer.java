@@ -34,14 +34,19 @@ public class QuizConsumer {
     public void consumeQuiz(QuizCreationResponseDto response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
+        UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId())).orElseThrow(UserNotFoundException::new);
+
+        todayQuizRepository.deleteAllByUser(user);
+
         for (QuizItem item : response.getQuestions()) {
             TodayQuizEntity quiz = TodayQuizEntity.builder()
-                    .user(userRepository.findById(UUID.fromString(response.getInterviewId())).orElseThrow(UserNotFoundException::new))
+                    .user(user)
                     .question(item.getQuestion())
                     .correctAnswerIdx(item.getAnswerIndex())
                     .commentary(item.getExplanation())
                     .difficulty(item.getDifficulty())
                     .build();
+
 
             todayQuizRepository.save(quiz); // 먼저 저장하고 ID 생성
 
