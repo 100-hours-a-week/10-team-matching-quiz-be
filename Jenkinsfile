@@ -43,7 +43,7 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        sshagent (credentials: ['ci-cd-key']) {
+        sshagent (credentials: ['backend-ec2-key']) {
           sh """
             ssh -o StrictHostKeyChecking=no ec2-user@43.203.77.116 '
               ssh -o StrictHostKeyChecking=no ubuntu@172.30.11.7 "
