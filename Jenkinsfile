@@ -40,5 +40,18 @@ pipeline {
         }
       }
     }
+
+    stage('Deploy with Ansible') {
+      steps {
+        sshagent (credentials: ['bastion-ssh-key']) {
+          sh """
+            ssh -o StrictHostKeyChecking=no ec2-user@43.203.77.116 '
+              cd ~/ansible-deploy &&
+              ansible-playbook -i inventory.ini deploy.yml
+            '
+          """
+        }
+      }
+    }
   }
 }
