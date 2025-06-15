@@ -48,7 +48,7 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ec2-user@43.203.77.116 '
               ssh -o StrictHostKeyChecking=no ubuntu@172.30.11.7 "
                 cd ~/ansible-deploy &&
-                ansible-playbook -i inventory.ini deploy.yml
+                ansible-playbook -vvv -i inventory.ini deploy.yml
               "
             '
           """
