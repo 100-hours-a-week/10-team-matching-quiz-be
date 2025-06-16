@@ -51,7 +51,8 @@ public class UserServiceImpl implements UserService {
 
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
-        user.setCurriculum(userBasicInfo.getCurriculum());
+        if(!userBasicInfo.getCurriculum().isBlank())
+            user.setCurriculum(userBasicInfo.getCurriculum());
         user.setProfileImageUrl(s3Util.getUrl(userBasicInfo.getProfileImageName()));
 
         // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
@@ -171,6 +172,7 @@ public class UserServiceImpl implements UserService {
                 .profileImageUrl(user.getProfileImageUrl())     
                 .isInQueue(matchingParticipantEntity.isPresent())
                 .myId(user.getId().toString())
+                .isKTB(user.getIsKTB())
                 .build();
     }
 
