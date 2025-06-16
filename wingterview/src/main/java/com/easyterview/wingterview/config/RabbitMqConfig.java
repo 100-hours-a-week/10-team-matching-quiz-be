@@ -46,6 +46,24 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(queue).to(exchange).with("quiz.request.routingKey");
     }
 
+    @Bean(name = "feedbackRequestQueue")
+    public Queue feedbackRequestQueue() {
+        return new Queue("feedback.request.queue", true);
+    }
+
+    @Bean(name = "feedbackRequestExchange")
+    public TopicExchange feedbackRequestExchange() {
+        return new TopicExchange("feedback.request.exchange");
+    }
+
+    @Bean(name = "feedbackRequestBinding")
+    public Binding feedbackRequestBinding(
+            @Qualifier("feedbackRequestQueue") Queue queue,
+            @Qualifier("feedbackRequestExchange") TopicExchange exchange
+    ) {
+        return BindingBuilder.bind(queue).to(exchange).with("feedback.request.routingKey");
+    }
+
     // =====================
     // 📥 RESPONSE 설정
     // =====================
@@ -66,6 +84,24 @@ public class RabbitMqConfig {
             @Qualifier("quizResponseExchange") TopicExchange exchange
     ) {
         return BindingBuilder.bind(queue).to(exchange).with("quiz.response.routingKey");
+    }
+
+    @Bean(name = "feedbackResponseQueue")
+    public Queue feedbackResponseQueue() {
+        return new Queue("feedback.response.queue", true);
+    }
+
+    @Bean(name = "feedbackResponseExchange")
+    public TopicExchange feedbackResponseExchange() {
+        return new TopicExchange("feedback.response.exchange");
+    }
+
+    @Bean(name = "feedbackResponseBinding")
+    public Binding feedbackResponseBinding(
+            @Qualifier("feedbackResponseQueue") Queue queue,
+            @Qualifier("feedbackResponseExchange") TopicExchange exchange
+    ) {
+        return BindingBuilder.bind(queue).to(exchange).with("feedback.response.routingKey");
     }
 
     // =====================

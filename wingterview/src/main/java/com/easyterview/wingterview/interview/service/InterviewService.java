@@ -24,4 +24,6 @@ public interface InterviewService {
 
 
     InterviewIdResponse getInterviewId(String userId);
+
+    void requestSttFeedback(String userId);
 }

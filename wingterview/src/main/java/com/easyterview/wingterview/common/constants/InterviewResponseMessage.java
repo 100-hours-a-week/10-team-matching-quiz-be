@@ -16,7 +16,8 @@ public enum InterviewResponseMessage implements ResponseMessage {
     INTERVIEW_TIME_INITIALIZED(200, "AI 인터뷰 시간 초기화 완료"),
     INTERVIEW_DELETE_DONE(200, "인터뷰 종료 완료"),
     FEEDBACK_FETCH_DONE(200, "AI 피드백 받기 완료"),
-    INTERVIEW_INFO_DONE(200, "인터뷰 id 전송 완료");
+    INTERVIEW_INFO_DONE(200, "인터뷰 id 전송 완료"),
+    INTERVIEW_FEEDBACK_REQUEST_DONE(200, "인터뷰 피드백 요청 완료");
 
     private final int statusCode;
     private final String message;

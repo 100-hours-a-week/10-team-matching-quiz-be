@@ -59,6 +59,7 @@ public class InterviewHistoryRepositoryImpl implements InterviewHistoryRepositor
                             .firstQuestion(h.getSegments().getFirst().getSelectedQuestion())
                             .createdAt(h.getCreatedAt())
                             .hasFeedback(h.getSegments().getFirst().getFeedback() != null)
+                            .isFeedbackRequested(h.getIsFeedbackRequested())
                             .build();
                 })
                 .toList();
