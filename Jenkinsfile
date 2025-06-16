@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   triggers {
-    githubPush() // ← GitHub Webhook 트리거
+    githubPush()
   }
 
   environment {
@@ -19,32 +19,35 @@ pipeline {
         git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
       }
     }
-stage('Build & Push Docker Image') {
-  steps {
-    withCredentials([
-      usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS'),
-      string(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML') // 🔑 Jenkins Secret Text로 등록된 yml 내용
-    ]) {
-      sh """
-        cd wingterview
 
-        # ✅ application-secret.yml 생성
-        echo "\$APP_SECRET_YML" > application-secret.yml
+    stage('Build & Push Docker Image') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS'),
+          file(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_FILE') // Secret File
+        ]) {
+          sh """
+            cd wingterview
 
-        ./gradlew clean build -x test
-        echo "\$DOCKERHUB_PASS" | docker login -u "\$DOCKERHUB_USER" --password-stdin
-        docker build -f Dockerfile -t \$DOCKER_IMAGE .
-        docker push \$DOCKER_IMAGE
-      """
+            # ✅ Secret file을 application-secret.yml 로 복사
+            cp \$APP_SECRET_FILE application-secret.yml
+
+            ./gradlew clean build -x test
+
+            echo "\$DOCKERHUB_PASS" | docker login -u "\$DOCKERHUB_USER" --password-stdin
+
+            docker build -t \$DOCKER_IMAGE .
+
+            docker push \$DOCKER_IMAGE
+          """
+        }
+      }
     }
-  }
-}
-
 
     stage('Deploy to EC2') {
       steps {
         sshagent(credentials: ['backend-ec2-key']) {
-          sh '''#!/bin/bash
+          sh '''
             ssh -o StrictHostKeyChecking=no ec2-user@3.37.14.59 << 'ENDSSH'
               cd /home/ec2-user
               docker compose pull
