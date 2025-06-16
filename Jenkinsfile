@@ -19,20 +19,27 @@ pipeline {
         git branch: 'dev', url: 'https://github.com/100-hours-a-week/10-team-matching-quiz-be.git'
       }
     }
+stage('Build & Push Docker Image') {
+  steps {
+    withCredentials([
+      usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS'),
+      string(credentialsId: 'app-secret-yml', variable: 'APP_SECRET_YML') // 🔑 Jenkins Secret Text로 등록된 yml 내용
+    ]) {
+      sh """
+        cd wingterview
 
-    stage('Build & Push Docker Image') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-          sh """
-            cd wingterview
-            ./gradlew clean build -x test
-            echo "\$DOCKERHUB_PASS" | docker login -u "\$DOCKERHUB_USER" --password-stdin
-            docker build -f Dockerfile -t \$DOCKER_IMAGE .
-            docker push \$DOCKER_IMAGE
-          """
-        }
-      }
+        # ✅ application-secret.yml 생성
+        echo "\$APP_SECRET_YML" > application-secret.yml
+
+        ./gradlew clean build -x test
+        echo "\$DOCKERHUB_PASS" | docker login -u "\$DOCKERHUB_USER" --password-stdin
+        docker build -f Dockerfile -t \$DOCKER_IMAGE .
+        docker push \$DOCKER_IMAGE
+      """
     }
+  }
+}
+
 
     stage('Deploy to EC2') {
       steps {
