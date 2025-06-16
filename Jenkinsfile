@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  triggers {
+    githubPush() // ← GitHub Webhook 트리거
+  }
+
   environment {
     DOCKER_IMAGE = 'v1999vvv/backend:latest'
     EC2_USER = 'ec2-user'
