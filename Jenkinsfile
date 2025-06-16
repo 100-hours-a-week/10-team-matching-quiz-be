@@ -34,7 +34,7 @@ pipeline {
       steps {
         sshagent(credentials: ['backend-ec2-key']) {
           sh '''#!/bin/bash
-            ssh -o StrictHostKeyChecking=no ec2-user@43.201.251.197 << 'ENDSSH'
+            ssh -o StrictHostKeyChecking=no ec2-user@3.37.14.59 << 'ENDSSH'
               cd /home/ec2-user
               docker compose pull
               docker compose up -d
