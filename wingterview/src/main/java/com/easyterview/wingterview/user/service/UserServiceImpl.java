@@ -51,18 +51,20 @@ public class UserServiceImpl implements UserService {
 
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
-        if(!userBasicInfo.getCurriculum().isBlank())
-            user.setCurriculum(userBasicInfo.getCurriculum());
         user.setProfileImageUrl(s3Util.getUrl(userBasicInfo.getProfileImageName()));
 
-        // 자리를 section, seatPosition으로 분리하여 받은걸 parsing
-        SeatPosition seatPosition = userBasicInfo.getSeatPosition();
-        int seatInt = SeatPositionUtil.seatPosToInt(seatPosition);
-        Optional<UserEntity> seatUserOpt = userRepository.findBySeat(seatInt);
-        // 자리에 누가 있고 그게 내가 아니라면 -> 중복
-        if(seatUserOpt.isPresent() && !seatUserOpt.get().getId().equals(user.getId()))
-            throw new AlreadyBlockedSeatException();
-        user.setSeat(seatInt);
+        // KTB 회원인 경우
+        if(userBasicInfo.getIsKTB()) {
+            user.setCurriculum(userBasicInfo.getCurriculum());
+
+            SeatPosition seatPosition = userBasicInfo.getSeatPosition();
+            int seatInt = SeatPositionUtil.seatPosToInt(seatPosition);
+            Optional<UserEntity> seatUserOpt = userRepository.findBySeat(seatInt);
+            // 자리에 누가 있고 그게 내가 아니라면 -> 중복
+            if (seatUserOpt.isPresent() && !seatUserOpt.get().getId().equals(user.getId()))
+                throw new AlreadyBlockedSeatException();
+            user.setSeat(seatInt);
+        }
 
         List<UserTechStackEntity> techStacks = userBasicInfo.getTechStack().stream()
                 .map(TechStack::from) // 문자열 → enum
@@ -160,8 +162,8 @@ public class UserServiceImpl implements UserService {
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .name(user.getName())
-                .curriculum(user.getCurriculum())
-                .seatCode(SeatPositionUtil.seatIdxToSeatCode(user.getSeat()))
+                .curriculum(user.getIsKTB() ? user.getCurriculum() : "Temp")
+                .seatCode(user.getIsKTB() ? SeatPositionUtil.seatIdxToSeatCode(user.getSeat()) : "Temp-Temp")
                 .jobInterest(user.getUserJobInterest().stream()
                         .map(interestEntity -> interestEntity.getJobInterest().getLabel())
                         .collect(Collectors.toList()))
@@ -211,8 +213,9 @@ public class UserServiceImpl implements UserService {
         RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(UUID.fromString(interviewHistoryId)).orElseThrow(RecordNotFoundException::new);
 
         List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
-            if(s.getFeedback() == null)
+            if(s.getFeedback() == null) {
                 throw new FeedbackNotReadyException();
+            }
             InterviewFeedbackEntity interviewFeedback = s.getFeedback();
             return
             FeedbackItem.builder()

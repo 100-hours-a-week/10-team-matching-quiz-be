@@ -98,7 +98,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .interviewHistory(interviewHistory)
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                         .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), now.getTime() > originalEndAt.getTime() ? originalEndAt : now))
                         .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
                         .build();
 
@@ -718,7 +718,7 @@ public class InterviewServiceImpl implements InterviewService {
 
     @RabbitListener(queues = "feedback.response.queue")
     public void handleFeedbackResponse(FeedbackResponseDto responseDto) {
-        log.info("📥 복습 퀴즈 생성 응답 수신: {}", responseDto);
+        log.info("📥 피드백 응답 수신: {}", responseDto);
         feedbackConsumer.consumeFeedback(responseDto);
     }
 }

@@ -21,7 +21,7 @@ public class InterviewSegmentEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "selected_question", length = 100, nullable = false)
+    @Column(name = "selected_question", length = 200, nullable = false)
     private String selectedQuestion;
 
     @Column(name = "from_time", nullable = false)

@@ -79,7 +79,7 @@ public class QuizRepositoryImpl implements QuizRepositoryCustom {
         }
 
         return QuizListResponse.builder()
-                .quizInfoList(quizInfoList)
+                .quizzes(quizInfoList)
                 .hasNext(hasNext)
                 .nextCursor(String.valueOf(nextCursor))
                 .build();

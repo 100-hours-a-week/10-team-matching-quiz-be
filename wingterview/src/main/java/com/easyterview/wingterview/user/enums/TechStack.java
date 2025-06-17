@@ -16,7 +16,7 @@ public enum TechStack {
     KUBERNETES("Kubernetes"),
     AWS("AWS"),
     PYTORCH("Pytorch"),
-    FASTAPI("Fastapi"),
+    FASTAPI("FastAPI"),
     LANGCHAIN("Langchain"),
     MLOPS("MLOps"),
     DEVOPS("DevOps"),

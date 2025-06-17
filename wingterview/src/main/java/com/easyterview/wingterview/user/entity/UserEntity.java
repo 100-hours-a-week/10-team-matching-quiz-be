@@ -40,7 +40,8 @@ public class UserEntity {
     private String providerId;
 
     @Column(name = "is_ktb", nullable = false)
-    private Boolean isKTB;
+    @Builder.Default
+    private Boolean isKTB = false;
 
     @Column(name = "name", nullable = false, length = 50)
     @Builder.Default
