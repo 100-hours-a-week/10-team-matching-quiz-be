@@ -49,6 +49,8 @@ public class AuthServiceImpl implements AuthService {
         formData.add("redirect_uri", kakaoRedirectUri);
         formData.add("code", authorizationCode);
 
+        log.info("************ 실제 redirect uri,{}",kakaoRedirectUri);
+
         Map<String, Object> response = restClient.post()
                 .uri(kakaoTokenUri)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)

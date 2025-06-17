@@ -53,7 +53,7 @@ public class QuizServiceImpl implements QuizService{
         float correctRate = 0.0f;
         if(!quiz.isEmpty()){
             correctRate = (float) correctQuizCnt/quiz.size();
-            correctRate = Math.round(correctRate * 100) / 100.0f;
+            correctRate = Math.round(correctRate * 100);
         }
         return QuizStatsResponse.builder()
                 .correctRate(correctRate)

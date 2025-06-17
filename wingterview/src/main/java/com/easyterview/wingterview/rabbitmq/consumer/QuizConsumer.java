@@ -7,6 +7,7 @@ import com.easyterview.wingterview.quiz.entity.QuizSelectionEntity;
 import com.easyterview.wingterview.quiz.entity.TodayQuizEntity;
 import com.easyterview.wingterview.quiz.repository.QuizSelectionRepository;
 import com.easyterview.wingterview.quiz.repository.TodayQuizRepository;
+import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +31,18 @@ public class QuizConsumer {
     public void consumeQuiz(QuizCreationResponseDto response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
-        UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId())).orElseThrow(UserNotFoundException::new);
+        UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId()))
+                .orElseThrow(UserNotFoundException::new);
 
-        todayQuizRepository.deleteAllByUser(user);
+        List<TodayQuizEntity> quizzes = todayQuizRepository.findByUser(user);
 
+        for (TodayQuizEntity quiz : quizzes) {
+            quiz.getQuizSelectionEntityList().clear(); // 관계 제거
+        }
+        todayQuizRepository.deleteAll(quizzes); // cascade, orphanRemoval 적용됨
+
+        int questionIdx = 1;
         for (QuizItem item : response.getQuestions()) {
-            int questionIdx = 1;
             TodayQuizEntity quiz = TodayQuizEntity.builder()
                     .user(user)
                     .question(item.getQuestion())
@@ -45,8 +52,7 @@ public class QuizConsumer {
                     .difficulty(item.getDifficulty())
                     .build();
 
-
-            todayQuizRepository.save(quiz); // 먼저 저장하고 ID 생성
+            todayQuizRepository.save(quiz);
 
             AtomicInteger selectionIdx = new AtomicInteger(1);
             List<QuizSelectionEntity> selections = item.getOptions().stream()
@@ -62,7 +68,7 @@ public class QuizConsumer {
             quiz.getQuizSelectionEntityList().addAll(selections);
         }
 
-
         log.info("✅ 퀴즈 저장 완료 ({}개)", response.getQuestions().size());
     }
+
 }

@@ -25,9 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -223,8 +221,11 @@ public class UserServiceImpl implements UserService {
                     .endAt(s.getToTime())
                     .modelAnswer(interviewFeedback.getCorrectAnswer())
                     .startAt(s.getFromTime())
+                    .question(s.getSelectedQuestion())
+                    .order(s.getSegmentOrder())
                     .build();
-        }).toList();
+        }).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
+                .toList();
 
 
         return InterviewDetailDto.builder()
