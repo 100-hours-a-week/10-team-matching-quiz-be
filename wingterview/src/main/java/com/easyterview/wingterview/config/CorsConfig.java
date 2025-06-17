@@ -16,6 +16,8 @@ public class CorsConfig {
                 registry.addMapping("/**") // 모든 URL 경로에 대해
                         .allowedOrigins(
                             "https://dev.s3.wingterview.com",
+                            "https://wingterview.com",
+                            "https://www.wingterview.com",
                             "http://localhost:5173"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
