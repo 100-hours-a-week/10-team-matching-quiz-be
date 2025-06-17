@@ -49,7 +49,7 @@ public class TodayQuizEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @OneToMany(mappedBy = "todayQuiz", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "todayQuiz", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     @Builder.Default
     private List<QuizSelectionEntity> quizSelectionEntityList = new ArrayList<>();
 }

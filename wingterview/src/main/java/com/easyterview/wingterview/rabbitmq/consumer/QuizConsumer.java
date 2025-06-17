@@ -33,10 +33,11 @@ public class QuizConsumer {
 
         UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId())).orElseThrow(UserNotFoundException::new);
 
-        todayQuizRepository.deleteAllByUser(user);
+        List<TodayQuizEntity> quizzes = todayQuizRepository.findByUser(user);
+        todayQuizRepository.deleteAllInBatch(quizzes);
 
+        int questionIdx = 1;
         for (QuizItem item : response.getQuestions()) {
-            int questionIdx = 1;
             TodayQuizEntity quiz = TodayQuizEntity.builder()
                     .user(user)
                     .question(item.getQuestion())
@@ -45,7 +46,6 @@ public class QuizConsumer {
                     .commentary(item.getExplanation())
                     .difficulty(item.getDifficulty())
                     .build();
-
 
             todayQuizRepository.save(quiz); // 먼저 저장하고 ID 생성
 
