@@ -3,6 +3,9 @@ package com.easyterview.wingterview.common.util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 @Component
 public class S3Util {
@@ -19,8 +22,11 @@ public class S3Util {
     }
 
     public String getUrl(String objectKey) {
-        System.out.println("url : "+String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, regionName, objectKey));
-        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, regionName, objectKey);
+        String encodedKey = URLEncoder.encode(objectKey, StandardCharsets.UTF_8)
+                .replace("+", "%20"); // 공백 처리 중요!
+
+        System.out.println("profile_image/"+encodedKey);
+        return String.format("https://%s.s3.%s.amazonaws.com/profile_image/%s", bucketName, regionName, encodedKey);
     }
 }
 

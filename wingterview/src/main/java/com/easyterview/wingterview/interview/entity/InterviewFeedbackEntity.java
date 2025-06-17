@@ -20,9 +20,6 @@ public class InterviewFeedbackEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "user_answer", columnDefinition = "TEXT") // 사용자 답변 (중복이지만 피드백에서 참조용)
-    private String userAnswer;
-
     @Column(name = "correct_answer", columnDefinition = "TEXT") // 모범 답안
     private String correctAnswer;
 

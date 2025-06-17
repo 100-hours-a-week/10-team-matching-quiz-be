@@ -38,4 +38,8 @@ public class InterviewHistoryEntity {
 
     @Column(name = "end_at")
     private Timestamp endAt;
+
+    @Column(name = "is_feedback_requested", nullable = false)
+    @Builder.Default
+    private Boolean isFeedbackRequested = false;
 }

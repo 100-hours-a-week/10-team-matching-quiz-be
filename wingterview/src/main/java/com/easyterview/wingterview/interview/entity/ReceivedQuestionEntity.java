@@ -23,7 +23,7 @@ public class ReceivedQuestionEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "contents", length = 100, nullable = false)
+    @Column(name = "contents", length = 200, nullable = false)
     private String contents;
 
     @Column(name = "received_at", nullable = false)
