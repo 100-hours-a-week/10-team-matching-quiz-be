@@ -11,5 +11,6 @@ public class FeedbackItem {
     private String modelAnswer;
     private String commentary;
     private Integer startAt;
+    private Integer order;
     private Integer endAt;
 }
