@@ -56,13 +56,11 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<BaseResponse> getMyInfo(){
         UserInfoDto response = userService.getMyInfo();
-        log.info(response.toString());
         return BaseResponse.response(UserResponseMessage.USER_INFO_FETCH_DONE, response);
     }
 
     @GetMapping("/{userId}/interview")
     public ResponseEntity<BaseResponse> getInterviewList(@PathVariable String userId, @RequestParam(required = false) String cursor, @RequestParam(defaultValue = "5") Integer limit){
-        log.info("HI?");
         InterviewHistoryDto response = userService.getInterviewList(userId, cursor, limit);
         return BaseResponse.response(UserResponseMessage.USER_INTERVIEW_HISTORY_FETCH_DONE, response);
     }

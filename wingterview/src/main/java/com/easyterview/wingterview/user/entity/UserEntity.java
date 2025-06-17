@@ -39,6 +39,10 @@ public class UserEntity {
     @Column(name = "provider_id", nullable = false)
     private String providerId;
 
+    @Column(name = "is_ktb", nullable = false)
+    @Builder.Default
+    private Boolean isKTB = false;
+
     @Column(name = "name", nullable = false, length = 50)
     @Builder.Default
     private String name = "temp";

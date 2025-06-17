@@ -13,5 +13,6 @@ public class InterviewItem {
     private Long duration;
     private String firstQuestion;
     private Integer questionCount;
+    private Boolean isFeedbackRequested;
     private Boolean hasFeedback;
 }

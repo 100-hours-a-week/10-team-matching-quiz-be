@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @Builder
 public class QuizListResponse {
-    private final List<QuizInfo> quizInfoList;
+    private final List<QuizInfo> quizzes;
     private final Boolean hasNext;
     private final String nextCursor;
 }

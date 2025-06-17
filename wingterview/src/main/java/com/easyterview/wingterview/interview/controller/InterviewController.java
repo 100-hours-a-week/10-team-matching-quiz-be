@@ -81,4 +81,10 @@ public class InterviewController {
         InterviewIdResponse response = interviewService.getInterviewId(userId);
         return BaseResponse.response(InterviewResponseMessage.INTERVIEW_INFO_DONE, response);
     }
+
+    @PutMapping("/{userId}/stt/feedback")
+    public ResponseEntity<BaseResponse> requestSttFeedback(@PathVariable String userId){
+        interviewService.requestSttFeedback(userId);
+        return BaseResponse.response(InterviewResponseMessage.INTERVIEW_FEEDBACK_REQUEST_DONE);
+    }
 }

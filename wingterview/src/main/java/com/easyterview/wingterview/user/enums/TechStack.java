@@ -12,14 +12,17 @@ public enum TechStack {
     JAVA("Java"),
     SPRING("Spring"),
     REACT("React"),
-    TYPESCRIPT("Typescript"),
-    JAVASCRIPT("Javascript"),
     PYTHON("Python"),
     KUBERNETES("Kubernetes"),
     AWS("AWS"),
     PYTORCH("Pytorch"),
-    FASTAPI("Fastapi"),
-    LANGCHAIN("Langchain");
+    FASTAPI("FastAPI"),
+    LANGCHAIN("Langchain"),
+    MLOPS("MLOps"),
+    DEVOPS("DevOps"),
+    DATABASE("데이터베이스"),
+    SECURITY("보안"),
+    SOFTWARE_ARCHITECTURE("소프트웨어 아키텍처");
 
     private final String label;
 

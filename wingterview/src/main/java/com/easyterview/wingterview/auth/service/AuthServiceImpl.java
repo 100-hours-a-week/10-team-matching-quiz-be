@@ -90,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
             refreshToken.setUser(newUser); // 양방향 연관관계 설정
             userRepository.save(newUser);
             isNewUser = true;
-        } else if(user.get().getCurriculum().equals("temp")) {
+        } else if(user.get().getName().equals("temp")) {
             isNewUser = true;
         }
         else {

@@ -15,6 +15,7 @@ import com.easyterview.wingterview.interview.entity.*;
 import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.enums.Phase;
 import com.easyterview.wingterview.interview.repository.*;
+import com.easyterview.wingterview.rabbitmq.consumer.FeedbackConsumer;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
 import com.easyterview.wingterview.user.entity.UserChatroomEntity;
@@ -24,6 +25,7 @@ import com.easyterview.wingterview.user.repository.UserChatroomRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +55,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final InterviewHistoryRepository interviewHistoryRepository;
     private final InterviewSegmentRepository interviewSegmentRepository;
     private final RecordRepository recordRepository;
+    private final FeedbackConsumer feedbackConsumer;
 
     private final RabbitMqService rabbitMqService;
 
@@ -86,13 +89,16 @@ public class InterviewServiceImpl implements InterviewService {
                 UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                         .orElseThrow(InvalidTokenException::new);
                 InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
-                interviewHistory.setEndAt(Timestamp.valueOf(LocalDateTime.now()));
+                InterviewTimeEntity interviewTime = interviewTimeRepository.findByInterview(interviewOpt.get()).orElseThrow(InterviewNotFoundException::new);
+                Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+                Timestamp originalEndAt = interviewTime.getEndAt();
+                interviewHistory.setEndAt(now.getTime() > originalEndAt.getTime() ? originalEndAt : now);
 
                 InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
                         .interviewHistory(interviewHistory)
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                         .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), now.getTime() > originalEndAt.getTime() ? originalEndAt : now))
                         .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
                         .build();
 
@@ -680,4 +686,40 @@ public class InterviewServiceImpl implements InterviewService {
                         .build();
 
     }
+
+
+    // AI 피드백 request API 필요함
+    // feedback requested를 true로 바꿔준다.
+    @Override
+    @Transactional
+    public void requestSttFeedback(String userId) {
+        InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(UUID.fromString(userId)).orElseThrow(InterviewNotFoundException::new);
+        interviewHistory.setIsFeedbackRequested(true);
+        RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(interviewHistory.getId()).orElseThrow(InterviewNotFoundException::new);
+
+        List<QuestionSegment> questionSegments = interviewHistory.getSegments().stream()
+                .map(s -> {
+                    return
+                    QuestionSegment.builder()
+                            .segmentId(s.getId().toString())
+                            .startTime(s.getFromTime())
+                            .endTime(s.getToTime())
+                            .question(s.getSelectedQuestion())
+                            .build();
+                }).toList();
+
+
+
+        rabbitMqService.sendSTTFeedbackRequest(STTFeedbackRequestDto.builder()
+                .questionLists(questionSegments)
+                .recordingUrl(recordingEntity.getUrl())
+                .build());
+    }
+
+    @RabbitListener(queues = "feedback.response.queue")
+    public void handleFeedbackResponse(FeedbackResponseDto responseDto) {
+        log.info("📥 피드백 응답 수신: {}", responseDto);
+        feedbackConsumer.consumeFeedback(responseDto);
+    }
 }
+

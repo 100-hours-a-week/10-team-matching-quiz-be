@@ -94,7 +94,12 @@ public class QuizServiceImpl implements QuizService{
                     .build();
         }).toList();
 
-        todayQuizList.forEach(q -> System.out.println(q.getQuestion()));
+//        todayQuizList.forEach(q -> System.out.println(q.getQuestion()));
+//        System.out.println("******8*****");
+//        todayQuizList.forEach(q -> System.out.println(q.getAnswerIdx()));
+//        System.out.println("**************");
+//        todayQuizList.forEach(q -> System.out.println(q.getOptions().get(1)));
+
 
         return TodayQuizListResponse.builder()
                 .quizList(todayQuizList)
@@ -104,7 +109,7 @@ public class QuizServiceImpl implements QuizService{
     @Override
     public void createTodayQuiz() {
         UUID userId = UUIDUtil.getUserIdFromToken();
-        List<String> questionHistoryList = receivedQuestionRepository.findByUserId(userId).stream().map(ReceivedQuestionEntity::getContents).toList();
+        List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(userId).stream().map(ReceivedQuestionEntity::getContents).toList();
         QuizCreationRequestDto request = QuizCreationRequestDto.builder()
                 .questionHistoryList(questionHistoryList)
                 .userId(userId.toString())

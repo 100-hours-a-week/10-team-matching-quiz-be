@@ -99,6 +99,5 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FeedbackNotReadyException.class)
     public  ResponseEntity<BaseResponse> handleFeedbackNotReady(FeedbackNotReadyException e){
         return BaseResponse.response(ExceptionMessage.FEEDBACK_NOT_READY, CustomExceptionDto.builder().reason(e.getMessage()).build());
-
     }
 }

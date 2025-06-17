@@ -21,4 +21,5 @@ public class UserInfoDto {
     private String profileImageUrl;
     private Boolean isInQueue;
     private String myId;
+    private Boolean isKTB;
 }
