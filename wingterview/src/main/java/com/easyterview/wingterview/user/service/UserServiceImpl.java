@@ -224,9 +224,9 @@ public class UserServiceImpl implements UserService {
                     .question(s.getSelectedQuestion())
                     .order(s.getSegmentOrder())
                     .build();
-        }).toList();
+        }).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
+                .toList();
 
-        feedbackItemList.sort(Comparator.comparingInt(FeedbackItem::getOrder));
 
         return InterviewDetailDto.builder()
                 .feedback(feedbackItemList)
