@@ -11,13 +11,13 @@ import java.util.List;
 @Builder
 @ToString
 public class QuizCreationResponseDto {
+
     private String interviewId;
     private List<QuizItem> questions;
 
-
     @JsonCreator
     public QuizCreationResponseDto(
-            @JsonProperty("interviewId") String interviewId,
+            @JsonProperty("interview_id") String interviewId,
             @JsonProperty("questions") List<QuizItem> questions) {
         this.interviewId = interviewId;
         this.questions = questions;
