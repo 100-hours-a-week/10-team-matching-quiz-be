@@ -31,10 +31,15 @@ public class QuizConsumer {
     public void consumeQuiz(QuizCreationResponseDto response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
-        UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId())).orElseThrow(UserNotFoundException::new);
+        UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId()))
+                .orElseThrow(UserNotFoundException::new);
 
         List<TodayQuizEntity> quizzes = todayQuizRepository.findByUser(user);
-        todayQuizRepository.deleteAllInBatch(quizzes);
+
+        for (TodayQuizEntity quiz : quizzes) {
+            quiz.getQuizSelectionEntityList().clear(); // 관계 제거
+        }
+        todayQuizRepository.deleteAll(quizzes); // cascade, orphanRemoval 적용됨
 
         int questionIdx = 1;
         for (QuizItem item : response.getQuestions()) {
@@ -47,7 +52,7 @@ public class QuizConsumer {
                     .difficulty(item.getDifficulty())
                     .build();
 
-            todayQuizRepository.save(quiz); // 먼저 저장하고 ID 생성
+            todayQuizRepository.save(quiz);
 
             AtomicInteger selectionIdx = new AtomicInteger(1);
             List<QuizSelectionEntity> selections = item.getOptions().stream()
@@ -63,7 +68,7 @@ public class QuizConsumer {
             quiz.getQuizSelectionEntityList().addAll(selections);
         }
 
-
         log.info("✅ 퀴즈 저장 완료 ({}개)", response.getQuestions().size());
     }
+
 }
