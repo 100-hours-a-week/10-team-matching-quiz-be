@@ -25,4 +25,5 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     @Query("SELECT u FROM UserEntity u WHERE u.seat = :seat")
     Optional<UserEntity> findBySeatForUpdate(@Param("seat") int seat);
 
+    UserEntity findTopByOrderByCreatedAtAsc();
 }

@@ -1,10 +1,11 @@
 package com.easyterview.wingterview.rabbitmq.consumer;
 
-import com.easyterview.wingterview.global.exception.UserNotFoundException;
 import com.easyterview.wingterview.quiz.dto.response.QuizCreationResponseDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizItem;
+import com.easyterview.wingterview.quiz.entity.QuizGenerationStatusEntity;
 import com.easyterview.wingterview.quiz.entity.QuizSelectionEntity;
 import com.easyterview.wingterview.quiz.entity.TodayQuizEntity;
+import com.easyterview.wingterview.quiz.repository.QuizGenerationStatusRepository;
 import com.easyterview.wingterview.quiz.repository.QuizSelectionRepository;
 import com.easyterview.wingterview.quiz.repository.TodayQuizRepository;
 import com.easyterview.wingterview.user.entity.UserEntity;
@@ -14,8 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -26,13 +28,13 @@ public class QuizConsumer {
     private final TodayQuizRepository todayQuizRepository;
     private final QuizSelectionRepository quizSelectionRepository;
     private final UserRepository userRepository;
+    private final QuizGenerationStatusRepository quizGenerationStatusRepository;
 
     @Transactional
     public void consumeQuiz(QuizCreationResponseDto response) {
         log.info("📩 퀴즈 응답 수신: {}", response);
 
-        UserEntity user = userRepository.findById(UUID.fromString(response.getInterviewId()))
-                .orElseThrow(UserNotFoundException::new);
+        UserEntity user = userRepository.findTopByOrderByCreatedAtAsc();
 
         List<TodayQuizEntity> quizzes = todayQuizRepository.findByUser(user);
 
@@ -67,6 +69,10 @@ public class QuizConsumer {
 
             quiz.getQuizSelectionEntityList().addAll(selections);
         }
+
+        // 테스트용
+        QuizGenerationStatusEntity quizGenerationStatusEntity = quizGenerationStatusRepository.findTopByOrderByStartAtDesc();
+        quizGenerationStatusEntity.setEndAt(Timestamp.valueOf(LocalDateTime.now()));
 
         log.info("✅ 퀴즈 저장 완료 ({}개)", response.getQuestions().size());
     }

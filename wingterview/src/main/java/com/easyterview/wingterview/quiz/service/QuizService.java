@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.quiz.service;
 
+import com.easyterview.wingterview.quiz.dto.request.QuizTestResponseDto;
 import com.easyterview.wingterview.quiz.dto.request.TodayQuizResultRequestDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;

@@ -1,6 +1,5 @@
 package com.easyterview.wingterview.quiz.service;
 
-import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.global.exception.QuizNotFoundException;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
@@ -10,18 +9,15 @@ import com.easyterview.wingterview.quiz.dto.request.QuizResultItem;
 import com.easyterview.wingterview.quiz.dto.request.TodayQuizResultRequestDto;
 import com.easyterview.wingterview.quiz.dto.response.*;
 import com.easyterview.wingterview.quiz.entity.QuizEntity;
+import com.easyterview.wingterview.quiz.entity.QuizGenerationStatusEntity;
 import com.easyterview.wingterview.quiz.entity.QuizSelectionEntity;
 import com.easyterview.wingterview.quiz.entity.TodayQuizEntity;
-import com.easyterview.wingterview.quiz.repository.QuizRepository;
-import com.easyterview.wingterview.quiz.repository.QuizRepositoryCustom;
-import com.easyterview.wingterview.quiz.repository.QuizSelectionRepository;
-import com.easyterview.wingterview.quiz.repository.TodayQuizRepository;
+import com.easyterview.wingterview.quiz.repository.*;
 import com.easyterview.wingterview.rabbitmq.consumer.QuizConsumer;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
@@ -45,6 +41,7 @@ public class QuizServiceImpl implements QuizService{
     private final ReceivedQuestionRepository receivedQuestionRepository;
     private final RabbitMqService rabbitMqService;
     private final QuizConsumer quizConsumer;
+    private final QuizGenerationStatusRepository quizGenerationStatusRepository;
 
     @Override
     public QuizStatsResponse getQuizStats(String userId) {
@@ -108,13 +105,15 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     public void createTodayQuiz() {
-        UUID userId = UUIDUtil.getUserIdFromToken();
-        List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(userId).stream().map(ReceivedQuestionEntity::getContents).toList();
+        UserEntity user = userRepository.findTopByOrderByCreatedAtAsc();
+
+        List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(user.getId()).stream().map(ReceivedQuestionEntity::getContents).toList();
         QuizCreationRequestDto request = QuizCreationRequestDto.builder()
                 .questionHistoryList(questionHistoryList)
-                .userId(userId.toString())
+                .userId(user.getId().toString())
                 .build();
 
+        quizGenerationStatusRepository.save(QuizGenerationStatusEntity.builder().build());
 
         rabbitMqService.sendQuizCreation(request);
         log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
