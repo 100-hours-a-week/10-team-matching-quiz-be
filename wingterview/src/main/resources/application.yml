@@ -45,7 +45,7 @@ oauth:
 #    redirect-uri: https://dev.s3.wingterview.com/oauth/kakao
 #    redirect-uri: http://localhost:5173/auth/kakao
 #    redirect-uri: http://wingterview.com/auth/kakao
-    redirect-uri: https://wingterview.com/oauth/kakao
+    redirect-uri: https://www.wingterview.com/oauth/kakao
 
     client-id: ${oauth.kakao.client-id}
 
