@@ -7,6 +7,7 @@ import com.easyterview.wingterview.quiz.entity.QuizSelectionEntity;
 import com.easyterview.wingterview.quiz.entity.TodayQuizEntity;
 import com.easyterview.wingterview.quiz.repository.QuizSelectionRepository;
 import com.easyterview.wingterview.quiz.repository.TodayQuizRepository;
+import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
