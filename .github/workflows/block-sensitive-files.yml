@@ -3,19 +3,25 @@ name: Block Protected File Changes
 on:
   pull_request:
     branches:
-      - dev
-      - main
-    paths:
-      - 'wingterview/src/main/resources/application.yml'
-      - 'wingterview/src/main/java/com/easyterview/wingterview/config/CorsConfig.java'
-      - 'wingterview/Dockerfile'
-      - 'wingterview/build.gradle'
+      - main # main 브랜치에 PR 보낼 때만 작동
 
 jobs:
   block-changes:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          git fetch origin main
+          git diff --name-only origin/main > changed.txt
+          cat changed.txt
+
       - name: Cancel PR if protected files changed
         run: |
-          echo " Protected config files were modified in this PR."
-          exit 1
+          echo "🔍 Checking for protected file changes..."
+          PROTECTED_FILES=(
+            "wingterview/src/main/resources/application.yml"
+            "wingterview/src/main/java/com/easyterview/wingtervi
