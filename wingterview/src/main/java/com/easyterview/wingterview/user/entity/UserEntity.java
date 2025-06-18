@@ -54,7 +54,7 @@ public class UserEntity {
     @Column(name = "email", nullable = false, length = 320)
     private String email;
 
-    @Column(name = "profile_image_url", length = 255)
+    @Column(name = "profile_image_url", length = 1000)
     private String profileImageUrl;
 
     @Column(name = "curriculum", nullable = false, length = 10)

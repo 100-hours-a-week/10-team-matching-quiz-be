@@ -28,6 +28,23 @@ public class RabbitMqConfig {
     // 📤 REQUEST 설정
     // =====================
 
+    @Bean(name = "aiRequestQueue")
+    public Queue aiRequestQueue() {
+        return new Queue("ai.request.queue", true); // durable=true
+    }
+    @Bean(name = "aiRequestExchange")
+    public TopicExchange aiRequestExchange() {
+        return new TopicExchange("ai.request.exchange");
+    }
+
+    @Bean(name = "aiRequestBinding")
+    public Binding aiRequestBinding(
+            @Qualifier("aiRequestQueue") Queue queue,
+            @Qualifier("aiRequestExchange") TopicExchange exchange
+    ) {
+        return BindingBuilder.bind(queue).to(exchange).with("ai.request.routingKey");
+    }
+
     @Bean(name = "quizRequestQueue")
     public Queue quizRequestQueue() {
         return new Queue("quiz.request.queue", true);

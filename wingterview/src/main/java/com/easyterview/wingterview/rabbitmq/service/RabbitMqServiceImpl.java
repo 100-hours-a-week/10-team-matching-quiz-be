@@ -16,6 +16,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
@@ -53,92 +54,96 @@ public class RabbitMqServiceImpl implements RabbitMqService {
     @Value("${ai.api-url}")
     private String apiUrl;
 
+    @Transactional
     @Override
     public FollowUpQuestionResponseDto sendFollowUpBlocking(FollowUpQuestionRequest requestDto) {
         log.info("➡️ 꼬리질문 요청 메시지 전송 시작: {}", requestDto);
 
-        long estimatedResponseTime = 0L;
-        int queueSize = 0;
-        synchronized (lock) {
-            // 1. 현재 큐 크기 조회
-            queueSize = localQueueTracker.incrementAndGet();
+        try {
+            long estimatedResponseTime = 0L;
+            int queueSize = 0;
+            synchronized (lock) {
+                // 1. 현재 큐 크기 조회
+                queueSize = localQueueTracker.incrementAndGet();
 
-            // 2. 예상 응답 시간 계산
-            estimatedResponseTime = queueSize * PER_TASK_TIME_MS;
+                // 2. 예상 응답 시간 계산
+                estimatedResponseTime = queueSize * PER_TASK_TIME_MS;
 
-            log.info("⏱️ 예상 처리 시간: {}ms (, queueSize={})",
-                    estimatedResponseTime, queueSize);
-        }
-
-        // 3. 예상 응답 시간 초과 시 api 요청
-        if (queueSize > 0 && estimatedResponseTime > MAX_ALLOWED_TIME_MS) {
-            localQueueTracker.decrementAndGet();
-            ObjectMapper mapper = new ObjectMapper();
-
-            String prompt = buildPrompt(
-                    requestDto.getSelectedQuestion(),
-                    requestDto.getKeyword(),
-                    requestDto.getPassedQuestions()
-            );
-
-            ChatMessage message = ChatMessage.builder()
-                    .content(prompt)
-                    .role("user")
-                    .build();
-
-            ChatRequest request = ChatRequest.builder()
-                    .model("gpt-4o-mini")  // ✅ 반드시 유효한 모델명으로 수정
-                    .messages(List.of(message))
-                    .temperature(0.8)
-                    .build();
-
-            // JSON 문자열로 변환
-            String requestBody;
-            try {
-                requestBody = mapper.writeValueAsString(request);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("JSON 직렬화 오류", e);
+                log.info("⏱️ 예상 처리 시간: {}ms (, queueSize={})",
+                        estimatedResponseTime, queueSize);
             }
 
-            // 실제 전송
-            ResponseEntity<String> response = restClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + apiKey)
-                    .header("Content-Type", "application/json")
-                    .body(requestBody)
-                    .retrieve()
-                    .toEntity(String.class);
+            // 3. 예상 응답 시간 초과 시 api 요청
+            if (queueSize > 0 && estimatedResponseTime > MAX_ALLOWED_TIME_MS) {
+                ObjectMapper mapper = new ObjectMapper();
 
-            // 응답 파싱
-            try {
-                JsonNode jsonNode = mapper.readTree(response.getBody());
-                String content = jsonNode.get("choices").get(0).get("message").get("content").asText();
-                List<String> questions = mapper.readValue(content, List.class);
-                return new FollowUpQuestionResponseDto("무슨 메시지??",requestDto.getInterviewId(), questions); // 실제 리턴은 적절히 수정
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("응답 JSON 파싱 실패", e);
+                String prompt = buildPrompt(
+                        requestDto.getSelectedQuestion(),
+                        requestDto.getKeyword(),
+                        requestDto.getPassedQuestions()
+                );
+
+                ChatMessage message = ChatMessage.builder()
+                        .content(prompt)
+                        .role("user")
+                        .build();
+
+                ChatRequest request = ChatRequest.builder()
+                        .model("gpt-4o-mini")  // ✅ 반드시 유효한 모델명으로 수정
+                        .messages(List.of(message))
+                        .temperature(0.8)
+                        .build();
+
+                // JSON 문자열로 변환
+                String requestBody;
+                try {
+                    requestBody = mapper.writeValueAsString(request);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("JSON 직렬화 오류", e);
+                }
+
+                // 실제 전송
+                ResponseEntity<String> response = restClient.post()
+                        .uri(apiUrl)
+                        .header("Authorization", "Bearer " + apiKey)
+                        .header("Content-Type", "application/json")
+                        .body(requestBody)
+                        .retrieve()
+                        .toEntity(String.class);
+
+                // 응답 파싱
+                try {
+                    JsonNode jsonNode = mapper.readTree(response.getBody());
+                    String content = jsonNode.get("choices").get(0).get("message").get("content").asText();
+                    List<String> questions = mapper.readValue(content, List.class);
+                    return new FollowUpQuestionResponseDto("무슨 메시지??", requestDto.getInterviewId(), questions); // 실제 리턴은 적절히 수정
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("응답 JSON 파싱 실패", e);
+                }
             }
-        }
 
 
+            // 4. 실제 요청
+            Object response = rabbitTemplate.convertSendAndReceive(exchange, routingKey, requestDto);
 
-        // 4. 실제 요청
-        Object response = rabbitTemplate.convertSendAndReceive(exchange, routingKey, requestDto);
+            // 5. 응답 검증
+            if (response == null) {
+                throw new RuntimeException("❌ 꼬리질문 응답이 null입니다.");
+            }
 
-        // 5. 응답 검증
-        if (response == null) {
-            throw new RuntimeException("❌ 꼬리질문 응답이 null입니다.");
-        }
+            // 6. 응답 처리 시간 업데이트
 
-        // 6. 응답 처리 시간 업데이트
-
-        // TODO : 마지막 dequeue time을 활용하여 정밀하게 계산은 아직 못했습니다.
+            // TODO : 마지막 dequeue time을 활용하여 정밀하게 계산은 아직 못했습니다.
 //        lastDequeueTime.set(System.currentTimeMillis());
-        localQueueTracker.decrementAndGet();
 
-        FollowUpQuestionResponseDto dto = (FollowUpQuestionResponseDto) response;
-        log.info("✅ 꼬리질문 응답 수신 완료: {}", dto);
-        return dto;
+            FollowUpQuestionResponseDto dto = (FollowUpQuestionResponseDto) response;
+            log.info("✅ 꼬리질문 응답 수신 완료: {}", dto);
+            return dto;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            localQueueTracker.decrementAndGet();
+        }
     }
 
     private String buildPrompt(String selectedQuestion, String keyword,

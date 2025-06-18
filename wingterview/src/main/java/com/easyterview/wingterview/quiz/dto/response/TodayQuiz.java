@@ -11,6 +11,7 @@ public class TodayQuiz {
     private final Integer quizIdx;
     private final String question;
     private final List<String> options;
+    private final Integer userAnswer;
     private final Integer answerIdx;
     private final String commentary;
     private final String difficulty;

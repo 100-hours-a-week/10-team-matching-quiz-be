@@ -1,3 +1,8 @@
 /gradlew text eol=lf
 *.bat text eol=crlf
 *.jar binary
+
+wingterview/src/main/resources/application.yml merge=ours
+wingterview/src/main/java/com/easyterview/wingterview/config/CorsConfig.java merge=ours
+wingterview/Dockerfile merge=ours
+wingterview/build.gradle merge=ours
