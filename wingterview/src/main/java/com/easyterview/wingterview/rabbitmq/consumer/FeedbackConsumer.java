@@ -28,13 +28,10 @@ public class FeedbackConsumer {
         responseDto.getFeedbackLists().forEach(feedbackItem -> {
             InterviewSegmentEntity segment = interviewSegmentRepository.findById(UUID.fromString(feedbackItem.getSegmentId())).orElseThrow(InterviewNotFoundException::new);
 
-            int score = feedbackItem.getFeedback().charAt(0) - '0';
-
             InterviewFeedbackEntity interviewFeedback = InterviewFeedbackEntity.builder()
-                    .commentary(feedbackItem.getFeedback().substring(4))
+                    .commentary(feedbackItem.getFeedback())
                     .correctAnswer(feedbackItem.getModelAnswer())
                     .interviewSegment(segment)
-                    .score(score)
                     .build();
 
             interviewFeedbackRepository.save(interviewFeedback);
