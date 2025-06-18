@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.board.entity;
 
+import com.easyterview.wingterview.interview.entity.InterviewSegmentEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,8 +32,9 @@ public class BoardEntity {
     @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
-    @Column(name = "interview_history_id", nullable = false)
-    private UUID interviewHistoryId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interview_segment_id", nullable = false)
+    private InterviewSegmentEntity interviewSegment;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;

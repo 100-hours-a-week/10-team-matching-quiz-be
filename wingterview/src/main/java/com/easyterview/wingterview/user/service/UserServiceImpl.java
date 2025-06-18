@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
-        user.setProfileImageUrl(s3Util.getUrl(userBasicInfo.getProfileImageName()));
+        user.setProfileImageUrl(userBasicInfo.getProfileImageName() != null ? s3Util.getUrl(userBasicInfo.getProfileImageName()) : null);
         user.setIsKTB(userBasicInfo.getIsKTB());
 
         // KTB 회원인 경우
@@ -96,8 +96,6 @@ public class UserServiceImpl implements UserService {
         interviewStatRepository.save(interviewStat);
 
         user.setInterviewStat(interviewStat);
-
-        System.out.println(user.getIsKTB());
 
         userRepository.save(user);
     }
