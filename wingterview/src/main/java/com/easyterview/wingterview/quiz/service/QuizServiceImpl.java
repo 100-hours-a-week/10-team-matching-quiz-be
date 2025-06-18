@@ -76,11 +76,6 @@ public class QuizServiceImpl implements QuizService{
             throw new QuizNotFoundException();
         }
 
-        // TODO : 오늘의 퀴즈 이미 제출했을 떄 -> joy랑 이야기해보기
-        if(todayQuizEntityList.getFirst().getUserSelection() != null){
-            return null;
-        }
-
         List<TodayQuiz> todayQuizList = todayQuizEntityList.stream().map(e -> {
             List<QuizSelectionEntity> quizSelectionEntityList = quizSelectionRepository.findAllByTodayQuiz(e);
             return
@@ -90,6 +85,7 @@ public class QuizServiceImpl implements QuizService{
                     .commentary(e.getCommentary())
                     .options(quizSelectionEntityList.stream().map(QuizSelectionEntity::getSelection).toList())
                     .answerIdx(e.getCorrectAnswerIdx())
+                    .userAnswer(e.getUserSelection())   // 문제 하나 봤을 때 null이면 안푼거, null 아니면 푼거
                     .difficulty(e.getDifficulty())
                     .build();
         }).toList();

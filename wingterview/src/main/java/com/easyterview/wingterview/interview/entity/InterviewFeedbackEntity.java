@@ -26,6 +26,9 @@ public class InterviewFeedbackEntity {
     @Column(name = "commentary", columnDefinition = "TEXT") // AI 코멘터리
     private String commentary;
 
+    @Column(nullable = false)
+    private Integer score;
+
     @OneToOne
     @JoinColumn(name = "interview_segment_id", nullable = false)
     private InterviewSegmentEntity interviewSegment;
