@@ -220,6 +220,7 @@ public class UserServiceImpl implements UserService {
             InterviewFeedbackEntity interviewFeedback = s.getFeedback();
             return
             FeedbackItem.builder()
+                    .segmentId(s.getId().toString())
                     .commentary(interviewFeedback.getCommentary())
                     .endAt(s.getToTime())
                     .modelAnswer(interviewFeedback.getCorrectAnswer())

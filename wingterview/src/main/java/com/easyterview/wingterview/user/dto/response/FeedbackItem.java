@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class FeedbackItem {
+    private String segmentId;
     private String question;
     private String modelAnswer;
     private String commentary;
