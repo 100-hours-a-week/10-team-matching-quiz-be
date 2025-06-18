@@ -16,6 +16,7 @@ public class CorsConfig {
                 registry.addMapping("/**") // 모든 URL 경로에 대해
                         .allowedOrigins("https://dev.s3.wingterview.com")
                         .allowedOrigins("https://wingterview.com")
+                        .allowedOrigins("http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true) // 인증 정보 포함 여부
