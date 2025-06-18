@@ -17,7 +17,6 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "interview")
-@ToString
 public class InterviewEntity {
     @Id
     @GeneratedValue
