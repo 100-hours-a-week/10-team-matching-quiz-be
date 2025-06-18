@@ -218,8 +218,8 @@ public class UserServiceImpl implements UserService {
                         if (s.getFeedback() == null) {
                             return FeedbackItem.builder()
                                     .segmentId(s.getId().toString())
-                                    .startAt(s.getToTime())
-                                    .endAt(s.getFromTime())
+                                    .startAt(s.getFromTime())
+                                    .endAt(s.getToTime())
                                     .question(s.getSelectedQuestion())
                                     .order(s.getSegmentOrder())
                                     .build();
