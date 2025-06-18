@@ -18,10 +18,10 @@ spring:
     show-sql: true
 
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
-    port: ${SPRING_RABBITMQ_PORT}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
+    host: ${AMQP_HOST}
+    port: ${AMQP_PORT}
+    username: ${AMQP_USERNAME}
+    password: ${AMQP_PASSWORD}
 
 rabbitmq:
   queue:
@@ -43,23 +43,23 @@ oauth:
 #    redirect-uri: http://localhost:5173/auth/kakao
 #    redirect-uri: http://wingterview.com/auth/kakao
     redirect-uri: https://wingterview.com/auth/kakao
-    client-id: ${OAUTH_KAKAO_CLIENT_ID}
+    client-id: ${KAKAO_CLIENT_ID}
 
 ai:
   follow-up-url: https://ai.wingterview.com/interview/followup-questions
-  api-key: ${AI_API_KEY}
-  api-url: ${AI_API_URL}
+  api-key: ${AI_KEY}
+  api-url: ${AI_URL}
 
 cloud:
   aws:
     region:
-      static: ${CLOUD_AWS_REGION_STATIC}
+      static: ${AWS_REGION}
     s3:
-      bucket: ${CLOUD_AWS_S3_BUCKET}
+      bucket: ${S3_BUCKET}
 
   credentials:
-    access-key: ${CLOUD_CREDENTIALS_ACCESS_KEY}
-    secret-key: ${CLOUD_CREDENTIALS_SECRET_KEY}
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
     stack:
       auto: false
 
