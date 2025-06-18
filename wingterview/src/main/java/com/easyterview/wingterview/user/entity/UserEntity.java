@@ -1,6 +1,6 @@
 package com.easyterview.wingterview.user.entity;
 
-import com.easyterview.wingterview.chat.entity.ChatEntity;
+import com.easyterview.wingterview.board.entity.BoardEntity;
 import com.easyterview.wingterview.interview.entity.InterviewHistoryEntity;
 import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
@@ -110,10 +110,6 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @Builder.Default
-    private List<UserChatroomEntity> userChatroomEntityList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    @Builder.Default
     private List<QuizEntity> quizEntityList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
@@ -123,4 +119,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @Builder.Default
     private List<InterviewHistoryEntity> interviewHistoryEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @Builder.Default
+    private List<BoardEntity> boardEntityList = new ArrayList<>();
 }

@@ -100,4 +100,14 @@ public class GlobalExceptionHandler {
     public  ResponseEntity<BaseResponse> handleFeedbackNotReady(FeedbackNotReadyException e){
         return BaseResponse.response(ExceptionMessage.FEEDBACK_NOT_READY, CustomExceptionDto.builder().reason(e.getMessage()).build());
     }
+
+    @ExceptionHandler(IllegalOrderByStatementException.class)
+    public ResponseEntity<BaseResponse> handleIllegalOrderByStatement(IllegalOrderByStatementException e){
+        return BaseResponse.response(ExceptionMessage.INVALID_INPUT, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
+
+    @ExceptionHandler(BoardNotFoundException.class)
+    public ResponseEntity<BaseResponse> handleBoardNotFound(BoardNotFoundException e){
+        return BaseResponse.response(ExceptionMessage.BOARD_NOT_FOUND, CustomExceptionDto.builder().reason(e.getMessage()).build());
+    }
 }

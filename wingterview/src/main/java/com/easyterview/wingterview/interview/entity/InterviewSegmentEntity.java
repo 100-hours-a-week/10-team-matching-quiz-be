@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.interview.entity;
 
+import com.easyterview.wingterview.board.entity.BoardEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,4 +41,7 @@ public class InterviewSegmentEntity {
     // 양방향 관계 설정 (optional = true로 설정하여 피드백이 없을 수도 있음을 명시)
     @OneToOne(mappedBy = "interviewSegment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InterviewFeedbackEntity feedback;
+
+    @OneToOne(mappedBy = "interviewSegment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private BoardEntity board;
 }
