@@ -7,4 +7,4 @@ COPY build/libs/wingterview-0.0.1-SNAPSHOT.jar app.jar
 COPY application-secret.yml application-secret.yml
 
 
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=application-secret.yml"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=file:application-secret.yml"]
