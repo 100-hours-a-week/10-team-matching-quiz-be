@@ -76,6 +76,11 @@ public class QuizServiceImpl implements QuizService{
             throw new QuizNotFoundException();
         }
 
+        // TODO : 오늘의 퀴즈 이미 제출했을 떄 -> joy랑 이야기해보기
+        if(todayQuizEntityList.getFirst().getUserSelection() != null){
+            return null;
+        }
+
         List<TodayQuiz> todayQuizList = todayQuizEntityList.stream().map(e -> {
             List<QuizSelectionEntity> quizSelectionEntityList = quizSelectionRepository.findAllByTodayQuiz(e);
             return
@@ -85,7 +90,6 @@ public class QuizServiceImpl implements QuizService{
                     .commentary(e.getCommentary())
                     .options(quizSelectionEntityList.stream().map(QuizSelectionEntity::getSelection).toList())
                     .answerIdx(e.getCorrectAnswerIdx())
-                    .userAnswer(e.getUserSelection())   // 문제 하나 봤을 때 null이면 안푼거, null 아니면 푼거
                     .difficulty(e.getDifficulty())
                     .build();
         }).toList();
@@ -104,18 +108,16 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     public void createTodayQuiz() {
-        List<UserEntity> userList = userRepository.findAll();
-        userList.forEach(user -> {
-            List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(user.getId()).stream().map(ReceivedQuestionEntity::getContents).toList();
-            QuizCreationRequestDto request = QuizCreationRequestDto.builder()
-                    .questionHistoryList(questionHistoryList)
-                    .userId(user.getId().toString())
-                    .build();
+        UUID userId = UUIDUtil.getUserIdFromToken();
+        List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(userId).stream().map(ReceivedQuestionEntity::getContents).toList();
+        QuizCreationRequestDto request = QuizCreationRequestDto.builder()
+                .questionHistoryList(questionHistoryList)
+                .userId(userId.toString())
+                .build();
 
 
-            rabbitMqService.sendQuizCreation(request);
-            log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
-        });
+        rabbitMqService.sendQuizCreation(request);
+        log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
     }
 
     @RabbitListener(queues = "quiz.response.queue")

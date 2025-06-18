@@ -37,7 +37,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/oauth/kakao").permitAll()
                         .requestMatchers("/api/matching/result").permitAll()
                         .requestMatchers("/api/matching").permitAll()
-                        .requestMatchers("/api/quiz/generate").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

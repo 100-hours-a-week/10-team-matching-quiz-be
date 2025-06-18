@@ -38,7 +38,3 @@ out/
 
 ### Secret config ###
 **/application-secret.yml
-
-**/application.yml
-**/Dockerfile
-**/build.gradle

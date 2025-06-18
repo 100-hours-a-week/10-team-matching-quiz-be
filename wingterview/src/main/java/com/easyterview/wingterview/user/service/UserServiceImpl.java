@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
         user.setName(userBasicInfo.getName());
         user.setNickname(userBasicInfo.getNickname());
         user.setProfileImageUrl(s3Util.getUrl(userBasicInfo.getProfileImageName()));
-        user.setIsKTB(userBasicInfo.getIsKTB());
 
         // KTB 회원인 경우
         if(userBasicInfo.getIsKTB()) {
@@ -96,8 +95,6 @@ public class UserServiceImpl implements UserService {
         interviewStatRepository.save(interviewStat);
 
         user.setInterviewStat(interviewStat);
-
-        System.out.println(user.getIsKTB());
 
         userRepository.save(user);
     }
@@ -211,57 +208,32 @@ public class UserServiceImpl implements UserService {
     @Override
     public InterviewDetailDto getInterviewDetail(String userId, String interviewHistoryId) {
         InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findById(UUID.fromString(interviewHistoryId)).orElseThrow(InterviewNotFoundException::new);
+        RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(UUID.fromString(interviewHistoryId)).orElseThrow(RecordNotFoundException::new);
 
-        if(interviewHistory.getIsFeedbackRequested()) {
-            RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(UUID.fromString(interviewHistoryId)).orElseThrow(RecordNotFoundException::new);
-            List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
-                        if (s.getFeedback() == null) {
-                            return FeedbackItem.builder()
-                                    .segmentId(s.getId().toString())
-                                    .startAt(s.getFromTime())
-                                    .endAt(s.getToTime())
-                                    .question(s.getSelectedQuestion())
-                                    .order(s.getSegmentOrder())
-                                    .build();
-                        }
-                        InterviewFeedbackEntity interviewFeedback = s.getFeedback();
-                        return
-                                FeedbackItem.builder()
-                                        .segmentId(s.getId().toString())
-                                        .commentary(interviewFeedback.getCommentary())
-                                        .endAt(s.getToTime())
-                                        .modelAnswer(interviewFeedback.getCorrectAnswer())
-                                        .startAt(s.getFromTime())
-                                        .question(s.getSelectedQuestion())
-                                        .order(s.getSegmentOrder())
-                                        .build();
-                    }).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
-                    .toList();
-
-
-            return InterviewDetailDto.builder()
-                    .feedback(feedbackItemList)
-                    .recordingUrl(recordingEntity.getUrl())
-                    .createdAt(interviewHistory.getCreatedAt())
-                    .duration((interviewHistory.getEndAt().getTime() - interviewHistory.getCreatedAt().getTime()) / 1000)
+        List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
+            if(s.getFeedback() == null) {
+                throw new FeedbackNotReadyException();
+            }
+            InterviewFeedbackEntity interviewFeedback = s.getFeedback();
+            return
+            FeedbackItem.builder()
+                    .commentary(interviewFeedback.getCommentary())
+                    .endAt(s.getToTime())
+                    .modelAnswer(interviewFeedback.getCorrectAnswer())
+                    .startAt(s.getFromTime())
+                    .question(s.getSelectedQuestion())
+                    .order(s.getSegmentOrder())
                     .build();
-        }
-        else{
-            List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
-                return FeedbackItem.builder()
-                        .segmentId(s.getId().toString())
-                        .question(s.getSelectedQuestion())
-                        .order(s.getSegmentOrder())
-                        .build();
-            }).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
-                    .toList();
+        }).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
+                .toList();
 
-            return InterviewDetailDto.builder()
-                    .createdAt(interviewHistory.getCreatedAt())
-                    .duration((interviewHistory.getEndAt().getTime() - interviewHistory.getCreatedAt().getTime()) / 1000)
-                    .feedback(feedbackItemList)
-                    .build();
-        }
+
+        return InterviewDetailDto.builder()
+                .feedback(feedbackItemList)
+                .recordingUrl(recordingEntity.getUrl())
+                .createdAt(interviewHistory.getCreatedAt())
+                .duration((interviewHistory.getEndAt().getTime() - interviewHistory.getCreatedAt().getTime()) / 1000)
+                .build();
     }
 
 
