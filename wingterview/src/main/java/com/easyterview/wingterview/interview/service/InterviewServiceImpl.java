@@ -1,9 +1,5 @@
 package com.easyterview.wingterview.interview.service;
 
-import com.easyterview.wingterview.chat.entity.ChatEntity;
-import com.easyterview.wingterview.chat.entity.ChatroomEntity;
-import com.easyterview.wingterview.chat.repository.ChatRepository;
-import com.easyterview.wingterview.chat.repository.ChatroomRepository;
 import com.easyterview.wingterview.common.util.InterviewStatus;
 import com.easyterview.wingterview.common.util.InterviewUtil;
 import com.easyterview.wingterview.common.util.TimeUtil;
@@ -18,10 +14,8 @@ import com.easyterview.wingterview.interview.repository.*;
 import com.easyterview.wingterview.rabbitmq.consumer.FeedbackConsumer;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
-import com.easyterview.wingterview.user.entity.UserChatroomEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.RecordRepository;
-import com.easyterview.wingterview.user.repository.UserChatroomRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,9 +42,6 @@ public class InterviewServiceImpl implements InterviewService {
     private final QuestionHistoryRepository questionHistoryRepository;
     private final ReceivedQuestionRepository receivedQuestionRepository;
     private final MainQuestionRepository mainQuestionRepository;
-    private final UserChatroomRepository userChatroomRepository;
-    private final ChatroomRepository chatroomRepository;
-    private final ChatRepository chatRepository;
     private final InterviewTimeRepository interviewTimeRepository;
     private final InterviewHistoryRepository interviewHistoryRepository;
     private final InterviewSegmentRepository interviewSegmentRepository;
@@ -567,45 +558,45 @@ public class InterviewServiceImpl implements InterviewService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
 
-        ChatroomEntity chatRoom;
-
-        // 5. 인터뷰 ID 기준으로 연결된 채팅방이 이미 있는지 확인
-        List<UserChatroomEntity> existingUserChatrooms = userChatroomRepository.findAllByInterviewId(interviewUUID);
-        if (!existingUserChatrooms.isEmpty()) {
-            // 6. 이미 채팅방이 있다면 재사용
-            chatRoom = existingUserChatrooms.getFirst().getChatroom();
-        } else {
-            // 7. 없으면 새로운 채팅방 생성
-            chatRoom = ChatroomEntity.builder()
-                    .title(currentUser.getName() + "와 " + otherUser.getName() + "의 대화방")
-                    .build();
-            chatroomRepository.save(chatRoom); // ID 부여를 위해 먼저 저장
-
-            // 8. 새 채팅방을 각 사용자에게 매핑 (UserChatroomEntity)
-            userChatroomRepository.save(UserChatroomEntity.builder()
-                    .chatroom(chatRoom)
-                    .interviewId(interviewUUID)
-                    .user(currentUser)
-                    .build());
-
-            userChatroomRepository.save(UserChatroomEntity.builder()
-                    .chatroom(chatRoom)
-                    .interviewId(interviewUUID)
-                    .user(otherUser)
-                    .build());
-        }
-
-        // 9. 피드백 메시지 구성 ("내용\n(점수: 4.5)" 형태)
-        String message = String.format("%s\n(점수: %.1f)", dto.getFeedback(), dto.getScore());
-
-        // 10. ChatEntity 생성 및 저장
-        ChatEntity newChat = ChatEntity.builder()
-                .chatroom(chatRoom)
-                .contents(message)
-                .sender(currentUser)
-                .build();
-
-        chatRepository.save(newChat);
+//        ChatroomEntity chatRoom;
+//
+//        // 5. 인터뷰 ID 기준으로 연결된 채팅방이 이미 있는지 확인
+//        List<UserChatroomEntity> existingUserChatrooms = userChatroomRepository.findAllByInterviewId(interviewUUID);
+//        if (!existingUserChatrooms.isEmpty()) {
+//            // 6. 이미 채팅방이 있다면 재사용
+//            chatRoom = existingUserChatrooms.getFirst().getChatroom();
+//        } else {
+//            // 7. 없으면 새로운 채팅방 생성
+//            chatRoom = ChatroomEntity.builder()
+//                    .title(currentUser.getName() + "와 " + otherUser.getName() + "의 대화방")
+//                    .build();
+//            chatroomRepository.save(chatRoom); // ID 부여를 위해 먼저 저장
+//
+//            // 8. 새 채팅방을 각 사용자에게 매핑 (UserChatroomEntity)
+//            userChatroomRepository.save(UserChatroomEntity.builder()
+//                    .chatroom(chatRoom)
+//                    .interviewId(interviewUUID)
+//                    .user(currentUser)
+//                    .build());
+//
+//            userChatroomRepository.save(UserChatroomEntity.builder()
+//                    .chatroom(chatRoom)
+//                    .interviewId(interviewUUID)
+//                    .user(otherUser)
+//                    .build());
+//        }
+//
+//        // 9. 피드백 메시지 구성 ("내용\n(점수: 4.5)" 형태)
+//        String message = String.format("%s\n(점수: %.1f)", dto.getFeedback(), dto.getScore());
+//
+//        // 10. ChatEntity 생성 및 저장
+//        ChatEntity newChat = ChatEntity.builder()
+//                .chatroom(chatRoom)
+//                .contents(message)
+//                .sender(currentUser)
+//                .build();
+//
+//        chatRepository.save(newChat);
     }
 
     @Override
