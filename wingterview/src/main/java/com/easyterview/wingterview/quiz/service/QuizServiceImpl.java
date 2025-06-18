@@ -104,16 +104,18 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     public void createTodayQuiz() {
-        UUID userId = UUIDUtil.getUserIdFromToken();
-        List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(userId).stream().map(ReceivedQuestionEntity::getContents).toList();
-        QuizCreationRequestDto request = QuizCreationRequestDto.builder()
-                .questionHistoryList(questionHistoryList)
-                .userId(userId.toString())
-                .build();
+        List<UserEntity> userList = userRepository.findAll();
+        userList.forEach(user -> {
+            List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(user.getId()).stream().map(ReceivedQuestionEntity::getContents).toList();
+            QuizCreationRequestDto request = QuizCreationRequestDto.builder()
+                    .questionHistoryList(questionHistoryList)
+                    .userId(user.getId().toString())
+                    .build();
 
 
-        rabbitMqService.sendQuizCreation(request);
-        log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
+            rabbitMqService.sendQuizCreation(request);
+            log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
+        });
     }
 
     @RabbitListener(queues = "quiz.response.queue")
