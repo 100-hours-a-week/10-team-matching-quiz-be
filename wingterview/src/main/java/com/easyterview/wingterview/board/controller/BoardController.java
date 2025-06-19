@@ -8,9 +8,11 @@ import com.easyterview.wingterview.board.service.BoardService;
 import com.easyterview.wingterview.common.constants.BoardResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/board")
@@ -18,21 +20,22 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping("/board/{segmentId}")
+    @PostMapping("/{segmentId}")
     public ResponseEntity<BaseResponse> createBoard(@RequestBody BoardCreationRequestDto requestDto, @PathVariable String segmentId){
         BoardCreationResponseDto response = boardService.createBoard(requestDto, segmentId);
         return BaseResponse.response(BoardResponseMessage.BOARD_CREATION_DONE,response);
     }
 
-    @GetMapping("/board")
+    @GetMapping
     public ResponseEntity<BaseResponse> getBoardList(@RequestParam String orderBy,
                                                      @RequestParam(required = false) String cursor,
                                                      @RequestParam(defaultValue = "10") Integer limit){
+        log.info("**********보드 리스트 가져오기**********");
         BoardListResponseDto response = boardService.getBoardList(orderBy,cursor,limit);
         return BaseResponse.response(BoardResponseMessage.BOARD_LIST_FETCH_DONE, response);
     }
 
-    @GetMapping("/board/{boardId}")
+    @GetMapping("/{boardId}")
     public ResponseEntity<BaseResponse> getBoardDetail(@PathVariable String boardId){
         BoardDetailResponseDto response = boardService.getBoardDetail(boardId);
         return BaseResponse.response(BoardResponseMessage.BOARD_FETCH_DONE,response);

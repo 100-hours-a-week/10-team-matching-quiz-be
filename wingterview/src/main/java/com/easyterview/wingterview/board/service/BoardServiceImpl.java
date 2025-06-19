@@ -51,7 +51,7 @@ public class BoardServiceImpl implements BoardService{
     @Override
     @Transactional(readOnly = true)
     public BoardListResponseDto getBoardList(String orderBy, String cursor, Integer limit) {
-        return boardRepositoryCustom.findByOrderByAndCursorAndLimit(orderBy, UUID.fromString(cursor),limit);
+        return boardRepositoryCustom.findByOrderByAndCursorAndLimit(orderBy, cursor == null ? null : UUID.fromString(cursor),limit);
     }
 
     @Override
