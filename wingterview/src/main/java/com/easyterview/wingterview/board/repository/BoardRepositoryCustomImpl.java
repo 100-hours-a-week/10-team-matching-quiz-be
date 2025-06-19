@@ -28,7 +28,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom{
 
     @Override
     public BoardListResponseDto findByOrderByAndCursorAndLimit(String orderBy, UUID cursor, Integer limit) {
-        log.info("*********{} {} {}", orderBy, cursor, limit);
+        log.info("*********{} {}", orderBy, limit);
 
         try {
 
