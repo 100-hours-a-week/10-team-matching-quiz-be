@@ -20,13 +20,13 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping("/board/{segmentId}")
+    @PostMapping("/{segmentId}")
     public ResponseEntity<BaseResponse> createBoard(@RequestBody BoardCreationRequestDto requestDto, @PathVariable String segmentId){
         BoardCreationResponseDto response = boardService.createBoard(requestDto, segmentId);
         return BaseResponse.response(BoardResponseMessage.BOARD_CREATION_DONE,response);
     }
 
-    @GetMapping("/board")
+    @GetMapping
     public ResponseEntity<BaseResponse> getBoardList(@RequestParam String orderBy,
                                                      @RequestParam(required = false) String cursor,
                                                      @RequestParam(defaultValue = "10") Integer limit){
@@ -35,7 +35,7 @@ public class BoardController {
         return BaseResponse.response(BoardResponseMessage.BOARD_LIST_FETCH_DONE, response);
     }
 
-    @GetMapping("/board/{boardId}")
+    @GetMapping("/{boardId}")
     public ResponseEntity<BaseResponse> getBoardDetail(@PathVariable String boardId){
         BoardDetailResponseDto response = boardService.getBoardDetail(boardId);
         return BaseResponse.response(BoardResponseMessage.BOARD_FETCH_DONE,response);
