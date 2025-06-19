@@ -31,7 +31,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom{
 
         BooleanBuilder condition = new BooleanBuilder();
         if (cursor != null) {
-            if(orderBy.equals("시간순")) {
+            if(orderBy.equals("latest")) {
                 Timestamp cursorTime = queryFactory
                         .select(q.createdAt)
                         .from(q)
@@ -41,7 +41,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom{
                 if (cursorTime == null) throw new BoardNotFoundException();
                 condition.and(q.createdAt.loe(cursorTime));
             }
-            else if(orderBy.equals("조회수순")){
+            else if(orderBy.equals("popular")){
                 Integer viewCnt = queryFactory
                         .select(q.viewCnt)
                         .from(q)
