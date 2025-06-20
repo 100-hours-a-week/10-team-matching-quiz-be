@@ -245,13 +245,11 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
         else{
-            List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
-                return FeedbackItem.builder()
-                        .segmentId(s.getId().toString())
-                        .question(s.getSelectedQuestion())
-                        .order(s.getSegmentOrder())
-                        .build();
-            }).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
+            List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> FeedbackItem.builder()
+                    .segmentId(s.getId().toString())
+                    .question(s.getSelectedQuestion())
+                    .order(s.getSegmentOrder())
+                    .build()).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
                     .toList();
 
             return InterviewDetailDto.builder()

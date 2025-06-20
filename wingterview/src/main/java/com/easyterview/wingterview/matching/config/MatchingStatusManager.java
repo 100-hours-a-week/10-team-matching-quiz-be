@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MatchingStatusManager {
     private volatile boolean isMatchingOpen = true;
-    public boolean isMatchingOpen() {
-        return isMatchingOpen;
+    public boolean isMatchingClosed() {
+        return !isMatchingOpen;
     }
 
     public void closeMatching() {

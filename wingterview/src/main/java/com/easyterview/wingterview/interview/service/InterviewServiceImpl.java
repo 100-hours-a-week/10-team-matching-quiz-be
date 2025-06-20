@@ -90,7 +90,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                         .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                         .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), now.getTime() > originalEndAt.getTime() ? originalEndAt : now))
-                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                         .build();
 
                 interviewSegmentRepository.save(interviewSegment);
@@ -250,7 +250,7 @@ public class InterviewServiceImpl implements InterviewService {
                             .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                             .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                             .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                             .build();
 
                     interviewSegmentRepository.save(interviewSegment);
@@ -379,7 +379,7 @@ public class InterviewServiceImpl implements InterviewService {
                             .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                             .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                             .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                             .build();
 
                     interviewSegmentRepository.save(interviewSegment);
@@ -454,7 +454,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                         .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                         .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                         .build();
 
                 interviewSegmentRepository.save(interviewSegment);
@@ -689,15 +689,12 @@ public class InterviewServiceImpl implements InterviewService {
         RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(interviewHistory.getId()).orElseThrow(InterviewNotFoundException::new);
 
         List<QuestionSegment> questionSegments = interviewHistory.getSegments().stream()
-                .map(s -> {
-                    return
-                    QuestionSegment.builder()
-                            .segmentId(s.getId().toString())
-                            .startTime(s.getFromTime())
-                            .endTime(s.getToTime())
-                            .question(s.getSelectedQuestion())
-                            .build();
-                }).toList();
+                .map(s -> QuestionSegment.builder()
+                        .segmentId(s.getId().toString())
+                        .startTime(s.getFromTime())
+                        .endTime(s.getToTime())
+                        .question(s.getSelectedQuestion())
+                        .build()).toList();
 
 
 

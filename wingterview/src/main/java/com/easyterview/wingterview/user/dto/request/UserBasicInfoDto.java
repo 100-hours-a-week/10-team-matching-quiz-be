@@ -1,13 +1,10 @@
 package com.easyterview.wingterview.user.dto.request;
 
-import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.validator.annotation.ValidUserBasicInfo;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

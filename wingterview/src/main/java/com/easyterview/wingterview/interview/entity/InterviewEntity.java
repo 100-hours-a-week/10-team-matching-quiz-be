@@ -1,7 +1,6 @@
 package com.easyterview.wingterview.interview.entity;
 
 import com.easyterview.wingterview.interview.enums.Phase;
-import com.easyterview.wingterview.user.entity.RecordingEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;

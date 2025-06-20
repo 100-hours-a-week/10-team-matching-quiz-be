@@ -7,7 +7,6 @@ import com.easyterview.wingterview.board.entity.QBoardEntity;
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.BoardNotFoundException;
 import com.easyterview.wingterview.global.exception.IllegalOrderByStatementException;
-import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
 import com.easyterview.wingterview.interview.entity.QInterviewSegmentEntity;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
