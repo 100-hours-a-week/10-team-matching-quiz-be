@@ -2,6 +2,7 @@ package com.easyterview.wingterview.interview.dto.response;
 
 import lombok.*;
 
+@Getter
 @Builder
 public class AiInterviewInfoDto {
     private String InterviewId;
