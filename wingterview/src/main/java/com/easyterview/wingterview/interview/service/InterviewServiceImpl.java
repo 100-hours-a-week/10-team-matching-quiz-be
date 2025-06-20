@@ -236,6 +236,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                 QuestionHistoryEntity questionHistory = interview.getQuestionHistory();
                 if (questionHistory == null) {
+                    log.info("***************여기 들어와야하는데");
                     questionHistoryRepository.save(QuestionHistoryEntity.builder()
                             .interview(interview)
                             .selectedQuestion(questions.getFirst())
@@ -244,6 +245,7 @@ public class InterviewServiceImpl implements InterviewService {
                     );
                 } else {
                     // 아마 마지막 질문 녹음은 따로 처리해야할듯
+                    log.info("***************왜여기들어오지??");
                     InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
                     InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
                             .interviewHistory(interviewHistory)
