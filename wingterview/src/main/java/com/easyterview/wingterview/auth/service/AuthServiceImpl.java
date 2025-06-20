@@ -56,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(formData)
                 .retrieve()
-                .body(new ParameterizedTypeReference<Map<String, Object>>() {
+                .body(new ParameterizedTypeReference<>() {
                 });
 
         log.info("************ 여기 들어왔냐?");

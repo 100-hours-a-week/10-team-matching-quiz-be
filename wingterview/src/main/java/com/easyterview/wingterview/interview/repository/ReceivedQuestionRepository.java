@@ -1,7 +1,6 @@
 package com.easyterview.wingterview.interview.repository;
 
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
-import com.querydsl.core.Fetchable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,11 +1,7 @@
 package com.easyterview.wingterview.matching.algorithm;
 
-import com.easyterview.wingterview.user.entity.UserEntity;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

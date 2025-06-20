@@ -3,10 +3,8 @@ package com.easyterview.wingterview.auth.controller;
 import com.easyterview.wingterview.auth.dto.request.AuthRequestDto;
 import com.easyterview.wingterview.auth.dto.response.AuthResponseDto;
 import com.easyterview.wingterview.auth.dto.response.RefreshResponseDto;
-import com.easyterview.wingterview.auth.jwt.JwtUtil;
 import com.easyterview.wingterview.auth.service.AuthService;
 import com.easyterview.wingterview.common.constants.AuthResponseMessage;
-import com.easyterview.wingterview.common.constants.ExceptionMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;

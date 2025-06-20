@@ -63,16 +63,12 @@ public class SeatPositionUtil {
         int row = Integer.parseInt(st.nextToken());
         int col = Integer.parseInt(st.nextToken());
 
-        if(section.equals("A")){
-
-        }
-        else if (section.equals("B")){
+        if (section.equals("B")){
             col += 3;
         }
-        else{
+        else if(section.equals("C")){
             col += 6;
         }
-
 
         return seatPosToInt(row,col);
     }

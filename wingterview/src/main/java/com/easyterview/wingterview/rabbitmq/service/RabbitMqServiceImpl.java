@@ -60,8 +60,8 @@ public class RabbitMqServiceImpl implements RabbitMqService {
         log.info("➡️ 꼬리질문 요청 메시지 전송 시작: {}", requestDto);
 
         try {
-            long estimatedResponseTime = 0L;
-            int queueSize = 0;
+            long estimatedResponseTime;
+            int queueSize;
             synchronized (lock) {
                 // 1. 현재 큐 크기 조회
                 queueSize = localQueueTracker.incrementAndGet();
@@ -72,6 +72,8 @@ public class RabbitMqServiceImpl implements RabbitMqService {
                 log.info("⏱️ 예상 처리 시간: {}ms (, queueSize={})",
                         estimatedResponseTime, queueSize);
             }
+
+            System.out.println(queueSize + " " + estimatedResponseTime);
 
             // 3. 예상 응답 시간 초과 시 api 요청
             if (queueSize > 0 && estimatedResponseTime > MAX_ALLOWED_TIME_MS) {

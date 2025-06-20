@@ -2,15 +2,12 @@ package com.easyterview.wingterview.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @Configuration
 public class RestClientConfig {
@@ -39,7 +36,7 @@ public class RestClientConfig {
         MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().add(0, jsonConverter); // 0번에 추가 (우선순위 높임)
+        restTemplate.getMessageConverters().addFirst(jsonConverter); // 0번에 추가 (우선순위 높임)
         return restTemplate;
     }
 }
