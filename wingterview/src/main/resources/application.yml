@@ -30,7 +30,7 @@ rabbitmq:
   exchange:
     name: ai.request.exchange
   routing:
-    key : ai.request.single
+    key : ai.request.routingKey
 
 #  redis:
 #    host: localhost
