@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // 모든 URL 경로에 대해
-                        .allowedOrigins("https://dev.s3.wingterview.com")
+                        .allowedOrigins("https://wingterview.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true) // 인증 정보 포함 여부
