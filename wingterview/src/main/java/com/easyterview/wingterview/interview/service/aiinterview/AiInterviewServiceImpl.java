@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.interview.service;
+package com.easyterview.wingterview.interview.service.aiinterview;
 
 import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.AlreadyEnqueuedException;
@@ -11,15 +11,11 @@ import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
 import com.easyterview.wingterview.interview.entity.InterviewTimeEntity;
 import com.easyterview.wingterview.interview.enums.ParticipantRole;
 import com.easyterview.wingterview.interview.repository.*;
-import com.easyterview.wingterview.rabbitmq.consumer.FeedbackConsumer;
-import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
-import com.easyterview.wingterview.user.repository.RecordRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

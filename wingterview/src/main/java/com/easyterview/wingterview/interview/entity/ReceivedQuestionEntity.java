@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -32,4 +33,13 @@ public class ReceivedQuestionEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
+
+    public static ReceivedQuestionEntity toEntity(String question, UserEntity user){
+        return
+                ReceivedQuestionEntity.builder()
+                        .contents(question)
+                        .receivedAt(Timestamp.valueOf(LocalDateTime.now()))
+                        .user(user)
+                        .build();
+    }
 }

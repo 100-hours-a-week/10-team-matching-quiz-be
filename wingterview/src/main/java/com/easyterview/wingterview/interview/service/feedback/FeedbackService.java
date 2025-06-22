@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.interview.service;
+package com.easyterview.wingterview.interview.service.feedback;
 
 import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
 

@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.interview.service;
+package com.easyterview.wingterview.interview.service.interviewflow;
 
 import com.easyterview.wingterview.common.util.InterviewStatus;
 import com.easyterview.wingterview.common.util.InterviewUtil;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

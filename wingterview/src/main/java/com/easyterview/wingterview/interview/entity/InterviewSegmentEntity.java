@@ -1,10 +1,14 @@
 package com.easyterview.wingterview.interview.entity;
 
 import com.easyterview.wingterview.board.entity.BoardEntity;
+import com.easyterview.wingterview.common.util.TimeUtil;
+import com.easyterview.wingterview.global.exception.QuestionOptionNotFoundException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -43,4 +47,15 @@ public class InterviewSegmentEntity {
 
     @OneToOne(mappedBy = "interviewSegment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BoardEntity board;
+
+    public static InterviewSegmentEntity toEntity(InterviewHistoryEntity interviewHistory, Integer currentSegmentOrder, InterviewEntity interview, String oldQuestion) {
+        return
+                InterviewSegmentEntity.builder()
+                        .interviewHistory(interviewHistory)
+                        .segmentOrder(currentSegmentOrder + 1)
+                        .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
+                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
+                        .selectedQuestion(oldQuestion)
+                        .build();
+    }
 }

@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.interview.service;
+package com.easyterview.wingterview.interview.service.question;
 
 import com.easyterview.wingterview.common.util.TimeUtil;
 import com.easyterview.wingterview.common.util.UUIDUtil;
@@ -13,16 +13,12 @@ import com.easyterview.wingterview.interview.dto.response.FollowUpQuestionRespon
 import com.easyterview.wingterview.interview.dto.response.QuestionCreationResponseDto;
 import com.easyterview.wingterview.interview.entity.*;
 import com.easyterview.wingterview.interview.repository.*;
-import com.easyterview.wingterview.rabbitmq.consumer.FeedbackConsumer;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
-import com.easyterview.wingterview.user.repository.RecordRepository;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -50,6 +46,7 @@ public class QuestionServiceImpl implements QuestionService{
     @Transactional
     public Object makeQuestion(String interviewId, QuestionCreationRequestDto dto) {
 
+        // 기본 정보 가져오기
         InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
                 .orElseThrow(InterviewNotFoundException::new);
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())

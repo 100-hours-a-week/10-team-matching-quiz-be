@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.interview.service;
+package com.easyterview.wingterview.interview.service.question;
 
 import com.easyterview.wingterview.interview.dto.request.QuestionCreationRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSelectionRequestDto;

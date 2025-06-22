@@ -1,4 +1,4 @@
-package com.easyterview.wingterview.interview.service;
+package com.easyterview.wingterview.interview.service.interviewflow;
 
 import com.easyterview.wingterview.interview.dto.response.InterviewIdResponse;
 import com.easyterview.wingterview.interview.dto.response.NextRoundDto;
