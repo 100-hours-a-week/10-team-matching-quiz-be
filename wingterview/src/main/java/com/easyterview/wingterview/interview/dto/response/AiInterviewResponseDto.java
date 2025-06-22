@@ -1,7 +1,6 @@
 package com.easyterview.wingterview.interview.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder

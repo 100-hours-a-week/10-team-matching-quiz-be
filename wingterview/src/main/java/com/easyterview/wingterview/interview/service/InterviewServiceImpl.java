@@ -90,7 +90,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                         .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                         .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), now.getTime() > originalEndAt.getTime() ? originalEndAt : now))
-                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                         .build();
 
                 interviewSegmentRepository.save(interviewSegment);
@@ -236,6 +236,7 @@ public class InterviewServiceImpl implements InterviewService {
 
                 QuestionHistoryEntity questionHistory = interview.getQuestionHistory();
                 if (questionHistory == null) {
+                    log.info("***************여기 들어와야하는데");
                     questionHistoryRepository.save(QuestionHistoryEntity.builder()
                             .interview(interview)
                             .selectedQuestion(questions.getFirst())
@@ -244,13 +245,14 @@ public class InterviewServiceImpl implements InterviewService {
                     );
                 } else {
                     // 아마 마지막 질문 녹음은 따로 처리해야할듯
+                    log.info("***************왜여기들어오지??");
                     InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElseThrow(InterviewNotFoundException::new);
                     InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
                             .interviewHistory(interviewHistory)
                             .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                             .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                             .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                             .build();
 
                     interviewSegmentRepository.save(interviewSegment);
@@ -379,7 +381,7 @@ public class InterviewServiceImpl implements InterviewService {
                             .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                             .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                             .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                            .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                             .build();
 
                     interviewSegmentRepository.save(interviewSegment);
@@ -454,7 +456,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
                         .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
                         .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).get().getSelectedQuestion())
+                        .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
                         .build();
 
                 interviewSegmentRepository.save(interviewSegment);
@@ -689,15 +691,12 @@ public class InterviewServiceImpl implements InterviewService {
         RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(interviewHistory.getId()).orElseThrow(InterviewNotFoundException::new);
 
         List<QuestionSegment> questionSegments = interviewHistory.getSegments().stream()
-                .map(s -> {
-                    return
-                    QuestionSegment.builder()
-                            .segmentId(s.getId().toString())
-                            .startTime(s.getFromTime())
-                            .endTime(s.getToTime())
-                            .question(s.getSelectedQuestion())
-                            .build();
-                }).toList();
+                .map(s -> QuestionSegment.builder()
+                        .segmentId(s.getId().toString())
+                        .startTime(s.getFromTime())
+                        .endTime(s.getToTime())
+                        .question(s.getSelectedQuestion())
+                        .build()).toList();
 
 
 

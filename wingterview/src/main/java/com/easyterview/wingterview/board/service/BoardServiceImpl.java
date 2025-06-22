@@ -12,7 +12,6 @@ import com.easyterview.wingterview.global.exception.BoardNotFoundException;
 import com.easyterview.wingterview.global.exception.FeedbackNotReadyException;
 import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
 import com.easyterview.wingterview.global.exception.UserNotFoundException;
-import com.easyterview.wingterview.interview.entity.InterviewSegmentEntity;
 import com.easyterview.wingterview.interview.repository.InterviewSegmentRepository;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.UUID;
 
 @RequiredArgsConstructor

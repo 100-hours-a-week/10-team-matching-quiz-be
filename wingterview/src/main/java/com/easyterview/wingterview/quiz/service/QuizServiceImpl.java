@@ -1,6 +1,5 @@
 package com.easyterview.wingterview.quiz.service;
 
-import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.global.exception.QuizNotFoundException;
 import com.easyterview.wingterview.interview.entity.ReceivedQuestionEntity;
@@ -21,7 +20,6 @@ import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;

@@ -4,7 +4,6 @@ import com.easyterview.wingterview.common.util.UUIDUtil;
 import com.easyterview.wingterview.global.exception.IllegalFileFormatException;
 import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
 import com.easyterview.wingterview.global.exception.UserNotFoundException;
-import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewHistoryEntity;
 import com.easyterview.wingterview.interview.repository.InterviewHistoryRepository;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
@@ -49,7 +48,7 @@ public class S3ServiceImpl implements S3Service {
     @Transactional
     public URL generatePresignedUrl(String objectKey, Duration expiration) {
         final String contentType = resolveContentType(objectKey);
-        String route = "";
+        String route;
         if(contentType.startsWith("image")){
             route = "profile_image/";
         }

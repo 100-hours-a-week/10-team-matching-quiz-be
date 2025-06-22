@@ -1,6 +1,5 @@
 package com.easyterview.wingterview.interview.entity;
 
-import com.easyterview.wingterview.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
