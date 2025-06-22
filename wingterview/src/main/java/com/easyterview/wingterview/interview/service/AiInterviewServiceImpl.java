@@ -27,7 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AiInterviewServiceImpl implements AiInterviewService{
+public class AiInterviewServiceImpl implements AiInterviewService {
 
     private final InterviewRepository interviewRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
@@ -35,58 +35,79 @@ public class AiInterviewServiceImpl implements AiInterviewService{
     private final InterviewTimeRepository interviewTimeRepository;
     private final InterviewHistoryRepository interviewHistoryRepository;
 
-
     @Transactional
     @Override
     public AiInterviewResponseDto startAiInterview(TimeInitializeRequestDto requestDto) {
-        // 1. 사용자 인증
-        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(InvalidTokenException::new);
+        // 유저 정보 및 예외처리
+        UserEntity user = getUserOrThrow();
+        checkNotAlreadyEnqueued(user);
 
-        // 2. 대기열 중복 여부 확인
-        if (interviewParticipantRepository.findByUser(user).isPresent()) {
-            throw new AlreadyEnqueuedException();
-        }
+        // 인터뷰, 인터뷰 참가자, 인터뷰 시간 엔티티 만들기
+        InterviewEntity interview = createInterview();
+        createInterviewHistory(user);
+        InterviewParticipantEntity participant = createParticipant(user, interview);
+        InterviewTimeEntity interviewTime = createInterviewTime(interview, requestDto.getTime());
 
-        // 3. 인터뷰 엔티티 생성
-        InterviewEntity interview = InterviewEntity.builder()
-                .isAiInterview(true)
-                .build();
+        // 연관관계 설정 및 저장
+        relateEntities(interview, participant, interviewTime);
+        saveEntities(participant, interviewTime);
 
-        InterviewHistoryEntity interviewHistory = InterviewHistoryEntity.builder()
-                .user(user)
-                .build();
-
-        // 4. 인터뷰 엔티티 먼저 저장 (ID 생성)
-        interviewRepository.save(interview);
-        user.getInterviewHistoryEntityList().add(interviewHistory);
-        interviewHistoryRepository.save(interviewHistory);
-
-        // 5. 참여자 엔티티 생성 및 연결
-        InterviewParticipantEntity interviewee = InterviewParticipantEntity.builder()
-                .user(user)
-                .role(ParticipantRole.SECOND_INTERVIEWER)
-                .interview(interview) // 이미 저장된 interview 연결
-                .build();
-
-        // 6. 시간 설정
-        InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
-                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(requestDto.getTime())))
-                .interview(interview) // 이미 저장된 interview 연결
-                .build();
-
-        // 7. 양방향 관계 설정
-        interview.setParticipants(List.of(interviewee));
-        interview.setInterviewTime(interviewTime);
-
-        // 8. 나머지 엔티티 저장
-        interviewParticipantRepository.save(interviewee);
-        interviewTimeRepository.save(interviewTime);
-
-        // 9. 응답 반환x
         return AiInterviewResponseDto.builder()
-                .interviewId(String.valueOf(interview.getId()))
+                .interviewId(interview.getId().toString())
                 .build();
     }
 
+    // ======================== 👇 헬퍼 메서드들 👇 ========================
+
+    private void relateEntities(InterviewEntity interview, InterviewParticipantEntity participant, InterviewTimeEntity interviewTime) {
+        interview.setParticipants(List.of(participant));
+        interview.setInterviewTime(interviewTime);
+    }
+
+    private void saveEntities(InterviewParticipantEntity participant, InterviewTimeEntity interviewTime) {
+        interviewParticipantRepository.save(participant);
+        interviewTimeRepository.save(interviewTime);
+    }
+
+    private UserEntity getUserOrThrow() {
+        return userRepository.findById(UUIDUtil.getUserIdFromToken())
+                .orElseThrow(InvalidTokenException::new);
+    }
+
+    private void checkNotAlreadyEnqueued(UserEntity user) {
+        if (interviewParticipantRepository.findByUser(user).isPresent()) {
+            throw new AlreadyEnqueuedException();
+        }
+    }
+
+    private InterviewEntity createInterview() {
+        InterviewEntity interview = InterviewEntity.builder()
+                .isAiInterview(true)
+                .build();
+        return interviewRepository.save(interview);
+    }
+
+    private void createInterviewHistory(UserEntity user) {
+        InterviewHistoryEntity history = InterviewHistoryEntity.builder()
+                .user(user)
+                .build();
+        user.getInterviewHistoryEntityList().add(history); // 양방향 관계 설정
+        interviewHistoryRepository.save(history);
+    }
+
+    private InterviewParticipantEntity createParticipant(UserEntity user, InterviewEntity interview) {
+        return InterviewParticipantEntity.builder()
+                .user(user)
+                .role(ParticipantRole.SECOND_INTERVIEWER)
+                .interview(interview)
+                .build();
+    }
+
+    private InterviewTimeEntity createInterviewTime(InterviewEntity interview, int timeMinutes) {
+        return InterviewTimeEntity.builder()
+                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(timeMinutes)))
+                .interview(interview)
+                .build();
+    }
 }
+
