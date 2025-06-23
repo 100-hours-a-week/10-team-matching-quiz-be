@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/prometheus").permitAll() // prometheus
                         .requestMatchers("/health").permitAll()  // ← 추가!
                         .requestMatchers("/api/auth/oauth/kakao").permitAll()
                         .requestMatchers("/api/matching/result").permitAll()
