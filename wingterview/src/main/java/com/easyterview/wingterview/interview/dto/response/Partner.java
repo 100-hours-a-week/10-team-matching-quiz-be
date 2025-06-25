@@ -15,15 +15,4 @@ public class Partner {
     private final String profileImageUrl;
     private final List<String> jobInterest;
     private final List<String> techStack;
-
-    public static Partner fromEntity(UserEntity partnerEntity){
-        return Partner.builder()
-                .name(partnerEntity.getName())
-                .nickname(partnerEntity.getNickname())
-                .profileImageUrl(partnerEntity.getProfileImageUrl())
-                .techStack(partnerEntity.getUserTechStack().stream().map(t -> t.getTechStack().getLabel()).toList())
-                .jobInterest(partnerEntity.getUserJobInterest().stream().map(j -> j.getJobInterest().getLabel()).toList())
-                .curriculum(partnerEntity.getCurriculum())
-                .build();
-    }
 }

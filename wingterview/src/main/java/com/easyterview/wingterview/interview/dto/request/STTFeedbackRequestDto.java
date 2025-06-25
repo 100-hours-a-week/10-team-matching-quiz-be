@@ -11,7 +11,6 @@ import java.util.List;
 @Builder
 @ToString
 public class STTFeedbackRequestDto {
-
     @JsonProperty("recording_url")
     private String recordingUrl;
 

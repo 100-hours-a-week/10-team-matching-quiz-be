@@ -5,6 +5,7 @@ import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.service.aiinterview.AiInterviewService;
 import com.easyterview.wingterview.interview.service.feedback.FeedbackService;
 import com.easyterview.wingterview.interview.service.interviewflow.InterviewFlowService;
+import com.easyterview.wingterview.interview.service.question.QuestionGenerationFacade;
 import com.easyterview.wingterview.interview.service.question.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ public class InterviewFacade {
     private final InterviewFlowService interviewFlowService;
     private final FeedbackService feedbackService;
     private final AiInterviewService aiInterviewService;
-    private final QuestionService questionService;
+    private final QuestionGenerationFacade questionGenerationFacade;
 
     public NextRoundDto goNextStage(String interviewId){
         return interviewFlowService.goNextStage(interviewId);
@@ -26,11 +27,11 @@ public class InterviewFacade {
     }
 
     public Object makeQuestion(String interviewId, QuestionCreationRequestDto dto){
-        return questionService.makeQuestion(interviewId, dto);
+        return questionGenerationFacade.makeQuestion(interviewId, dto);
     }
 
     public void selectQuestion(String interviewId, QuestionSelectionRequestDto dto) {
-        questionService.selectQuestion(interviewId, dto);
+        questionGenerationFacade.selectQuestion(interviewId, dto);
     }
 
     public void sendFeedback(String interviewId, FeedbackRequestDto dto) {

@@ -34,4 +34,12 @@ public class InterviewParticipantEntity {
     @Column(name = "role", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
     private ParticipantRole role;
+
+    public static InterviewParticipantEntity toEntity(UserEntity user, InterviewEntity interview){
+        return InterviewParticipantEntity.builder()
+                .user(user)
+                .role(ParticipantRole.SECOND_INTERVIEWER)
+                .interview(interview)
+                .build();
+    }
 }

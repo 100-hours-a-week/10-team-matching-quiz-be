@@ -3,20 +3,24 @@ package com.easyterview.wingterview.interview.service.interviewflow;
 import com.easyterview.wingterview.common.util.InterviewStatus;
 import com.easyterview.wingterview.common.util.InterviewUtil;
 import com.easyterview.wingterview.common.util.TimeUtil;
-import com.easyterview.wingterview.common.util.UUIDUtil;
-import com.easyterview.wingterview.global.exception.*;
+import com.easyterview.wingterview.common.util.mapper.dto.AiInterviewInfoMapper;
+import com.easyterview.wingterview.common.util.mapper.dto.InterviewStatusMapper;
+import com.easyterview.wingterview.common.util.mapper.dto.NextRoundDtoMapper;
+import com.easyterview.wingterview.common.util.mapper.dto.PartnerMapper;
+import com.easyterview.wingterview.common.util.mapper.entity.InterviewSegmentMapper;
+import com.easyterview.wingterview.common.util.mapper.entity.InterviewTimeMapper;
 import com.easyterview.wingterview.interview.dto.response.*;
 import com.easyterview.wingterview.interview.entity.*;
 import com.easyterview.wingterview.interview.enums.Phase;
+import com.easyterview.wingterview.interview.provider.*;
 import com.easyterview.wingterview.interview.repository.*;
 import com.easyterview.wingterview.user.entity.UserEntity;
-import com.easyterview.wingterview.user.repository.UserRepository;
+import com.easyterview.wingterview.user.provider.UserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,19 +31,26 @@ import java.util.UUID;
 public class InterviewFlowServiceImpl implements InterviewFlowService {
 
     private final InterviewRepository interviewRepository;
-    private final UserRepository userRepository;
-    private final InterviewHistoryRepository interviewHistoryRepository;
     private final InterviewTimeRepository interviewTimeRepository;
     private final InterviewSegmentRepository interviewSegmentRepository;
     private final QuestionOptionsRepository questionOptionsRepository;
     private final QuestionHistoryRepository questionHistoryRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
+    private final InterviewProvider interviewProvider;
+    private final InterviewHistoryProvider interviewHistoryProvider;
+    private final InterviewTimeProvider interviewTimeProvider;
+    private final InterviewSegmentProvider interviewSegmentProvider;
+    private final QuestionHistoryProvider questionHistoryProvider;
+    private final UserProvider userProvider;
+    private final InterviewParticipantProvider interviewParticipantProvider;
+    private final QuestionOptionsProvider questionOptionsProvider;
 
     @Override
     @Transactional
     public NextRoundDto goNextStage(String interviewId) {
-        InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId)).orElseThrow(InterviewNotFoundException::new);
+        InterviewEntity interview = interviewProvider.getInterviewOrThrow(interviewId);
         InterviewStatus nextStatus = InterviewUtil.nextPhase(interview.getRound(), interview.getPhase(), interview.getIsAiInterview());
+
         // 1:1면접이면서 Pending이면 시간 설정
         if (!interview.getIsAiInterview() && isEnteringProgress(nextStatus)) {
             initializeNormalInterviewTime(interview);
@@ -47,18 +58,11 @@ public class InterviewFlowServiceImpl implements InterviewFlowService {
 
         // AI 면접이면서 Progress이면 면접이 끝나므로 마지막 segment 저장 & 인터뷰 끝 저장
         else if (interview.getIsAiInterview() && isCurrentProgress(interview)) {
-            UserEntity user = userRepository
-                    .findById(UUIDUtil.getUserIdFromToken())
-                    .orElseThrow(InvalidTokenException::new);
-            InterviewHistoryEntity interviewHistory = interviewHistoryRepository
-                    .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
-                    .orElseThrow(InterviewNotFoundException::new);
-            InterviewTimeEntity interviewTime = interviewTimeRepository
-                    .findByInterview(interview)
-                    .orElseThrow(InterviewNotFoundException::new);
+            UserEntity user = userProvider.getUserOrThrow();
+            InterviewHistoryEntity interviewHistory = interviewHistoryProvider.getInterviewHistoryOrThrow(user);
+            InterviewTimeEntity interviewTime = interviewTimeProvider.getInterviewTimeOrThrow(interview);
 
             setInterviewEndAndSaveInterviewSegment(interview, interviewTime, interviewHistory);
-
         }
 
         // 새 status 저장
@@ -70,27 +74,23 @@ public class InterviewFlowServiceImpl implements InterviewFlowService {
         questionHistoryRepository.deleteAllByInterviewId(UUID.fromString(interviewId));
 
         // 바꾼 분기 dto 리턴
-        return NextRoundDto.builder()
-                .currentPhase(nextStatus.getPhase().getPhase())
-                .currentRound(nextStatus.getRound())
-                .build();
+        return NextRoundDtoMapper.of(nextStatus);
     }
 
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Object getInterviewStatus() {
 
         // 유저 정보 -> 인터뷰 정보 가져오기
-        UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(InvalidTokenException::new);
-        InterviewParticipantEntity interviewParticipant = interviewParticipantRepository.findByUser(user)
-                .orElseThrow(UserNotParticipatedException::new);
+        UserEntity user = userProvider.getUserOrThrow();
+        InterviewParticipantEntity interviewParticipant = interviewParticipantProvider.getInterviewParticipantOrThrow(user);
         InterviewEntity interview = interviewParticipant.getInterview();
 
         if (!interview.getIsAiInterview()) {
             return buildHumanInterviewStatusDto(user, interview, interviewParticipant);
         }
+
         // AI Interview
         else {
             return buildAiInterviewInfoDto(interview);
@@ -100,10 +100,7 @@ public class InterviewFlowServiceImpl implements InterviewFlowService {
     @Override
     @Transactional
     public void exitInterview(String interviewId) {
-        InterviewEntity interview = interviewRepository.findById(UUID.fromString(interviewId))
-                .orElseThrow(InterviewNotFoundException::new);
-
-        interviewRepository.delete(interview);
+        interviewRepository.deleteById(UUID.fromString(interviewId));
     }
 
     @Override
@@ -119,13 +116,10 @@ public class InterviewFlowServiceImpl implements InterviewFlowService {
                         .build();
     }
 
+    // ======================== 👇 헬퍼 메서드들 👇 ========================
 
     private void initializeNormalInterviewTime(InterviewEntity interview) {
-        InterviewTimeEntity interviewTime = InterviewTimeEntity.builder()
-                .endAt(Timestamp.valueOf(LocalDateTime.now().plusMinutes(20)))
-                .interview(interview)
-                .build();
-
+        InterviewTimeEntity interviewTime = InterviewTimeMapper.toEntity(20, interview);
         interviewTimeRepository.save(interviewTime);
         interview.setInterviewTime(interviewTime);
     }
@@ -139,109 +133,66 @@ public class InterviewFlowServiceImpl implements InterviewFlowService {
     }
 
     private void setInterviewEndAndSaveInterviewSegment(InterviewEntity interview, InterviewTimeEntity interviewTime, InterviewHistoryEntity interviewHistory) {
-        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-        Timestamp originalEndAt = interviewTime.getEndAt();
-        Timestamp endAt = now.after(originalEndAt) ? originalEndAt : now;
+        Timestamp endAt = TimeUtil.getEndAt(interviewTime.getEndAt());
         interviewHistory.setEndAt(endAt);
 
-        InterviewSegmentEntity interviewSegment = InterviewSegmentEntity.builder()
-                .interviewHistory(interviewHistory)
-                .segmentOrder(interviewSegmentRepository.countByInterviewHistory(interviewHistory) + 1)
-                .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), endAt))
-                .selectedQuestion(questionHistoryRepository.findByInterview(interview).orElseThrow(QuestionOptionNotFoundException::new).getSelectedQuestion())
-                .build();
+        InterviewSegmentEntity interviewSegment = InterviewSegmentMapper.toEntity(interviewHistory,
+                interviewSegmentProvider.getCurrentSegmentOrder(interviewHistory) + 1,
+                interview,
+                questionHistoryProvider.getQuestionHistoryOrThrow(interview));
 
         interviewSegmentRepository.save(interviewSegment);
     }
 
     private InterviewStatusDto buildHumanInterviewStatusDto(UserEntity user, InterviewEntity interview, InterviewParticipantEntity interviewParticipant) {
         // 상대방 정보 가져오기
-        UserEntity partnerEntity = getPartnerParticipant(user, interview).getUser();
+        UserEntity partnerEntity = userProvider.findPartner(interview, user);
 
         // 남은 시간 계산
-        Integer timeRemain = interviewTimeRepository.findByInterview(interview)
-                .map(t -> TimeUtil.getRemainTime(t.getEndAt()))
-                .orElse(null);
+        Integer timeRemain = getTimeRemain(interview);
 
         // 내가 현재 인터뷰어인지 확인
         boolean isInterviewer = InterviewUtil.checkInterviewer(interviewParticipant.getRole(), interview.getRound());
-
         // 상대방 정보 dto
-        Partner partner = Partner.fromEntity(partnerEntity);
+        Partner partner = PartnerMapper.of(partnerEntity);
+        // 질문 정보 record
+        QuestionInfo questionInfo = getQuestionInfo(interview);
 
-        // 질문 정보
-        int questionIdx = -1;
-        String selectedQuestion = "";
-        List<String> questionOptions = null;
-        if (interview.getPhase().equals(Phase.PROGRESS)) {
-            QuestionInfo questionInfo = getQuestionInfo(interview);
-            questionIdx = questionInfo.questionIdx();
-            selectedQuestion = questionInfo.selectedQuestion();
-            questionOptions = questionInfo.questionOptions();
-        }
-
-        // 인터뷰 상태 dto 반환
-        return InterviewStatusDto.builder()
-                .interviewId(String.valueOf(interview.getId()))
-                .timeRemain(timeRemain)
-                .currentRound(interview.getRound())
-                .currentPhase(interview.getPhase().getPhase())
-                .isInterviewer(isInterviewer)
-                .isAiInterview(false)
-                .partner(partner)
-                .questionIdx(questionIdx)
-                .selectedQuestion(selectedQuestion)
-                .questionOption(questionOptions)
-                .build();
+        // return
+        return InterviewStatusMapper.of(interview, timeRemain, isInterviewer, partner, questionInfo);
     }
 
     private AiInterviewInfoDto buildAiInterviewInfoDto(InterviewEntity interview) {
         // 남은 시간 계산
-        Integer timeRemain = interviewTimeRepository.findByInterview(interview)
-                .map(t -> TimeUtil.getRemainTime(t.getEndAt()))
-                .orElse(null);
+        Integer timeRemain = getTimeRemain(interview);
 
-        // 질문 정보
-        int questionIdx = -1;
-        String question = "";
-        if (interview.getPhase() == Phase.PROGRESS) {
-            QuestionInfo questionInfo = getQuestionInfo(interview);
-            questionIdx = questionInfo.questionIdx();
-            question = questionInfo.selectedQuestion();
-        }
+        // 질문 정보 record
+        QuestionInfo questionInfo = getQuestionInfo(interview);
 
-        return AiInterviewInfoDto.builder()
-                .InterviewId(String.valueOf(interview.getId()))
-                .currentPhase(interview.getPhase().getPhase())
-                .isAiInterview(true)
-                .question(question)
-                .questionIdx(questionIdx)
-                .timeRemain(timeRemain)
-                .build();
+        // return
+        return AiInterviewInfoMapper.of(interview, timeRemain, questionInfo);
     }
 
     private QuestionInfo getQuestionInfo(InterviewEntity interview) {
-        Optional<QuestionHistoryEntity> questionHistory = questionHistoryRepository.findByInterview(interview);
-        List<String> options = questionOptionsRepository.findTop4ByInterviewOrderByCreatedAtDesc(interview)
-                .stream()
+        if (!interview.getPhase().equals(Phase.PROGRESS)) {
+            return new QuestionInfo(-1, "", List.of());
+        }
+
+        Optional<QuestionHistoryEntity> questionHistory = questionHistoryProvider.getQuestionHistoryOpt(interview);
+        List<String> options = questionOptionsProvider.getLastOptions(interview).stream()
                 .map(QuestionOptionsEntity::getOption)
-                .toList();
+                .toList();;
 
         return new QuestionInfo(
-                questionHistory.map(QuestionHistoryEntity::getSelectedQuestionIdx).orElse(-1),
-                questionHistory.map(QuestionHistoryEntity::getSelectedQuestion).orElse(""),
-                options
-        );
+                        questionHistory.map(QuestionHistoryEntity::getSelectedQuestionIdx).orElse(-1),
+                        questionHistory.map(QuestionHistoryEntity::getSelectedQuestion).orElse(""),
+                        options);
+
     }
 
-    private record QuestionInfo(int questionIdx, String selectedQuestion, List<String> questionOptions) {}
-
-    private InterviewParticipantEntity getPartnerParticipant(UserEntity user, InterviewEntity interview) {
-        return interview.getParticipants()
-                .stream()
-                .filter(i -> !i.getUser().getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(UserNotFoundException::new);
+    private Integer getTimeRemain(InterviewEntity interview) {
+        InterviewTimeEntity interviewTime = interviewTimeProvider.getInterviewTimeOrThrow(interview);
+        return TimeUtil.getRemainTime(interviewTime.getEndAt());
     }
+
 }

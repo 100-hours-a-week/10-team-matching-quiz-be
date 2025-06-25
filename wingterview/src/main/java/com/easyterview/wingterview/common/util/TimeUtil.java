@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Slf4j
@@ -24,5 +25,10 @@ public class TimeUtil {
         long seconds = ChronoUnit.SECONDS.between(start, end);
 
         return (int) seconds;
+    }
+
+    public static Timestamp getEndAt(Timestamp originalEndAt){
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        return now.after(originalEndAt) ? originalEndAt : now;
     }
 }

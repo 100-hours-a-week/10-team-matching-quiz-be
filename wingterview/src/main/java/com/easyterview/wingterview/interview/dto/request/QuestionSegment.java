@@ -24,16 +24,5 @@ public class QuestionSegment {
     private Integer endTime;
 
     private String question;
-
-    public static List<QuestionSegment> fromEntity(InterviewHistoryEntity interviewHistory){
-        return
-        interviewHistory.getSegments().stream()
-                .map(s -> QuestionSegment.builder()
-                        .segmentId(s.getId().toString())
-                        .startTime(s.getFromTime())
-                        .endTime(s.getToTime())
-                        .question(s.getSelectedQuestion())
-                        .build()).toList();
-    }
 }
 

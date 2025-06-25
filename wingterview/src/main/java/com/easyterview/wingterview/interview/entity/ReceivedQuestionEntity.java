@@ -34,12 +34,5 @@ public class ReceivedQuestionEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    public static ReceivedQuestionEntity toEntity(String question, UserEntity user){
-        return
-                ReceivedQuestionEntity.builder()
-                        .contents(question)
-                        .receivedAt(Timestamp.valueOf(LocalDateTime.now()))
-                        .user(user)
-                        .build();
-    }
+
 }

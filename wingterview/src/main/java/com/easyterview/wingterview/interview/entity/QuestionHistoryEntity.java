@@ -37,11 +37,5 @@ public class QuestionHistoryEntity {
     @JoinColumn(name = "interview_id", nullable = false)
     private InterviewEntity interview;
 
-    public static QuestionHistoryEntity toEntity(InterviewEntity interview, String question){
-        return QuestionHistoryEntity.builder()
-                .interview(interview)
-                .selectedQuestion(question)
-                .selectedQuestionIdx(1)
-                .build();
-    }
+
 }

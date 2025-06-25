@@ -47,15 +47,4 @@ public class InterviewSegmentEntity {
 
     @OneToOne(mappedBy = "interviewSegment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BoardEntity board;
-
-    public static InterviewSegmentEntity toEntity(InterviewHistoryEntity interviewHistory, Integer currentSegmentOrder, InterviewEntity interview, String oldQuestion) {
-        return
-                InterviewSegmentEntity.builder()
-                        .interviewHistory(interviewHistory)
-                        .segmentOrder(currentSegmentOrder + 1)
-                        .fromTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), interview.getQuestionHistory().getCreatedAt()))
-                        .toTime(TimeUtil.getTime(interview.getInterviewTime().getStartAt(), Timestamp.valueOf(LocalDateTime.now())))
-                        .selectedQuestion(oldQuestion)
-                        .build();
-    }
 }

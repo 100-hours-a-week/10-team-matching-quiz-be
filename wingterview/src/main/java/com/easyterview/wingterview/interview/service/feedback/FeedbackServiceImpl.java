@@ -1,22 +1,21 @@
 package com.easyterview.wingterview.interview.service.feedback;
 
-import com.easyterview.wingterview.common.util.UUIDUtil;
+import com.easyterview.wingterview.common.util.mapper.dto.STTFeedbackRequestMapper;
+import com.easyterview.wingterview.common.util.mapper.dto.QuestionSegmentMapper;
 import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
-import com.easyterview.wingterview.global.exception.InvalidTokenException;
 import com.easyterview.wingterview.interview.dto.request.FeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.request.QuestionSegment;
-import com.easyterview.wingterview.interview.dto.request.STTFeedbackRequestDto;
 import com.easyterview.wingterview.interview.dto.response.FeedbackResponseDto;
 import com.easyterview.wingterview.interview.entity.InterviewEntity;
 import com.easyterview.wingterview.interview.entity.InterviewHistoryEntity;
-import com.easyterview.wingterview.interview.entity.InterviewParticipantEntity;
+import com.easyterview.wingterview.interview.provider.InterviewProvider;
 import com.easyterview.wingterview.interview.repository.*;
 import com.easyterview.wingterview.rabbitmq.consumer.FeedbackConsumer;
 import com.easyterview.wingterview.rabbitmq.service.RabbitMqService;
 import com.easyterview.wingterview.user.entity.RecordingEntity;
 import com.easyterview.wingterview.user.entity.UserEntity;
+import com.easyterview.wingterview.user.provider.UserProvider;
 import com.easyterview.wingterview.user.repository.RecordRepository;
-import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService{
 
-    private final InterviewRepository interviewRepository;
-    private final UserRepository userRepository;
+    private final InterviewProvider interviewProvider;
+    private final UserProvider userProvider;
     private final InterviewHistoryRepository interviewHistoryRepository;
     private final RecordRepository recordRepository;
     private final FeedbackConsumer feedbackConsumer;
@@ -43,32 +42,23 @@ public class FeedbackServiceImpl implements FeedbackService{
     public void requestSttFeedback(String userId) {
         InterviewHistoryEntity interviewHistory = getLastInterviewHistoryOrElseThrow(userId);
         RecordingEntity recordingEntity = getLastRecordingOrElseThrow(interviewHistory);
-        List<QuestionSegment> questionSegments = QuestionSegment.fromEntity(interviewHistory);
+        List<QuestionSegment> questionSegments = QuestionSegmentMapper.of(interviewHistory);
 
-        rabbitMqService.sendSTTFeedbackRequest(STTFeedbackRequestDto.builder()
-                .questionLists(questionSegments)
-                .recordingUrl(recordingEntity.getUrl())
-                .build());
+        rabbitMqService.sendSTTFeedbackRequest(STTFeedbackRequestMapper.of(questionSegments, recordingEntity));
     }
-
-
 
     // 상대방에게 피드백 보내는 로직 -> 현재는 사용 x -> 추후 1:1 매칭 및 면접 기능 활성화시 사용
     @Transactional
     @Override
     public void sendFeedback(String interviewId, FeedbackRequestDto dto) {
         // 1. 인터뷰 정보 조회
-        InterviewEntity interview = getInterviewOrElseThrow(interviewId);
+        InterviewEntity interview = interviewProvider.getInterviewOrThrow(interviewId);
 
         // 2. 현재 로그인된 사용자 조회
-        UserEntity currentUser = getUserOrElseThrow();
+        UserEntity currentUser = userProvider.getUserOrThrow();
 
         // 3. 상대방 유저 찾기 (현재 유저와 ID가 다른 참여자)
-        UserEntity otherUser = interview.getParticipants().stream()
-                .map(InterviewParticipantEntity::getUser)
-                .filter(user -> !user.getId().equals(currentUser.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("상대 유저를 찾을 수 없습니다."));
+        UserEntity otherUser = userProvider.findPartner(interview, currentUser);
     }
 
     @RabbitListener(queues = "feedback.response.queue")
@@ -77,16 +67,6 @@ public class FeedbackServiceImpl implements FeedbackService{
     }
 
     // ======================== 👇 헬퍼 메서드들 👇 ========================
-
-    private UserEntity getUserOrElseThrow() {
-        return userRepository.findById(UUIDUtil.getUserIdFromToken())
-                .orElseThrow(InvalidTokenException::new);
-    }
-
-    private InterviewEntity getInterviewOrElseThrow(String interviewId) {
-        return interviewRepository.findById(UUID.fromString(interviewId))
-                .orElseThrow(InterviewNotFoundException::new);
-    }
 
     private RecordingEntity getLastRecordingOrElseThrow(InterviewHistoryEntity interviewHistory) {
         return recordRepository.findByInterviewHistoryId(interviewHistory.getId()).orElseThrow(InterviewNotFoundException::new);
