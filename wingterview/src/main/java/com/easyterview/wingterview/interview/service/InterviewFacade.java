@@ -6,7 +6,6 @@ import com.easyterview.wingterview.interview.service.aiinterview.AiInterviewServ
 import com.easyterview.wingterview.interview.service.feedback.FeedbackService;
 import com.easyterview.wingterview.interview.service.interviewflow.InterviewFlowService;
 import com.easyterview.wingterview.interview.service.question.QuestionGenerationFacade;
-import com.easyterview.wingterview.interview.service.question.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
