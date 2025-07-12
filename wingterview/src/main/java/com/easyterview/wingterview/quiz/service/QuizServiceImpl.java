@@ -22,6 +22,7 @@ import com.easyterview.wingterview.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,6 +102,7 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @Override
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul") // 매일 00:00에 실행
     public void createTodayQuiz() {
         List<UserEntity> userList = userRepository.findAll();
         userList.forEach(user -> {
