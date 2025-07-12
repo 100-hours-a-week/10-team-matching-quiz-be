@@ -1,6 +1,7 @@
 package com.easyterview.wingterview.user.service;
 
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
+import com.easyterview.wingterview.user.dto.request.UserUpdateRequestDto;
 import com.easyterview.wingterview.user.dto.response.*;
 
 public interface UserService {
@@ -15,4 +16,6 @@ public interface UserService {
     InterviewHistoryDto getInterviewList(String userId, String cursor, Integer limit);
 
     InterviewDetailDto getInterviewDetail(String userId, String interviewId);
+
+    void updateUserInfo(String userId, UserUpdateRequestDto dto);
 }

@@ -3,6 +3,7 @@ package com.easyterview.wingterview.user.controller;
 import com.easyterview.wingterview.common.constants.UserResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
+import com.easyterview.wingterview.user.dto.request.UserUpdateRequestDto;
 import com.easyterview.wingterview.user.dto.response.*;
 import com.easyterview.wingterview.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,5 +70,11 @@ public class UserController {
     public ResponseEntity<BaseResponse> getInterviewDetail(@PathVariable String userId, @PathVariable String interviewId){
         InterviewDetailDto response = userService.getInterviewDetail(userId, interviewId);
         return BaseResponse.response(UserResponseMessage.USER_INTERVIEW_DETAIL_FETCH_DONE, response);
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<BaseResponse> updateUserInfo(@PathVariable String userId, @RequestBody UserUpdateRequestDto dto){
+        userService.updateUserInfo(userId, dto);
+        return BaseResponse.response(UserResponseMessage.USER_INFO_MODIFICATION_DONE);
     }
 }

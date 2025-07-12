@@ -13,20 +13,20 @@ import com.easyterview.wingterview.matching.entity.MatchingParticipantEntity;
 import com.easyterview.wingterview.matching.repository.MatchingParticipantRepository;
 import com.easyterview.wingterview.user.dto.request.SeatPosition;
 import com.easyterview.wingterview.user.dto.request.UserBasicInfoDto;
+import com.easyterview.wingterview.user.dto.request.UserUpdateRequestDto;
 import com.easyterview.wingterview.user.dto.response.*;
 import com.easyterview.wingterview.user.entity.*;
 import com.easyterview.wingterview.user.enums.JobInterest;
 import com.easyterview.wingterview.user.enums.TechStack;
-import com.easyterview.wingterview.user.repository.InterviewStatRepository;
-import com.easyterview.wingterview.user.repository.RecordRepository;
-import com.easyterview.wingterview.user.repository.UserRepository;
+import com.easyterview.wingterview.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserJobInterestRepository userJobInterestRepository;
+    private final UserTechStackRepository userTechStackRepository;
     private final InterviewStatRepository interviewStatRepository;
     private final MatchingParticipantRepository matchingParticipantRepository;
     private final InterviewHistoryRepositoryCustom interviewHistoryRepositoryCustom;
@@ -53,7 +55,7 @@ public class UserServiceImpl implements UserService {
         user.setIsKTB(userBasicInfo.getIsKTB());
 
         // KTB 회원인 경우
-        if(userBasicInfo.getIsKTB()) {
+        if (userBasicInfo.getIsKTB()) {
             user.setCurriculum(userBasicInfo.getCurriculum());
 
             SeatPosition seatPosition = userBasicInfo.getSeatPosition();
@@ -103,23 +105,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public SeatPositionDto getBlockedSeats() {
         // DTO 구조 변경(A,B,C 분단)
-        boolean[][] A = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()/3];
-        boolean[][] B = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()/3];
-        boolean[][] C = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength()/3];
+        boolean[][] A = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength() / 3];
+        boolean[][] B = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength() / 3];
+        boolean[][] C = new boolean[Seats.ROW_LENGTH.getLength()][Seats.COL_LENGTH.getLength() / 3];
         List<Integer> seats = userRepository.findAllSeatInfo();
 
         // 자리들에 대해 boolean[][] 배열에 넣어주기
         seats.forEach((index) -> {
             int seatX = index / Seats.COL_LENGTH.getLength();
             int seatY = index % Seats.COL_LENGTH.getLength();
-            if(seatY / 3 == 0){
-                A[seatX][seatY%3] = true;
-            }
-            else if(seatY / 3 == 1){
-                B[seatX][seatY%3] = true;
-            }
-            else{
-                C[seatX][seatY%3] = true;
+            if (seatY / 3 == 0) {
+                A[seatX][seatY % 3] = true;
+            } else if (seatY / 3 == 1) {
+                B[seatX][seatY % 3] = true;
+            } else {
+                C[seatX][seatY % 3] = true;
             }
         });
         BlockedSeats blockedSeats = BlockedSeats.builder()
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(UUIDUtil.getUserIdFromToken())
                 .orElseThrow(InvalidTokenException::new);
         Integer mySeatIdx = user.getSeat();
-        int[] mySeatPosition = user.getSeat() == null ? null : new int[] {mySeatIdx / Seats.COL_LENGTH.getLength() + 1 , mySeatIdx % Seats.COL_LENGTH.getLength() + 1 };
+        int[] mySeatPosition = user.getSeat() == null ? null : new int[]{mySeatIdx / Seats.COL_LENGTH.getLength() + 1, mySeatIdx % Seats.COL_LENGTH.getLength() + 1};
 
         return SeatPositionDto.builder()
                 .seats(blockedSeats)
@@ -165,12 +165,12 @@ public class UserServiceImpl implements UserService {
                 .seatCode(user.getIsKTB() ? SeatPositionUtil.seatIdxToSeatCode(user.getSeat()) : "Temp-Temp")
                 .jobInterest(user.getUserJobInterest().stream()
                         .map(interestEntity -> interestEntity.getJobInterest().getLabel())
-                        .collect(Collectors.toList()))
+                        .collect(toList()))
                 .techStack(user.getUserTechStack().stream()
                         .map(techStackEntity -> techStackEntity.getTechStack().getLabel())
                         .toList())
                 .interviewCnt(user.getInterviewStat().getInterviewCnt())
-                .profileImageUrl(user.getProfileImageUrl())     
+                .profileImageUrl(user.getProfileImageUrl())
                 .isInQueue(matchingParticipantEntity.isPresent())
                 .myId(user.getId().toString())
                 .isKTB(user.getIsKTB())
@@ -203,14 +203,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public InterviewHistoryDto getInterviewList(String userId, String cursor, Integer limit) {
-        return interviewHistoryRepositoryCustom.findByCursorWithLimit(userId,cursor == null ? null : UUID.fromString(cursor),limit);
+        return interviewHistoryRepositoryCustom.findByCursorWithLimit(userId, cursor == null ? null : UUID.fromString(cursor), limit);
     }
 
     @Override
     public InterviewDetailDto getInterviewDetail(String userId, String interviewHistoryId) {
         InterviewHistoryEntity interviewHistory = interviewHistoryRepository.findById(UUID.fromString(interviewHistoryId)).orElseThrow(InterviewNotFoundException::new);
 
-        if(interviewHistory.getIsFeedbackRequested()) {
+        if (interviewHistory.getIsFeedbackRequested()) {
             RecordingEntity recordingEntity = recordRepository.findByInterviewHistoryId(UUID.fromString(interviewHistoryId)).orElseThrow(RecordNotFoundException::new);
             List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> {
                         if (s.getFeedback() == null) {
@@ -243,13 +243,12 @@ public class UserServiceImpl implements UserService {
                     .createdAt(interviewHistory.getCreatedAt())
                     .duration((interviewHistory.getEndAt().getTime() - interviewHistory.getCreatedAt().getTime()) / 1000)
                     .build();
-        }
-        else{
+        } else {
             List<FeedbackItem> feedbackItemList = interviewHistory.getSegments().stream().map(s -> FeedbackItem.builder()
-                    .segmentId(s.getId().toString())
-                    .question(s.getSelectedQuestion())
-                    .order(s.getSegmentOrder())
-                    .build()).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
+                            .segmentId(s.getId().toString())
+                            .question(s.getSelectedQuestion())
+                            .order(s.getSegmentOrder())
+                            .build()).sorted(Comparator.comparingInt(FeedbackItem::getOrder))
                     .toList();
 
             return InterviewDetailDto.builder()
@@ -260,5 +259,37 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    @Transactional
+    public void updateUserInfo(String userId, UserUpdateRequestDto dto) {
+        UserEntity user = userRepository.findById(UUID.fromString(userId)).orElseThrow(UserNotFoundException::new);
 
+        if (dto.getJobInterest() != null) {
+            userJobInterestRepository.deleteAllByUserId(UUID.fromString(userId));
+            List<UserJobInterestEntity> newUserJobInterest = dto.getJobInterest().stream().map(s -> UserJobInterestEntity.builder()
+                    .user(user)
+                    .jobInterest(JobInterest.from(s))
+                    .build()
+            ).toList();
+            user.setUserJobInterest(newUserJobInterest);
+        }
+
+        if (dto.getTechStack() != null) {
+            userTechStackRepository.deleteAllByUserId(UUID.fromString(userId));
+            List<UserTechStackEntity> newUserTechStack = dto.getTechStack().stream().map(s -> UserTechStackEntity.builder()
+                    .user(user)
+                    .techStack(TechStack.from(s))
+                    .build()
+            ).toList();
+            user.setUserTechStack(newUserTechStack);
+        }
+
+        if(dto.getSeatPosition() != null){
+            user.setSeat(SeatPositionUtil.seatPosToInt(dto.getSeatPosition()));
+        }
+
+        if(dto.getProfileImageUrl() != null){
+            user.setProfileImageUrl(dto.getProfileImageUrl());
+        }
+    }
 }
