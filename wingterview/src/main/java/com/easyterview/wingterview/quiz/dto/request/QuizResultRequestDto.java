@@ -5,6 +5,6 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class TodayQuizResultRequestDto {
+public class QuizResultRequestDto {
     List<QuizResultItem> quizzes;
 }

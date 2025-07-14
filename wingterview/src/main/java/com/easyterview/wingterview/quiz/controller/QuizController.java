@@ -2,7 +2,7 @@ package com.easyterview.wingterview.quiz.controller;
 
 import com.easyterview.wingterview.common.constants.QuizResponseMessage;
 import com.easyterview.wingterview.global.response.BaseResponse;
-import com.easyterview.wingterview.quiz.dto.request.TodayQuizResultRequestDto;
+import com.easyterview.wingterview.quiz.dto.request.QuizResultRequestDto;
 import com.easyterview.wingterview.quiz.dto.response.QuizListResponse;
 import com.easyterview.wingterview.quiz.dto.response.QuizStatsResponse;
 import com.easyterview.wingterview.quiz.dto.response.TodayQuizListResponse;
@@ -40,7 +40,7 @@ public class QuizController {
     }
 
     @PostMapping("/today-quiz/{userId}")
-    public ResponseEntity<BaseResponse> sendTodayQuizResult(@PathVariable String userId, @RequestBody TodayQuizResultRequestDto request){
+    public ResponseEntity<BaseResponse> sendTodayQuizResult(@PathVariable String userId, @RequestBody QuizResultRequestDto request){
         quizService.sendTodayQuizResult(userId, request);
         return BaseResponse.response(QuizResponseMessage.QUIZ_RESULT_SEND_DONE);
     }
@@ -52,4 +52,22 @@ public class QuizController {
         return BaseResponse.response(QuizResponseMessage.TODAY_QUIZ_FETCH_DONE);
     }
 
+    @GetMapping("/quiz/cs-quiz/{userId}")
+    public ResponseEntity<BaseResponse> getCsQuizList(@PathVariable String userId){
+        TodayQuizListResponse responseDto = quizService.getCsQuizList(userId);
+        return BaseResponse.response(QuizResponseMessage.CS_QUIZ_FETCH_DONE,responseDto);
+    }
+
+    @PostMapping("/quiz/cs-quiz/{userId}")
+    public ResponseEntity<BaseResponse> makeCsQuizList(@PathVariable String userId, @RequestParam String category){
+        quizService.makeCsQuizList(userId, category);
+        return BaseResponse.response(QuizResponseMessage.CS_QUIZ_CREATION_DONE);
+    }
+
+    @PutMapping("/quiz/cs-quiz/{userId}")
+    public ResponseEntity<BaseResponse> sendCsQuizResult(@PathVariable String userId, @RequestBody QuizResultRequestDto request){
+        System.out.println(request.getQuizzes().get(0).getUserSelection());
+        quizService.sendCsQuizResult(userId, request);
+        return BaseResponse.response(QuizResponseMessage.CS_QUIZ_RESULT_SEND_DONE);
+    }
 }

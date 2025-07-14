@@ -264,32 +264,42 @@ public class UserServiceImpl implements UserService {
     public void updateUserInfo(String userId, UserUpdateRequestDto dto) {
         UserEntity user = userRepository.findById(UUID.fromString(userId)).orElseThrow(UserNotFoundException::new);
 
+        if(dto.getName() != null){
+            user.setName(dto.getName());
+        }
+
+        if(dto.getNickname() != null){
+            user.setNickname(dto.getNickname());
+        }
+
         if (dto.getJobInterest() != null) {
-            userJobInterestRepository.deleteAllByUserId(UUID.fromString(userId));
             List<UserJobInterestEntity> newUserJobInterest = dto.getJobInterest().stream().map(s -> UserJobInterestEntity.builder()
                     .user(user)
                     .jobInterest(JobInterest.from(s))
                     .build()
             ).toList();
-            user.setUserJobInterest(newUserJobInterest);
+            user.getUserJobInterest().clear();
+            user.getUserJobInterest().addAll(newUserJobInterest);
         }
 
         if (dto.getTechStack() != null) {
-            userTechStackRepository.deleteAllByUserId(UUID.fromString(userId));
             List<UserTechStackEntity> newUserTechStack = dto.getTechStack().stream().map(s -> UserTechStackEntity.builder()
                     .user(user)
                     .techStack(TechStack.from(s))
                     .build()
             ).toList();
-            user.setUserTechStack(newUserTechStack);
+            user.getUserTechStack().clear();
+            user.getUserTechStack().addAll(newUserTechStack);
         }
 
-        if(dto.getSeatPosition() != null){
+        if(dto.getSeatPosition().getSeat().getFirst() != null && dto.getSeatPosition().getSeat().getLast() != null){
             user.setSeat(SeatPositionUtil.seatPosToInt(dto.getSeatPosition()));
         }
 
         if(dto.getProfileImageUrl() != null){
             user.setProfileImageUrl(dto.getProfileImageUrl());
         }
+
+        userRepository.save(user);
     }
 }

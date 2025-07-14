@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface UserJobInterestRepository extends JpaRepository<UUID, UserJobInterestEntity> {
+public interface UserJobInterestRepository extends JpaRepository<UserJobInterestEntity, UUID> {
     void deleteAllByUserId(UUID uuid);
 }
