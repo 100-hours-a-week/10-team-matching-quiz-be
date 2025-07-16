@@ -38,7 +38,7 @@ oauth:
     client-id: ${KAKAO_CLIENT_ID}
 
 ai:
-  follow-up-url: https://prod-nlb-c0b1c269768967f4.elb.ap-northeast-2.amazonaws.com/interview/followup-questions
+  follow-up-url: https://ai.wingterview.com/interview/followup-questions
   api-key: ${AI_KEY}
   api-url: ${AI_URL}
 
