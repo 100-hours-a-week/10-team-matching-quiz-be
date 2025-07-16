@@ -1,14 +1,12 @@
 spring:
+  config:
+    import: application-secret.yml
+
   datasource:
-    #url: jdbc:mysql://mysql:3306/wingterview?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul
-    url: jdbc:mysql://prod-rds-az1.c7yeqiwak4u9.ap-northeast-2.rds.amazonaws.com:3306/wingterview?useUnicode=true&character_set_server=utf8mb4&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://wingterview.c94aseeus9o9.ap-northeast-2.rds.amazonaws.com:3306/wingterview?useUnicode=true&character_set_server=utf8mb4&serverTimezone=Asia/Seoul
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-
-  config:
-    import: optional:file:application-secret.yml
-
 
   jpa:
     hibernate:
@@ -30,20 +28,13 @@ rabbitmq:
   exchange:
     name: ai.request.exchange
   routing:
-    key : ai.request.routingKey
+    key: ai.request.routingKey
 
-#  redis:
-#    host: localhost
-#    port: 6379
-      
 oauth:
   kakao:
     token-request-uri: https://kauth.kakao.com/oauth/token
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
-#    redirect-uri: https://dev.s3.wingterview.com/auth/kakao
-#    redirect-uri: http://localhost:5173/auth/kakao
-#    redirect-uri: http://wingterview.com/auth/kakao
-    redirect-uri: https://wingterview.com/auth/kakao
+    redirect-uri: https://wingterview10.com/auth/kakao
     client-id: ${KAKAO_CLIENT_ID}
 
 ai:
@@ -57,12 +48,11 @@ cloud:
       static: ${AWS_REGION}
     s3:
       bucket: ${S3_BUCKET}
-
-  credentials:
-    access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY}
-    stack:
-      auto: false
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+      stack:
+        auto: false
 
 springdoc:
   api-docs:
@@ -71,3 +61,12 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info
+  endpoint:
+    prometheus:
+      enabled: true
