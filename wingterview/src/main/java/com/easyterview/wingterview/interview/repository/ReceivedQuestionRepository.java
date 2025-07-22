@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface ReceivedQuestionRepository extends JpaRepository<ReceivedQuestionEntity, UUID> {
     List<ReceivedQuestionEntity> findTop10ByUserIdOrderByReceivedAt(UUID userId);
 
-    Fetchable<Object> findTop10ByUserIdAndReceivedAtBetweenOrderByReceivedAtDesc(UUID id, LocalDateTime startOfYesterday, LocalDateTime endOfYesterday);
+    List<ReceivedQuestionEntity> findTop10ByUserIdAndReceivedAtBetweenOrderByReceivedAtDesc(UUID id, LocalDateTime startOfYesterday, LocalDateTime endOfYesterday);
 }
