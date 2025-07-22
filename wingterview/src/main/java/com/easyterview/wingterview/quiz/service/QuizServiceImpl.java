@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class QuizServiceImpl implements QuizService{
+public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
@@ -51,8 +52,8 @@ public class QuizServiceImpl implements QuizService{
         List<QuizEntity> quiz = quizRepository.findAllByUserId(UUID.fromString(userId));
         int correctQuizCnt = quiz.stream().filter(QuizEntity::getIsCorrect).toList().size();
         float correctRate = 0.0f;
-        if(!quiz.isEmpty()){
-            correctRate = (float) correctQuizCnt/quiz.size();
+        if (!quiz.isEmpty()) {
+            correctRate = (float) correctQuizCnt / quiz.size();
             correctRate = Math.round(correctRate * 100);
         }
         return QuizStatsResponse.builder()
@@ -62,7 +63,7 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     public QuizListResponse getQuizList(String userId, Boolean wrong, String cursor, Integer limit) {
-        return quizRepositoryCustom.findByCursorWithLimit(UUID.fromString(userId),wrong,cursor == null ? null : UUID.fromString(cursor),limit);
+        return quizRepositoryCustom.findByCursorWithLimit(UUID.fromString(userId), wrong, cursor == null ? null : UUID.fromString(cursor), limit);
     }
 
     @Override
@@ -79,15 +80,15 @@ public class QuizServiceImpl implements QuizService{
         List<TodayQuiz> todayQuizList = todayQuizEntityList.stream().map(e -> {
             List<QuizSelectionEntity> quizSelectionEntityList = quizSelectionRepository.findAllByTodayQuiz(e);
             return
-            TodayQuiz.builder()
-                    .question(e.getQuestion())
-                    .quizIdx(e.getQuestionIdx())
-                    .commentary(e.getCommentary())
-                    .options(quizSelectionEntityList.stream().map(QuizSelectionEntity::getSelection).toList())
-                    .answerIdx(e.getCorrectAnswerIdx())
-                    .userAnswer(e.getUserSelection())   // 문제 하나 봤을 때 null이면 안푼거, null 아니면 푼거
-                    .difficulty(e.getDifficulty())
-                    .build();
+                    TodayQuiz.builder()
+                            .question(e.getQuestion())
+                            .quizIdx(e.getQuestionIdx())
+                            .commentary(e.getCommentary())
+                            .options(quizSelectionEntityList.stream().map(QuizSelectionEntity::getSelection).toList())
+                            .answerIdx(e.getCorrectAnswerIdx())
+                            .userAnswer(e.getUserSelection())   // 문제 하나 봤을 때 null이면 안푼거, null 아니면 푼거
+                            .difficulty(e.getDifficulty())
+                            .build();
         }).toList();
 
 //        todayQuizList.forEach(q -> System.out.println(q.getQuestion()));
@@ -106,8 +107,14 @@ public class QuizServiceImpl implements QuizService{
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul") // 매일 00:00에 실행
     public void createTodayQuiz() {
         List<UserEntity> userList = userRepository.findAll();
+        LocalDateTime startOfYesterday = LocalDate.now().minusDays(1).atStartOfDay();               // 어제 00:00
+        LocalDateTime endOfYesterday = LocalDate.now().atStartOfDay().minusNanos(1);
         userList.forEach(user -> {
-            List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdOrderByReceivedAt(user.getId()).stream().map(ReceivedQuestionEntity::getContents).toList();
+
+            List<String> questionHistoryList = receivedQuestionRepository.findTop10ByUserIdAndReceivedAtBetweenOrderByReceivedAtDesc(user.getId(), startOfYesterday, endOfYesterday).stream().map(ReceivedQuestionEntity::getContents).toList();
+            if (questionHistoryList.isEmpty())
+                return;
+
             QuizCreationRequestDto request = QuizCreationRequestDto.builder()
                     .questionHistoryList(questionHistoryList)
                     .userId(user.getId().toString())
@@ -116,6 +123,7 @@ public class QuizServiceImpl implements QuizService{
 
             rabbitMqService.sendQuizCreation(request);
             log.info("📤 복습 퀴즈 생성 요청 전송: {}", request);
+
         });
     }
 
@@ -175,25 +183,25 @@ public class QuizServiceImpl implements QuizService{
     @Transactional(readOnly = true)
     public TodayQuizListResponse getCsQuizList(String userId) {
         List<UserCsQuizEntity> userCsQuizList = userCsQuizRepository.findAllWithChoicesByUserId(UUID.fromString(userId));
-        if(userCsQuizList.isEmpty())
+        if (userCsQuizList.isEmpty())
             throw new QuizNotFoundException();
 
         List<TodayQuiz> quizList = userCsQuizList.stream().map(c -> {
             List<CsQuizSelectionEntity> choices = c.getCsQuiz().getChoices();
             return
-            TodayQuiz.builder()
-                    .quizIdx(c.getQuizIdx())
-                    .question(c.getCsQuiz().getQuestion())
-                    .options(choices.stream().map(CsQuizSelectionEntity::getContent).toList())
-                    .commentary(c.getCsQuiz().getExplanation())
-                    .difficulty(null)
-                    .answerIdx(choices.stream()
-                            .filter(CsQuizSelectionEntity::getIsAnswer)
-                            .findFirst()
-                            .map(CsQuizSelectionEntity::getOptionIdx)
-                            .orElseThrow(() -> new RuntimeException("정답이 없습니다")))
-                    .userAnswer(c.getUserAnswerIdx())
-                    .build();
+                    TodayQuiz.builder()
+                            .quizIdx(c.getQuizIdx())
+                            .question(c.getCsQuiz().getQuestion())
+                            .options(choices.stream().map(CsQuizSelectionEntity::getContent).toList())
+                            .commentary(c.getCsQuiz().getExplanation())
+                            .difficulty(null)
+                            .answerIdx(choices.stream()
+                                    .filter(CsQuizSelectionEntity::getIsAnswer)
+                                    .findFirst()
+                                    .map(CsQuizSelectionEntity::getOptionIdx)
+                                    .orElseThrow(() -> new RuntimeException("정답이 없습니다")))
+                            .userAnswer(c.getUserAnswerIdx())
+                            .build();
         }).toList();
 
         return TodayQuizListResponse.builder()
@@ -209,11 +217,11 @@ public class QuizServiceImpl implements QuizService{
         String quizCategory = QuizCategory.fromDisplayName(category).name();
         AtomicInteger quizIdx = new AtomicInteger(1);
         List<UserCsQuizEntity> userCsQuizEntityList = csQuizRepository.findTop10RandomByCategory(quizCategory).stream().map(c ->
-            UserCsQuizEntity.builder()
-                    .csQuiz(c)
-                    .user(user)
-                    .quizIdx(quizIdx.getAndIncrement())
-                    .build()
+                UserCsQuizEntity.builder()
+                        .csQuiz(c)
+                        .user(user)
+                        .quizIdx(quizIdx.getAndIncrement())
+                        .build()
         ).toList();
 
         userCsQuizRepository.saveAll(userCsQuizEntityList);
