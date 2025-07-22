@@ -25,4 +25,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     @Query("SELECT u FROM UserEntity u WHERE u.seat = :seat")
     Optional<UserEntity> findBySeatForUpdate(@Param("seat") int seat);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM UserEntity u WHERE u.id = :id")
+    Optional<UserEntity> findByIdForUpdate(@Param("id") UUID id);
+
 }

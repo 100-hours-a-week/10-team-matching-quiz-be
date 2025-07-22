@@ -265,7 +265,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUserInfo(String userId, UserUpdateRequestDto dto) {
-        UserEntity user = userRepository.findById(UUID.fromString(userId)).orElseThrow(UserNotFoundException::new);
+
+        UserEntity user = userRepository.findByIdForUpdate(UUID.fromString(userId)).orElseThrow(UserNotFoundException::new);
 
         if(dto.getName() != null){
             user.setName(dto.getName());

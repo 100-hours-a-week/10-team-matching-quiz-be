@@ -3,7 +3,8 @@ spring:
     import: application-secret.yml
 
   datasource:
-    url: jdbc:mysql://wingterview.c94aseeus9o9.ap-northeast-2.rds.amazonaws.com:3306/wingterview?useUnicode=true&character_set_server=utf8mb4&serverTimezone=Asia/Seoul
+#    url: jdbc:mysql://wingterview.c94aseeus9o9.ap-northeast-2.rds.amazonaws.com:3306/wingterview?useUnicode=true&character_set_server=utf8mb4&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/wingterview?useUnicode=true&character_set_server=utf8mb4&serverTimezone=Asia/Seoul
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -34,7 +35,8 @@ oauth:
   kakao:
     token-request-uri: https://kauth.kakao.com/oauth/token
     token-info-uri: https://kapi.kakao.com/v1/user/access_token_info
-    redirect-uri: https://wingterview10.com/auth/kakao
+#    redirect-uri: https://wingterview10.com/auth/kakao
+    redirect-uri: http://localhost:5173/auth/kakao
     client-id: ${KAKAO_CLIENT_ID}
 
 ai:
