@@ -226,7 +226,10 @@ public class UserServiceImpl implements UserService {
                         return
                                 FeedbackItem.builder()
                                         .segmentId(s.getId().toString())
-                                        .commentary(interviewFeedback.getCommentary())
+                                        .goodPoints(interviewFeedback.getGoodPoints())
+                                        .details(interviewFeedback.getDetails())
+                                        .score(interviewFeedback.getScore())
+                                        .improvements(interviewFeedback.getImprovements())
                                         .endAt(s.getToTime())
                                         .modelAnswer(interviewFeedback.getCorrectAnswer())
                                         .startAt(s.getFromTime())

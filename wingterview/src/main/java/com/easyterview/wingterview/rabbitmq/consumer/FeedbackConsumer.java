@@ -29,7 +29,10 @@ public class FeedbackConsumer {
             InterviewSegmentEntity segment = interviewSegmentRepository.findById(UUID.fromString(feedbackItem.getSegmentId())).orElseThrow(InterviewNotFoundException::new);
 
             InterviewFeedbackEntity interviewFeedback = InterviewFeedbackEntity.builder()
-                    .commentary(feedbackItem.getFeedback())
+                    .score(feedbackItem.getFeedback().getOverallScore())
+                    .goodPoints(feedbackItem.getFeedback().getGoodPoints())
+                    .improvements(feedbackItem.getFeedback().getAreasForImprovement())
+                    .details(feedbackItem.getFeedback().getDetailedAnalysis())
                     .correctAnswer(feedbackItem.getModelAnswer())
                     .interviewSegment(segment)
                     .build();

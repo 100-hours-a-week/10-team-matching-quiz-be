@@ -23,8 +23,17 @@ public class InterviewFeedbackEntity {
     @Column(name = "correct_answer", columnDefinition = "TEXT") // 모범 답안
     private String correctAnswer;
 
-    @Column(name = "commentary", columnDefinition = "TEXT") // AI 코멘터리
-    private String commentary;
+    @Column(nullable = false)
+    private Integer score;
+
+    @Column(name = "good_points", nullable = false, columnDefinition = "TEXT")
+    private String goodPoints;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String improvements;
+
+    @Column(nullable = false , columnDefinition = "TEXT")
+    private String details;
 
     @OneToOne
     @JoinColumn(name = "interview_segment_id", nullable = false)

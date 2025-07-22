@@ -1,5 +1,6 @@
 package com.easyterview.wingterview.interview.dto.response;
 
+import com.easyterview.wingterview.interview.entity.Feedback;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,5 +16,5 @@ public class FeedbackItem {
     @JsonProperty("model_answer")
     private String modelAnswer;
 
-    private String feedback;
+    private Feedback feedback;
 }
