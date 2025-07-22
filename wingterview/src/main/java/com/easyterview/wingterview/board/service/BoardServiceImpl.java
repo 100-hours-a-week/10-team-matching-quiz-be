@@ -4,6 +4,7 @@ import com.easyterview.wingterview.board.dto.req.BoardCreationRequestDto;
 import com.easyterview.wingterview.board.dto.res.BoardCreationResponseDto;
 import com.easyterview.wingterview.board.dto.res.BoardDetailResponseDto;
 import com.easyterview.wingterview.board.dto.res.BoardListResponseDto;
+import com.easyterview.wingterview.board.dto.res.Feedback;
 import com.easyterview.wingterview.board.entity.BoardEntity;
 import com.easyterview.wingterview.board.repository.BoardRepository;
 import com.easyterview.wingterview.board.repository.BoardRepositoryCustom;
@@ -12,6 +13,7 @@ import com.easyterview.wingterview.global.exception.BoardNotFoundException;
 import com.easyterview.wingterview.global.exception.FeedbackNotReadyException;
 import com.easyterview.wingterview.global.exception.InterviewNotFoundException;
 import com.easyterview.wingterview.global.exception.UserNotFoundException;
+import com.easyterview.wingterview.interview.entity.InterviewFeedbackEntity;
 import com.easyterview.wingterview.interview.repository.InterviewSegmentRepository;
 import com.easyterview.wingterview.user.entity.UserEntity;
 import com.easyterview.wingterview.user.repository.UserRepository;
@@ -60,12 +62,19 @@ public class BoardServiceImpl implements BoardService{
         if(board.getInterviewSegment().getFeedback() == null)
             throw new FeedbackNotReadyException();
 
+        InterviewFeedbackEntity feedback = board.getInterviewSegment().getFeedback();
+
         return BoardDetailResponseDto.builder()
                 .viewCnt(board.getViewCnt())
                 .authorComment(board.getComment())
                 .authorNickname(board.getUser().getNickname())
                 .authorProfileImageUrl(board.getUser().getProfileImageUrl())
-                .feedback(board.getInterviewSegment().getFeedback().getCommentary())
+                .feedback(Feedback.builder()
+                        .score(feedback.getScore())
+                        .details(feedback.getDetails())
+                        .improvements(feedback.getImprovements())
+                        .goodPoints(feedback.getGoodPoints())
+                        .build())
                 .modelAnswer(board.getInterviewSegment().getFeedback().getCorrectAnswer())
                 .createdAt(board.getCreatedAt())
                 .question(board.getInterviewSegment().getSelectedQuestion())
