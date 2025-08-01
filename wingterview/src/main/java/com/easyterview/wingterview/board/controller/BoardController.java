@@ -30,7 +30,6 @@ public class BoardController {
     public ResponseEntity<BaseResponse> getBoardList(@RequestParam String orderBy,
                                                      @RequestParam(required = false) String cursor,
                                                      @RequestParam(defaultValue = "10") Integer limit){
-        log.info("**********보드 리스트 가져오기**********");
         BoardListResponseDto response = boardService.getBoardList(orderBy,cursor,limit);
         return BaseResponse.response(BoardResponseMessage.BOARD_LIST_FETCH_DONE, response);
     }
@@ -40,4 +39,13 @@ public class BoardController {
         BoardDetailResponseDto response = boardService.getBoardDetail(boardId);
         return BaseResponse.response(BoardResponseMessage.BOARD_FETCH_DONE,response);
     }
+
+    @PostMapping("/dummy")
+    public ResponseEntity<BaseResponse> createDummyBoards(@RequestParam int count) {
+        System.out.println(count);
+        boardService.createDummyBoards(count);
+        return BaseResponse.response(BoardResponseMessage.BOARD_FETCH_DONE);
+    }
+
+
 }

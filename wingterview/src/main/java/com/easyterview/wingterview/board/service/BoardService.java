@@ -11,4 +11,6 @@ public interface BoardService {
     BoardListResponseDto getBoardList(String orderBy, String cursor, Integer limit);
 
     BoardDetailResponseDto getBoardDetail(String boardId);
+
+    void createDummyBoards(int count);
 }

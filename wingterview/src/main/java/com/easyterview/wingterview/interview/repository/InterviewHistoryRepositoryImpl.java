@@ -50,6 +50,8 @@ public class InterviewHistoryRepositoryImpl implements InterviewHistoryRepositor
                         durationSec = (h.getEndAt().getTime() - h.getCreatedAt().getTime()) / 1000;
                     }
 
+                    System.out.println(h.getSegments().size());
+
                     return InterviewItem.builder()
                             .id(h.getId().toString())
                             .questionCount(h.getSegments().size())

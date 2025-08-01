@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +31,8 @@ public class InterviewHistoryEntity {
 
     // 양방향 관계 설정
     @OneToMany(mappedBy = "interviewHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<InterviewSegmentEntity> segments;
+    @Builder.Default
+    private List<InterviewSegmentEntity> segments = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp

@@ -37,6 +37,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.50.0' // 최신 버전 확인
+	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64'
 
 	// --- OpenAPI (Swagger 문서 자동화) ---
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
@@ -70,6 +72,14 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 	// --- 테스트 (주석처리된 항목들) ---
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+
+	testImplementation("org.testcontainers:junit-jupiter:1.19.0")
+	testImplementation("org.testcontainers:mysql:1.19.0")
+	testImplementation("org.testcontainers:rabbitmq:1.19.0")
+	testImplementation("org.testcontainers:redis:1.19.0")
 	// 필요 시 활성화
 }
 

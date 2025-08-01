@@ -1,18 +1,22 @@
 package com.easyterview.wingterview.board.dto.res;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BoardItem {
-    private final String authorNickname;
-    private final String authorProfileImageUrl;
-    private final String boardId;
-    private final String question;
-    private final Integer viewCnt;
-    private final Timestamp createdAt;
-    private final Boolean isMyPost;
+    private String authorNickname;
+    private String authorProfileImageUrl;
+    private String boardId;
+    private String question;
+    private Integer viewCnt;
+    private Timestamp createdAt;
+    private Boolean isMyPost;
 }

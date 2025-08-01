@@ -29,4 +29,5 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     @Query("SELECT u FROM UserEntity u WHERE u.id = :id")
     Optional<UserEntity> findByIdForUpdate(@Param("id") UUID id);
 
+    Optional<UserEntity> findByName(String name);
 }
